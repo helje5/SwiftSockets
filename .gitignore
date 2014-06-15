@@ -6,3 +6,8 @@
 #
 # Pods/
 
+ARISockets.xcodeproj/project.xcworkspace/xcuserdata
+ARISockets.xcodeproj/xcuserdata
+
+.DS_Store
+
