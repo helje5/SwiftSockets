@@ -16,6 +16,8 @@ FIXME: Collect and list all issues :-)
   - withCString on a SwiftString hosted by an NSString (NPE)
 - No access to ioctl()
 - sizeof() only works on types, not on variables/constants
+- Cannot put methods into extensions which are going to be overridden 
+  ('declarations in extensions cannot be overridden yet')
 
 ###How To?
 
