@@ -3,9 +3,15 @@ SwiftSockets
 
 A simple GCD based socket library for Swift.
 
-SwiftSockets is kind of a demo on how to integrate Swift with raw C APIs. More for stealing Swift coding ideas than for actually using the code in a realworld project. In most real world Swift apps you have access to Cocoa, use it.
+SwiftSockets is kind of a demo on how to integrate Swift with raw C APIs. More
+for stealing Swift coding ideas than for actually using the code in a real
+world project. In most real world Swift apps you have access to Cocoa, use it.
 
-It also comes with a great Echo daemon as a demo, it's always there if you need a chat.
+It also comes with a great Echo daemon as a demo, it's always there if you need
+a chat.
+
+Note: This is my first Swift project. Any suggestions on how to improve the
+code are welcome.
 
 ###Targets
 
@@ -13,6 +19,8 @@ The project includes three targets:
 - ARISockets
 - ARIEchoServer
 - ARIFetch
+
+I suggest you start out looking at the ARIEchoServer.
 
 ####ARISockets
 
@@ -46,15 +54,24 @@ socket.write("Ring, ring!\r\n")
 
 ####ARIEchoServer
 
-Great echo server. This is actually a Cocoa app. Compile it, run it, then connect to it in the Terminal.app via ```telnet 8042```.
+Great echo server. This is actually a Cocoa app. Compile it, run it, then
+connect to it in the Terminal.app via ```telnet 8042```.
+
+![](http://i.imgur.com/nRhADxg.png)
 
 ####ARIFetch
 
-Connects a socket to some end point, sends an HTTP/1.0 GET request with some awesome headers, then shows the results the server sends. Cocoa app.
+Connects a socket to some end point, sends an HTTP/1.0 GET request with some
+awesome headers, then shows the results the server sends. Cocoa app.
+
 Why HTTP/1.0? Avoids redirects on www.apple.com :-)
+
+![](http://i.imgur.com/874ovtE.png)
+
 
 ###Goals
 
+- [x] Max line length: 80 characters
 - [ ] Great error handling
   - [x] PS style great error handling
   - [x] println() error handling
@@ -90,11 +107,15 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [x] OutputStream
   - [x] Left shift AND right shift
   - [ ] Enums on steroids
+  - [ ] Dynamic type system, reflection
 
 ###Why?!
 
-This is an experiment to get acquainted with Swift. To check whether something real can be implemented in 'pure' Swift. Meaning, without using any Objective-C Cocoa classes (no NS'ism).
-Or in other words: Can you use Swift without writing all the 'real' code in wrapped Objective-C? :-)
+This is an experiment to get acquainted with Swift. To check whether something
+real can be implemented in 'pure' Swift. Meaning, without using any Objective-C
+Cocoa classes (no NS'ism).
+Or in other words: Can you use Swift without writing all the 'real' code in
+wrapped Objective-C? :-)
 
 ###Contact
 
