@@ -73,6 +73,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
 ###Goals
 
 - [x] Max line length: 80 characters
+  - [ ] Update to a line length standard consistent with display sizes in the 21st century
 - [ ] Great error handling
   - [x] PS style great error handling
   - [x] println() error handling
@@ -112,6 +113,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Left shift AND right shift
   - [ ] Enums on steroids
   - [ ] Dynamic type system, reflection
+  - [ ] Operator overloading
 
 ###Why?!
 
