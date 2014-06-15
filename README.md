@@ -112,6 +112,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Left shift AND right shift
   - [ ] Enums on steroids
   - [ ] Dynamic type system, reflection
+  - [x] Operator overloading
 
 ###Why?!
 
