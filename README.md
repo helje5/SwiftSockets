@@ -113,6 +113,8 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] Enums on steroids
   - [ ] Dynamic type system, reflection
   - [x] Operator overloading
+  - [ ] UCS-4 identifiers
+  - [ ] ~~RTF source code with images and code sections in different fonts~~
 
 ###Why?!
 
