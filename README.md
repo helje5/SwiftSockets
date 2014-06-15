@@ -10,8 +10,9 @@ world project. In most real world Swift apps you have access to Cocoa, use it.
 It also comes with a great Echo daemon as a demo, it's always there if you need
 a chat.
 
-Note: This is my first Swift project. Any suggestions on how to improve the
-code are welcome.
+**Note**: This is my first [Swift](https://developer.apple.com/swift/) project.
+Any suggestions on how to improve the code are welcome. I expect lots and lots
+:-)
 
 ###Targets
 
@@ -119,4 +120,4 @@ wrapped Objective-C? :-)
 
 ###Contact
 
-[@helje5](http://twitter.com/helje5)
+[@helje5](http://twitter.com/helje5) | helge@alwaysrightinstitute.com
