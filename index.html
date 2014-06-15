@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>SwiftSockets by AlwaysRightInstitute</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>SwiftSockets</h1>
+          <h2>A simple GCD based socket wrapper for Swift.</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/AlwaysRightInstitute/SwiftSockets/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/AlwaysRightInstitute/SwiftSockets" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a name="swiftsockets" class="anchor" href="#swiftsockets"><span class="octicon octicon-link"></span></a>SwiftSockets</h1>
+
+<p>A simple GCD based socket library for Swift.</p>
+
+<p>SwiftSockets is kind of a demo on how to integrate Swift with raw C APIs. More
+for stealing Swift coding ideas than for actually using the code in a real
+world project. In most real world Swift apps you have access to Cocoa, use it.</p>
+
+<p>It also comes with a great Echo daemon as a demo, it's always there if you need
+a chat.</p>
+
+<p><strong>Note</strong>: This is my first <a href="https://developer.apple.com/swift/">Swift</a> project.
+Any suggestions on how to improve the code are welcome. I expect lots and lots
+:-)</p>
+
+<h3>
+<a name="targets" class="anchor" href="#targets"><span class="octicon octicon-link"></span></a>Targets</h3>
+
+<p>The project includes three targets:</p>
+
+<ul>
+<li>ARISockets</li>
+<li>ARIEchoServer</li>
+<li>ARIFetch</li>
+</ul><p>I suggest you start out looking at the ARIEchoServer.</p>
+
+<h4>
+<a name="arisockets" class="anchor" href="#arisockets"><span class="octicon octicon-link"></span></a>ARISockets</h4>
+
+<p>A framework containing the socket classes and relevant extensions. It takes a bit of inspiration from the <a href="http://sope.opengroupware.org">SOPE</a> NGStreams library.</p>
+
+<p>Server Sample:</p>
+
+<div class="highlight highlight-swift"><pre><span class="k">let</span> <span class="n">socket</span> <span class="o">=</span> <span class="n">PassiveSocket</span><span class="p">(</span><span class="nl">address</span><span class="p">:</span> <span class="n">sockaddr_in</span><span class="p">(</span><span class="nl">port</span><span class="p">:</span> <span class="mi">4242</span><span class="p">))</span>
+<span class="n">socket</span><span class="p">.</span><span class="n">listen</span><span class="p">(</span><span class="n">dispatch_get_global_queue</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nl">backlog</span><span class="p">:</span> <span class="mi">5</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">clientSocket</span> <span class="k">in</span>
+  <span class="n">println</span><span class="p">(</span><span class="s">"Wait, someone is attempting to talk to me!"</span><span class="p">)</span>
+  <span class="n">clientSocket</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+  <span class="n">println</span><span class="p">(</span><span class="s">"All good, go ahead!"</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Client Sample:</p>
+
+<div class="highlight highlight-swift"><pre><span class="k">let</span> <span class="n">socket</span> <span class="o">=</span> <span class="n">ActiveSocket</span><span class="p">()</span>
+<span class="n">socket</span><span class="p">.</span><span class="n">onRead</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="k">let</span> <span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span> <span class="o">=</span> <span class="n">socket</span><span class="p">.</span><span class="n">read</span><span class="p">()</span>
+  <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="p">{</span>
+    <span class="n">println</span><span class="p">(</span><span class="s">"EOF, or great error handling."</span><span class="p">)</span>
+    <span class="k">return</span>
+  <span class="p">}</span>
+  <span class="n">println</span><span class="p">(</span><span class="s">"Answer to ring,ring is: \(count) bytes: \(block)"</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="n">socket</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="n">sockaddr_in</span><span class="p">(</span><span class="nl">port</span><span class="p">:</span><span class="mi">80</span><span class="p">,</span> <span class="nl">address</span><span class="p">:</span><span class="s">"127.0.0.1"</span><span class="p">))</span>
+<span class="n">socket</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="s">"Ring, ring!</span><span class="se">\r\n</span><span class="s">"</span><span class="p">)</span>
+</pre></div>
+
+<h4>
+<a name="ariechoserver" class="anchor" href="#ariechoserver"><span class="octicon octicon-link"></span></a>ARIEchoServer</h4>
+
+<p>Great echo server. This is actually a Cocoa app. Compile it, run it, then
+connect to it in the Terminal.app via <code>telnet 8042</code>.</p>
+
+<p><img src="http://i.imgur.com/874ovtE.png" alt=""></p>
+
+<h4>
+<a name="arifetch" class="anchor" href="#arifetch"><span class="octicon octicon-link"></span></a>ARIFetch</h4>
+
+<p>Connects a socket to some end point, sends an HTTP/1.0 GET request with some
+awesome headers, then shows the results the server sends. Cocoa app.</p>
+
+<p>Why HTTP/1.0? Avoids redirects on <a href="http://www.apple.com">www.apple.com</a> :-)</p>
+
+<p><img src="http://i.imgur.com/nRhADxg.png" alt=""></p>
+
+<h3>
+<a name="goals" class="anchor" href="#goals"><span class="octicon octicon-link"></span></a>Goals</h3>
+
+<ul>
+<li>[x] Max line length: 80 characters</li>
+<li>[ ] Great error handling
+
+<ul>
+<li>[x] PS style great error handling</li>
+<li>[x] println() error handling</li>
+<li>[ ] Real error handling</li>
+</ul>
+</li>
+<li>[x] Twisted (no blocking reads or writes)
+
+<ul>
+<li>[x] Async reads and writes
+
+<ul>
+<li>[ ] Never block :-)</li>
+</ul>
+</li>
+<li>[ ] Async connect()</li>
+</ul>
+</li>
+<li>[ ] Support all types of Unix sockets &amp; addresses
+
+<ul>
+<li>[x] IPv4</li>
+<li>[ ] IPv6 (I guess this should work too)</li>
+<li>[ ] Unix domain sockets</li>
+<li>[ ] Datagram sockets</li>
+</ul>
+</li>
+<li>[x] No NS'ism</li>
+<li>[ ] Use as many language features Swift provides
+
+<ul>
+<li>[ ] Generics (swiftc segfaults)</li>
+<li>[x] Closures
+
+<ul>
+<li>[x] weak self</li>
+</ul>
+</li>
+<li>[ ] Unowned</li>
+<li>[x] Extensions on structs</li>
+<li>[ ] Extensions to organize classes (swiftc segfaults)</li>
+<li>[x] Protocols on structs</li>
+<li>[ ] Tuples</li>
+<li>[x] Trailing closures</li>
+<li>[ ] <a href="https://github.com/Lazy" class="user-mention">@Lazy</a>
+</li>
+<li>[x] Pure Swift weak delegates via <a href="https://github.com/class" class="user-mention">@class</a>
+</li>
+<li>[x] Optionals</li>
+<li>[x] Convenience initializers</li>
+<li>[x] Class variables on structs</li>
+<li>[x] CConstPointer, CConstVoidPointer
+
+<ul>
+<li>[x] withCString {}</li>
+</ul>
+</li>
+<li>[x] sizeof()</li>
+<li>[x] Standard Protocols
+
+<ul>
+<li>[x] Printable</li>
+<li>[x] LogicValue</li>
+<li>[x] OutputStream</li>
+</ul>
+</li>
+<li>[x] Left shift AND right shift</li>
+<li>[ ] Enums on steroids</li>
+<li>[ ] Dynamic type system, reflection</li>
+</ul>
+</li>
+</ul><h3>
+<a name="why" class="anchor" href="#why"><span class="octicon octicon-link"></span></a>Why?!</h3>
+
+<p>This is an experiment to get acquainted with Swift. To check whether something
+real can be implemented in 'pure' Swift. Meaning, without using any Objective-C
+Cocoa classes (no NS'ism).
+Or in other words: Can you use Swift without writing all the 'real' code in
+wrapped Objective-C? :-)</p>
+
+<h3>
+<a name="contact" class="anchor" href="#contact"><span class="octicon octicon-link"></span></a>Contact</h3>
+
+<p><a href="http://twitter.com/helje5">@helje5</a> | <a href="mailto:helge@alwaysrightinstitute.com">helge@alwaysrightinstitute.com</a></p>
+        </section>
+
+        <footer>
+          SwiftSockets is maintained by <a href="https://github.com/AlwaysRightInstitute">AlwaysRightInstitute</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
