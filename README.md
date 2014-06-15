@@ -95,7 +95,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Extensions on structs
   - [ ] Extensions to organize classes (swiftc segfaults)
   - [x] Protocols on structs
-  - [ ] Tuples
+  - [x] Tuples
   - [x] Trailing closures
   - [ ] @Lazy
   - [x] Pure Swift weak delegates via @class
