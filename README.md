@@ -57,7 +57,7 @@ socket.write("Ring, ring!\r\n")
 Great echo server. This is actually a Cocoa app. Compile it, run it, then
 connect to it in the Terminal.app via ```telnet 8042```.
 
-![](http://i.imgur.com/nRhADxg.png)
+![](http://i.imgur.com/874ovtE.png)
 
 ####ARIFetch
 
@@ -66,7 +66,7 @@ awesome headers, then shows the results the server sends. Cocoa app.
 
 Why HTTP/1.0? Avoids redirects on www.apple.com :-)
 
-![](http://i.imgur.com/874ovtE.png)
+![](http://i.imgur.com/nRhADxg.png)
 
 
 ###Goals
