@@ -260,7 +260,7 @@ class ActiveSocket: Socket, OutputStream {
   var isDataAvailable: Bool { return pollFlag(POLLRDNORM) }
   
   func pollFlag(flag: CInt) -> Bool {
-    let rc: CInt? = poll(pollEverythingMask, timeout: 0)
+    let rc: CInt? = poll(flag, timeout: 0)
     if let flags = rc {
       if (flags & flag) != 0 {
         return true
