@@ -30,7 +30,7 @@ class EchoServer {
   
   func start() {
     listenSocket = PassiveSocket(address: sockaddr_in(port: port))
-    if !listenSocket {
+    if !listenSocket || !listenSocket! { // neat, eh? ;-)
       log("ERROR: could not create socket ...")
       return
     }
