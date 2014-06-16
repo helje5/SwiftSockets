@@ -14,6 +14,7 @@ FIXME: Collect and list all issues :-)
   - Moving properties to a class extension (to structure the code)
     - demo branch: feature/structure-code-with-extensions
   - Long constant strings
+    - demo branch: feature/long-static-strings
 - runtime segfaults
   - withCString on a SwiftString hosted by an NSString (NPE)
 - No access to ioctl()
