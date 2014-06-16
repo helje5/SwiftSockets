@@ -9,8 +9,10 @@ FIXME: Collect and list all issues :-)
 ###Bugs
 
 - swiftc segfaults
-  - If I do Socket<T: SocketAddress> (etc). Need to make a branch for that
+  - If I do Socket&lt;T: SocketAddress&gt; (etc). Need to make a branch for that
+    - demo branch: feature/generics
   - Moving properties to a class extension (to structure the code)
+    - demo branch: feature/structure-code-with-extensions
   - Long constant strings
 - runtime segfaults
   - withCString on a SwiftString hosted by an NSString (NPE)
