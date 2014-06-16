@@ -51,8 +51,14 @@ class ActiveSocket: Socket, OutputStream {
   }
   
   // let the socket own the read buffer, what is the best buffer type?
-  let readBufferSize : Int = 4096 // available space, a bit more for '\0'
   var readBuffer     : CChar[] =  CChar[](count: 4096 + 2, repeatedValue: 42)
+  var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
+    didSet {
+      if readBufferSize != oldValue {
+        readBuffer = CChar[](count: readBufferSize + 2, repeatedValue: 42)
+      }
+    }
+  }
 
   
   /* init */
