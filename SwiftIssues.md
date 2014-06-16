@@ -9,15 +9,22 @@ FIXME: Collect and list all issues :-)
 ###Bugs
 
 - swiftc segfaults
-  - If I do Socket<T: SocketAddress> (etc). Need to make a branch for that
+  - If I do Socket&lt;T: SocketAddress&gt; (etc). Need to make a branch for that
+    - demo branch: feature/generics
   - Moving properties to a class extension (to structure the code)
+    - demo branch: feature/structure-code-with-extensions
   - Long constant strings
+    - demo branch: feature/long-static-strings
 - runtime segfaults
   - withCString on a SwiftString hosted by an NSString (NPE)
+    - demo branch: feature/withCString
 - No access to ioctl()
-- sizeof() only works on types, not on variables/constants
+- sizeof() only works on types, not on variables/constants (No ```var buf: CInt; sizeof(buf)``` - lame! ;-)
 - Cannot put methods into extensions which are going to be overridden 
   ('declarations in extensions cannot be overridden yet')
+- no ```let constant = 42``` in extensions, gives 
+  "'var' declarations without getter/setter not allowed here" (this ain't
+  no var)
 
 ###How To?
 
@@ -46,3 +53,15 @@ Which doesn't feel right.
 
 I guess this can be done with UnsafePointer. Structures like sockaddr_un,
 which embed the path within the structure and thereby have a different size.
+
+#### Overloading functions with Optionals
+
+This seems to behave a bit weird (forgot the details ;-):
+```swift
+func getSocketOption(option: CInt) -> CInt {
+  return 0
+}
+func getSocketOption(option: CInt?) -> CInt {
+  return 0
+}
+```
