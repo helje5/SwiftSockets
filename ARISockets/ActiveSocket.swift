@@ -257,60 +257,6 @@ class ActiveSocket: Socket, OutputStream {
     return len
   }
   
-  var isDataAvailable: Bool { return pollFlag(POLLRDNORM) }
-  
-  func pollFlag(flag: CInt) -> Bool {
-    let rc: CInt? = poll(flag, timeout: 0)
-    if let flags = rc {
-      if (flags & flag) != 0 {
-        return true
-      }
-    }
-    return false
-  }
-  
-  let pollEverythingMask: CInt = ( POLLIN | POLLPRI | POLLOUT
-                                 | POLLRDNORM | POLLWRNORM
-                                 | POLLRDBAND | POLLWRBAND)
-  
-  let debugPoll = false // put here to avoid 'will never be executed' warning
-  
-  func poll(events: CInt, timeout: UInt? = 0) -> CInt? {
-    // This is declared as CInt because the POLLRDNORM and such are
-    if !isValid {
-      return nil
-    }
-    
-    let ctimeout = timeout ? CInt(timeout!) : -1 /* wait forever */
-    
-    var fds = pollfd(fd: fd!, events: CShort(events), revents: 0)
-    let rc  = Darwin.poll(&fds, 1, ctimeout)
-    
-    if rc < 0 {
-      println("poll() returned an error")
-      return nil
-    }
-    
-    if debugPoll {
-      var s = ""
-      let mask = CInt(fds.revents)
-      if 0 != (mask & POLLIN)     { s += " IN"  }
-      if 0 != (mask & POLLPRI)    { s += " PRI" }
-      if 0 != (mask & POLLOUT)    { s += " OUT" }
-      if 0 != (mask & POLLRDNORM) { s += " RDNORM" }
-      if 0 != (mask & POLLWRNORM) { s += " WRNORM" }
-      if 0 != (mask & POLLRDBAND) { s += " RDBAND" }
-      if 0 != (mask & POLLWRBAND) { s += " WRBAND" }
-      println("Poll result \(rc) flags \(fds.revents)\(s)")
-    }
-    
-    if rc == 0 {
-      return nil
-    }
-    
-    return CInt(fds.revents)
-  }
-  
   
   // This doesn't work, can't override a stored property
   // Leaving this feature alone for now, doesn't have real-world importance
