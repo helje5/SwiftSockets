@@ -32,6 +32,8 @@ class ActiveSocket: Socket, OutputStream {
   var readSource:     dispatch_source_t? = nil
   var sendCount:      Int                = 0
   var closeRequested: Bool               = false
+  var didCloseRead = false
+  
   
   var isConnected: Bool {
     return isValid ? (remoteAddress != nil) : false
@@ -83,14 +85,23 @@ class ActiveSocket: Socket, OutputStream {
       return
     }
     
+    // always shutdown receiving end, should call shutdown()
+    // TBD: not sure whether we have a locking issue here, can read&write
+    //      occur on different threads in GCD?
+    if !didCloseRead {
+      stopEventHandler()
+      readCB = nil // break potential cycles
+      Darwin.shutdown(fd!, SHUT_RD);
+      
+      didCloseRead = true
+    }
+    
     if sendCount > 0 {
       closeRequested = true
       return
     }
     
-    stopEventHandler()
-    readCB = nil // break potential cycles
-    queue  = nil // explicitly release, might be a good idea ;-)
+    queue = nil // explicitly release, might be a good idea ;-)
     
     super.close()
   }
