@@ -15,8 +15,6 @@ FIXME: Collect and list all issues :-)
     - demo branch: feature/structure-code-with-extensions
   - Long constant strings
     - demo branch: feature/long-static-strings
-- runtime segfaults
-  - withCString on a SwiftString hosted by an NSString (NPE)
 - No access to ioctl()
 - sizeof() only works on types, not on variables/constants
 - Cannot put methods into extensions which are going to be overridden 
