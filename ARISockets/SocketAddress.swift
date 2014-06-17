@@ -36,7 +36,8 @@ extension in_addr {
         //       Looking in the debugger it seems that the Swift string itself
         //       doesn't seem to have a buffer (because it's backed by
         //       NSString?)
-        let sz = String(s) + "" // enforce a copy
+        let sz = String(s) // DO NOT and crash: + "" // enforce a copy
+        println("\(sz)") // this prints a proper result
         
         sz.withCString { cs in inet_pton(AF_INET, cs, &buf) }
         s_addr = buf.s_addr
