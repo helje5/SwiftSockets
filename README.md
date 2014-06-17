@@ -31,9 +31,8 @@ Server Sample:
 ```swift
 let socket = PassiveSocket(address: sockaddr_in(port: 4242))
 socket.listen(dispatch_get_global_queue(0, 0), backlog: 5) {
-  clientSocket in
   println("Wait, someone is attempting to talk to me!")
-  clientSocket.close()
+  $0.close()
   println("All good, go ahead!")
 }
 ```
@@ -41,8 +40,8 @@ socket.listen(dispatch_get_global_queue(0, 0), backlog: 5) {
 Client Sample:
 ```swift
 let socket = ActiveSocket()
-socket.onRead = {
-  let (count, block) = socket.read()
+socket.onRead {
+  let (count, block) = $0.read()
   if count < 1 {
     println("EOF, or great error handling.")
     return
@@ -91,6 +90,8 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] Generics (swiftc segfaults)
   - [x] Closures
     - [x] weak self
+    - [x] trailing closures
+    - [x] implicit parameters
   - [ ] Unowned
   - [x] Extensions on structs
   - [ ] Extensions to organize classes (swiftc segfaults)

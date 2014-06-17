@@ -37,16 +37,19 @@ class ActiveSocket: Socket, OutputStream {
     return isValid ? (remoteAddress != nil) : false
   }
   
-  var onRead: ((ActiveSocket) -> Void)? = nil {
-    didSet {
-      if onRead {
-        if readSource == nil {
-          startEventHandler()
-        }
-      }
-      else if (readSource) {
-        stopEventHandler()
-      }
+  var readCB: ((ActiveSocket) -> Void)? = nil
+  
+  func onRead(cb: ((ActiveSocket) -> Void)?) {
+    let hadCB = readCB != nil
+    
+    if cb == nil && hadCB {
+      stopEventHandler()
+    }
+    
+    readCB = cb
+    
+    if !hadCB {
+      startEventHandler()
     }
   }
   
@@ -86,7 +89,7 @@ class ActiveSocket: Socket, OutputStream {
     }
     
     stopEventHandler()
-    onRead = nil // break potential cycles
+    readCB = nil // break potential cycles
     queue  = nil // explicitly release, might be a good idea ;-)
     
     super.close()
@@ -164,7 +167,7 @@ class ActiveSocket: Socket, OutputStream {
     dispatch_source_set_event_handler(readSource) {
       [weak self] in // maybe use unowned
       if self {
-        if let cb = self!.onRead {
+        if let cb = self!.readCB {
           cb(self!)
         }
       }

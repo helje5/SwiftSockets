@@ -27,7 +27,7 @@ class Socket {
   var boundAddress: sockaddr_in?
   var isValid:      Bool { return fd           != nil }
   var isBound:      Bool { return boundAddress != nil }
-  var onClose:      ((CInt) -> Void)? = nil
+  var closeCB:      ((CInt) -> Void)? = nil
   
   
   /* initializer / deinitializer */
@@ -64,15 +64,18 @@ class Socket {
       Darwin.close(fd!)
       fd = nil
 
-      if let cb = onClose {
+      if let cb = closeCB {
         // can be used to unregister socket etc when the socket is really closed
         cb(closedFD)
-        onClose = nil // break potential cycles
+        closeCB = nil // break potential cycles
       }
     }
     boundAddress = nil
   }
   
+  func onClose(cb: ((CInt) -> Void)?) {
+    closeCB = cb
+  }
   
   /* bind the socket. */
   

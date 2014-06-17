@@ -50,10 +50,10 @@ class EchoServer {
       
       self.sendWelcome(newSock)
       
-      newSock.onRead  = { sock in self.handleIncomingData(sock) }
-      newSock.onClose = { fd in
+      newSock.onRead  { self.handleIncomingData($0) }
+      newSock.onClose {
         // we need to consume the return value to give peace to the closure
-        let peace: AnyObject? = self.openSockets.removeValueForKey(fd)
+        let peace: AnyObject? = self.openSockets.removeValueForKey($0)
       }
       
       
