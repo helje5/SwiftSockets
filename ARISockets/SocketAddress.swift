@@ -93,17 +93,17 @@ extension sockaddr_in: SocketAddress {
     sin_zero   = (0,0,0,0,0,0,0,0)
   }
   
-  init(port: Int?, address: in_addr = INADDR_ANY) {
+  init(address: in_addr = INADDR_ANY, port: Int?) {
     self.init()
     
     sin_port = port ? in_port_t(htons(CUnsignedShort(port!))) : 0
     sin_addr = address
   }
   
-  init(port: Int?, address: String?) {
+  init(address: String?, port: Int?) {
     let isWildcard = address ? (address! == "*" || address! == "*.*.*.*"):true;
     let ipv4       = isWildcard ? INADDR_ANY : in_addr(string: address)
-    self.init(port: port, address: ipv4)
+    self.init(address: ipv4, port: port)
   }
   
   var port: Int { // should we make that optional and use wildcard as nil?
