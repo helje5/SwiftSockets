@@ -229,6 +229,11 @@ class ActiveSocket: Socket, OutputStream {
   }
 
   func read() -> ( Int, CChar[]) {
+    if !isValid {
+      println("Called read() on closed socket \(self)")
+      return ( -42, readBuffer )
+    }
+    
     var readCount: Int = 0
     let bufsize = UInt(readBufferSize)
     let fd      = self.fd!
