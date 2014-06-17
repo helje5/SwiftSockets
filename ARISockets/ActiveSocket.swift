@@ -32,21 +32,26 @@ class ActiveSocket: Socket, OutputStream {
   var readSource:     dispatch_source_t? = nil
   var sendCount:      Int                = 0
   var closeRequested: Bool               = false
+  var didCloseRead = false
+  
   
   var isConnected: Bool {
     return isValid ? (remoteAddress != nil) : false
   }
   
-  var onRead: ((ActiveSocket) -> Void)? = nil {
-    didSet {
-      if onRead {
-        if readSource == nil {
-          startEventHandler()
-        }
-      }
-      else if (readSource) {
-        stopEventHandler()
-      }
+  var readCB: ((ActiveSocket) -> Void)? = nil
+  
+  func onRead(cb: ((ActiveSocket) -> Void)?) {
+    let hadCB = readCB != nil
+    
+    if cb == nil && hadCB {
+      stopEventHandler()
+    }
+    
+    readCB = cb
+    
+    if !hadCB {
+      startEventHandler()
     }
   }
   
@@ -80,14 +85,23 @@ class ActiveSocket: Socket, OutputStream {
       return
     }
     
+    // always shutdown receiving end, should call shutdown()
+    // TBD: not sure whether we have a locking issue here, can read&write
+    //      occur on different threads in GCD?
+    if !didCloseRead {
+      stopEventHandler()
+      readCB = nil // break potential cycles
+      Darwin.shutdown(fd!, SHUT_RD);
+      
+      didCloseRead = true
+    }
+    
     if sendCount > 0 {
       closeRequested = true
       return
     }
     
-    stopEventHandler()
-    onRead = nil // break potential cycles
-    queue  = nil // explicitly release, might be a good idea ;-)
+    queue = nil // explicitly release, might be a good idea ;-)
     
     super.close()
   }
@@ -162,10 +176,10 @@ class ActiveSocket: Socket, OutputStream {
     }
     
     dispatch_source_set_event_handler(readSource) {
-      [weak self] in // maybe use unowned
+      [unowned self] in
       if self {
-        if let cb = self!.onRead {
-          cb(self!)
+        if let cb = self.readCB {
+          cb(self)
         }
       }
     }
@@ -226,6 +240,11 @@ class ActiveSocket: Socket, OutputStream {
   }
 
   func read() -> ( Int, CChar[]) {
+    if !isValid {
+      println("Called read() on closed socket \(self)")
+      return ( -42, readBuffer )
+    }
+    
     var readCount: Int = 0
     let bufsize = UInt(readBufferSize)
     let fd      = self.fd!

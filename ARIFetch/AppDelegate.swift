@@ -46,8 +46,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     let s = socket!
     
-    s.onRead  = handleIncomingData
-    s.onClose = { fd in println("Closing \(fd) ..."); }
+    s.onRead  { self.handleIncomingData($0) }
+    s.onClose { fd in println("Closing \(fd) ..."); }
     
     // connect
     
@@ -83,11 +83,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       socket.close()
       return
     }
-    
+
     var data = ""
     block.withUnsafePointerToElements {
       p in
-      data = String.fromCString(p)
+      data = String.fromCString(p) // this can fail, will abort()
     }
     
     // log to view. Careful, must run in main thread!
@@ -102,7 +102,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // TBD: or make the socket itself unblocking
     if count == socket.readBufferSize {
       println("Got a full buffer, more data waiting? MIGHT BLOCK")
-      socket.onRead?(socket) // recurse
+      socket.readCB?(socket) // recurse
     }
   }
 
