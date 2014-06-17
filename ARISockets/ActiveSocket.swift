@@ -165,10 +165,10 @@ class ActiveSocket: Socket, OutputStream {
     }
     
     dispatch_source_set_event_handler(readSource) {
-      [weak self] in // maybe use unowned
+      [unowned self] in
       if self {
-        if let cb = self!.readCB {
-          cb(self!)
+        if let cb = self.readCB {
+          cb(self)
         }
       }
     }
