@@ -30,16 +30,7 @@ extension in_addr {
       else {
         var buf = INADDR_ANY // Swift wants some initialization
         
-        // HACK: Seems to be an NSString bridging problem. If I put in a
-        //       value I got from NSTextField, withCString() has an NPE
-        //       crash.
-        //       Looking in the debugger it seems that the Swift string itself
-        //       doesn't seem to have a buffer (because it's backed by
-        //       NSString?)
-        let sz = String(s) // DO NOT and crash: + "" // enforce a copy
-        println("\(sz)") // this prints a proper result
-        
-        sz.withCString { cs in inet_pton(AF_INET, cs, &buf) }
+        s.withCString { cs in inet_pton(AF_INET, cs, &buf) }
         s_addr = buf.s_addr
       }
     }
