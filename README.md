@@ -48,7 +48,7 @@ socket.onRead {
   }
   println("Answer to ring,ring is: \(count) bytes: \(block)")
 }
-socket.connect(sockaddr_in(port:80, address:"127.0.0.1"))
+socket.connect(sockaddr_in(address:"127.0.0.1", port: 80))
 socket.write("Ring, ring!\r\n")
 ```
 
