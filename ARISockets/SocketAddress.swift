@@ -30,15 +30,7 @@ extension in_addr {
       else {
         var buf = INADDR_ANY // Swift wants some initialization
         
-        // HACK: Seems to be an NSString bridging problem. If I put in a
-        //       value I got from NSTextField, withCString() has an NPE
-        //       crash.
-        //       Looking in the debugger it seems that the Swift string itself
-        //       doesn't seem to have a buffer (because it's backed by
-        //       NSString?)
-        let sz = String(s) + "" // enforce a copy
-        
-        sz.withCString { cs in inet_pton(AF_INET, cs, &buf) }
+        s.withCString { cs in inet_pton(AF_INET, cs, &buf) }
         s_addr = buf.s_addr
       }
     }
@@ -93,17 +85,17 @@ extension sockaddr_in: SocketAddress {
     sin_zero   = (0,0,0,0,0,0,0,0)
   }
   
-  init(port: Int?, address: in_addr = INADDR_ANY) {
+  init(address: in_addr = INADDR_ANY, port: Int?) {
     self.init()
     
     sin_port = port ? in_port_t(htons(CUnsignedShort(port!))) : 0
     sin_addr = address
   }
   
-  init(port: Int?, address: String?) {
+  init(address: String?, port: Int?) {
     let isWildcard = address ? (address! == "*" || address! == "*.*.*.*"):true;
     let ipv4       = isWildcard ? INADDR_ANY : in_addr(string: address)
-    self.init(port: port, address: ipv4)
+    self.init(address: ipv4, port: port)
   }
   
   var port: Int { // should we make that optional and use wildcard as nil?

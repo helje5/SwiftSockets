@@ -55,7 +55,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let port = Int(self.port.intValue)
     println("Connect \(host):\(port) ...")
     
-    let ok = s.connect(sockaddr_in(port:port, address:host)) {
+    let ok = s.connect(sockaddr_in(address:host, port:port)) {
       println("connected \(s)")
       
       s.write(

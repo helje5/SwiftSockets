@@ -50,7 +50,7 @@ class ActiveSocket: Socket, OutputStream {
     
     readCB = cb
     
-    if !hadCB {
+    if cb != nil && !hadCB {
       startEventHandler()
     }
   }
