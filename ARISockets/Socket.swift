@@ -23,11 +23,11 @@ import Dispatch
  */
 class Socket {
   
-  var fd:           CInt?
-  var boundAddress: sockaddr_in?
-  var isValid:      Bool { return fd           != nil }
-  var isBound:      Bool { return boundAddress != nil }
-  var closeCB:      ((CInt) -> Void)? = nil
+  var fd           : CInt?             = nil
+  var boundAddress : sockaddr_in?      = nil
+  var closeCB      : ((CInt) -> Void)? = nil
+  var isValid      : Bool { return fd           != nil }
+  var isBound      : Bool { return boundAddress != nil }
   
   
   /* initializer / deinitializer */
@@ -117,8 +117,8 @@ class Socket {
     var baddrlen = socklen_t(baddr.len)
     
     // CAST: Hope this works, essentially cast to void and then take the rawptr
-    let bvptr: CMutableVoidPointer = &baddr
-    let bptr = CMutablePointer<sockaddr>(owner: nil, value: bvptr.value)
+    let bvptr : CMutableVoidPointer = &baddr
+    let bptr  = CMutablePointer<sockaddr>(owner: nil, value: bvptr.value)
     
     // Note: we are not interested in the length here, would be relevant
     //       for AF_UNIX sockets

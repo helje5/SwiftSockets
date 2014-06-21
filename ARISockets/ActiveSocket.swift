@@ -27,44 +27,18 @@ import Dispatch
 */
 class ActiveSocket: Socket, OutputStream {
   
-  var remoteAddress:  sockaddr_in?       = nil
-  var queue:          dispatch_queue_t?  = nil
-  var readSource:     dispatch_source_t? = nil
-  var sendCount:      Int                = 0
-  var closeRequested: Bool               = false
-  var didCloseRead = false
+  var remoteAddress  : sockaddr_in?       = nil
+  var queue          : dispatch_queue_t?  = nil
+  var readSource     : dispatch_source_t? = nil
+  var sendCount      : Int                = 0
+  var closeRequested : Bool               = false
+  var didCloseRead   = false
+  var readCB         : ((ActiveSocket) -> Void)? = nil
   
-  
-  var isConnected: Bool {
+  var isConnected : Bool {
     return isValid ? (remoteAddress != nil) : false
   }
   
-  var readCB: ((ActiveSocket) -> Void)? = nil
-  
-  func onRead(cb: ((ActiveSocket) -> Void)?) {
-    let hadCB = readCB != nil
-    
-    if cb == nil && hadCB {
-      stopEventHandler()
-    }
-    
-    readCB = cb
-    
-    if cb != nil && !hadCB {
-      startEventHandler()
-    }
-  }
-  
-  // let the socket own the read buffer, what is the best buffer type?
-  var readBuffer     : CChar[] =  CChar[](count: 4096 + 2, repeatedValue: 42)
-  var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
-    didSet {
-      if readBufferSize != oldValue {
-        readBuffer = CChar[](count: readBufferSize + 2, repeatedValue: 42)
-      }
-    }
-  }
-
   
   /* init */
   
@@ -139,6 +113,33 @@ class ActiveSocket: Socket, OutputStream {
     
     return true
   }
+  
+  /* read */
+  
+  func onRead(cb: ((ActiveSocket) -> Void)?) {
+    let hadCB = readCB != nil
+    
+    if cb == nil && hadCB {
+      stopEventHandler()
+    }
+    
+    readCB = cb
+    
+    if cb != nil && !hadCB {
+      startEventHandler()
+    }
+  }
+  
+  // let the socket own the read buffer, what is the best buffer type?
+  var readBuffer     : CChar[] =  CChar[](count: 4096 + 2, repeatedValue: 42)
+  var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
+    didSet {
+      if readBufferSize != oldValue {
+        readBuffer = CChar[](count: readBufferSize + 2, repeatedValue: 42)
+      }
+    }
+  }
+  
   
   /* setup event handler */
   
