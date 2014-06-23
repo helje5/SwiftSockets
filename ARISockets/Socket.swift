@@ -176,8 +176,9 @@ class Socket {
       return false
     }
     
-    var buf = CInt(value)
-    let rc = setsockopt(fd!, SOL_SOCKET, option, &buf, socklen_t(4))
+    var buf = value
+    let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf, socklen_t(sizeof(CInt)))
+    
     if rc != 0 { // ps: Great Error Handling
       println("Could not set option \(option) on socket \(self)")
     }
@@ -203,7 +204,7 @@ class Socket {
   }
   
   func setSocketOption(option: CInt, value: Bool) -> Bool {
-    return setSocketOption(SO_DONTROUTE, value: value ? 1 : 0)
+    return setSocketOption(option, value: value ? 1 : 0)
   }
   func getSocketOption(option: CInt) -> Bool {
     let v: CInt? = getSocketOption(option)
