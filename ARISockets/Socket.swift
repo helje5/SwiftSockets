@@ -23,11 +23,11 @@ import Dispatch
  */
 class Socket {
   
-  var fd:           CInt?
-  var boundAddress: sockaddr_in?
-  var isValid:      Bool { return fd           != nil }
-  var isBound:      Bool { return boundAddress != nil }
-  var closeCB:      ((CInt) -> Void)? = nil
+  var fd           : CInt?             = nil
+  var boundAddress : sockaddr_in?      = nil
+  var closeCB      : ((CInt) -> Void)? = nil
+  var isValid      : Bool { return fd           != nil }
+  var isBound      : Bool { return boundAddress != nil }
   
   
   /* initializer / deinitializer */
@@ -117,8 +117,8 @@ class Socket {
     var baddrlen = socklen_t(baddr.len)
     
     // CAST: Hope this works, essentially cast to void and then take the rawptr
-    let bvptr: CMutableVoidPointer = &baddr
-    let bptr = CMutablePointer<sockaddr>(owner: nil, value: bvptr.value)
+    let bvptr : CMutableVoidPointer = &baddr
+    let bptr  = CMutablePointer<sockaddr>(owner: nil, value: bvptr.value)
     
     // Note: we are not interested in the length here, would be relevant
     //       for AF_UNIX sockets
@@ -176,8 +176,9 @@ class Socket {
       return false
     }
     
-    var buf = CInt(value)
-    let rc = setsockopt(fd!, SOL_SOCKET, option, &buf, socklen_t(4))
+    var buf = value
+    let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf, socklen_t(sizeof(CInt)))
+    
     if rc != 0 { // ps: Great Error Handling
       println("Could not set option \(option) on socket \(self)")
     }
@@ -203,7 +204,7 @@ class Socket {
   }
   
   func setSocketOption(option: CInt, value: Bool) -> Bool {
-    return setSocketOption(SO_DONTROUTE, value: value ? 1 : 0)
+    return setSocketOption(option, value: value ? 1 : 0)
   }
   func getSocketOption(option: CInt) -> Bool {
     let v: CInt? = getSocketOption(option)

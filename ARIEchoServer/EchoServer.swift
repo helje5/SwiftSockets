@@ -53,7 +53,7 @@ class EchoServer {
       newSock.onRead  { self.handleIncomingData($0) }
       newSock.onClose {
         // we need to consume the return value to give peace to the closure
-        let peace: AnyObject? = self.openSockets.removeValueForKey($0)
+        _ = self.openSockets.removeValueForKey($0)
       }
       
       

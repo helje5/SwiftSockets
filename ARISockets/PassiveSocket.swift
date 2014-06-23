@@ -21,9 +21,9 @@ import Dispatch
 */
 class PassiveSocket: Socket {
   
-  var backlog:      Int? = nil
-  var isListening:  Bool { return backlog ? true : false; }
-  var listenSource: dispatch_source_t?
+  var backlog      : Int? = nil
+  var isListening  : Bool { return backlog ? true : false; }
+  var listenSource : dispatch_source_t? = nil
   
   /* init */
   
