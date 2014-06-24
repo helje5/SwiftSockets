@@ -321,14 +321,13 @@ class ActiveSocket: Socket, OutputStream {
   
   /* OutputStream (if I move this to an Extension => swiftc sefaults */
 
-  var encoding: UInt { return NSUTF8StringEncoding }
-  
   func write(string: String) {
-    // FIXME: this actually requires Foundation ...
-    // can also do this using String encoding
-    if let buffer = string.cStringUsingEncoding(encoding) {
-      if buffer.count > 1 { // remove \0 terminator
-        self.asyncWrite(buffer, length: buffer.count - 1)
+    string.withCString { (p: CString) -> Void in
+      if let cstr = p.persist() {
+        let len = cstr.count - 1 // remove \0 terminator
+        if len > 0 {
+          self.asyncWrite(cstr, length: len)
+        }
       }
     }
   }
