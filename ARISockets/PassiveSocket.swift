@@ -10,15 +10,25 @@ import Darwin
 import Dispatch
 
 /*
-* Represents a STREAM server socket based on the standard Unix sockets library.
-*
-* A passive socket has exactly one address, the address the socket is bound to.
-* If you do not bind the socket, the address is determined after the listen()
-* call was executed through the getsockname() call.
-*
-* Note that if the socket is bound it's still an active socket from the
-* system's PoV, it becomes an passive one when the listen call is executed.
-*/
+ * Represents a STREAM server socket based on the standard Unix sockets library.
+ *
+ * A passive socket has exactly one address, the address the socket is bound to.
+ * If you do not bind the socket, the address is determined after the listen()
+ * call was executed through the getsockname() call.
+ *
+ * Note that if the socket is bound it's still an active socket from the
+ * system's PoV, it becomes an passive one when the listen call is executed.
+ *
+ * Sample:
+ *
+ *   let socket = PassiveSocket(address: sockaddr_in(port: 4242))
+ *
+ *   socket.listen(dispatch_get_global_queue(0, 0), backlog: 5) {
+ *     println("Wait, someone is attempting to talk to me!")
+ *     $0.close()
+ *     println("All good, go ahead!")
+ *   }
+ */
 class PassiveSocket: Socket {
   
   var backlog      : Int? = nil

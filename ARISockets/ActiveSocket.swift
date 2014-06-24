@@ -10,21 +10,36 @@ import Darwin
 import Dispatch
 
 /**
-* Represents an active STREAM socket based on the standard Unix sockets
-* library.
-*
-* An active socket can be either a socket gained by calling accept on a
-* passive socket or by explicitly connecting one to an address (a client
-* socket).
-* Therefore an active socket has two addresses, the local and the remote one.
-*
-* There are three methods to perform a close, this is rooted in the fact that
-* a socket actually is full-duplex, it provides a send and a receive channel.
-* The stream-mode is updated according to what channels are open/closed.
-* Initially the socket is full-duplex and you cannot reopen a channel that was
-* shutdown. If you have shutdown both channels the socket can be considered
-* closed.
-*/
+ * Represents an active STREAM socket based on the standard Unix sockets
+ * library.
+ *
+ * An active socket can be either a socket gained by calling accept on a
+ * passive socket or by explicitly connecting one to an address (a client
+ * socket).
+ * Therefore an active socket has two addresses, the local and the remote one.
+ *
+ * There are three methods to perform a close, this is rooted in the fact that
+ * a socket actually is full-duplex, it provides a send and a receive channel.
+ * The stream-mode is updated according to what channels are open/closed. 
+ * Initially the socket is full-duplex and you cannot reopen a channel that was
+ * shutdown. If you have shutdown both channels the socket can be considered
+ * closed.
+ *
+ * Sample:
+ *   let socket = ActiveSocket()
+ *
+ *   socket.onRead {
+ *     let (count, block) = $0.read()
+ *     if count < 1 {
+ *       println("EOF, or great error handling.")
+ *       return
+ *     }
+ *     println("Answer to ring,ring is: \(count) bytes: \(block)")
+ *   }
+ *
+ *   socket.connect(sockaddr_in(address:"127.0.0.1", port: 80))
+ *   socket.write("Ring, ring!\r\n")
+ */
 class ActiveSocket: Socket, OutputStream {
   
   var remoteAddress  : sockaddr_in?       = nil
