@@ -30,7 +30,9 @@ extension in_addr {
       else {
         var buf = INADDR_ANY // Swift wants some initialization
         
-        s.withCString { cs in inet_pton(AF_INET, cs, &buf) }
+        // maybe only required on 10.10? crashes w/o forcing a copy
+        var sc = s + ""
+        sc.withCString { cs in inet_pton(AF_INET, cs, &buf) }
         s_addr = buf.s_addr
       }
     }

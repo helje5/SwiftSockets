@@ -10,21 +10,36 @@ import Darwin
 import Dispatch
 
 /**
-* Represents an active STREAM socket based on the standard Unix sockets
-* library.
-*
-* An active socket can be either a socket gained by calling accept on a
-* passive socket or by explicitly connecting one to an address (a client
-* socket).
-* Therefore an active socket has two addresses, the local and the remote one.
-*
-* There are three methods to perform a close, this is rooted in the fact that
-* a socket actually is full-duplex, it provides a send and a receive channel.
-* The stream-mode is updated according to what channels are open/closed.
-* Initially the socket is full-duplex and you cannot reopen a channel that was
-* shutdown. If you have shutdown both channels the socket can be considered
-* closed.
-*/
+ * Represents an active STREAM socket based on the standard Unix sockets
+ * library.
+ *
+ * An active socket can be either a socket gained by calling accept on a
+ * passive socket or by explicitly connecting one to an address (a client
+ * socket).
+ * Therefore an active socket has two addresses, the local and the remote one.
+ *
+ * There are three methods to perform a close, this is rooted in the fact that
+ * a socket actually is full-duplex, it provides a send and a receive channel.
+ * The stream-mode is updated according to what channels are open/closed. 
+ * Initially the socket is full-duplex and you cannot reopen a channel that was
+ * shutdown. If you have shutdown both channels the socket can be considered
+ * closed.
+ *
+ * Sample:
+ *   let socket = ActiveSocket()
+ *
+ *   socket.onRead {
+ *     let (count, block) = $0.read()
+ *     if count < 1 {
+ *       println("EOF, or great error handling.")
+ *       return
+ *     }
+ *     println("Answer to ring,ring is: \(count) bytes: \(block)")
+ *   }
+ *
+ *   socket.connect(sockaddr_in(address:"127.0.0.1", port: 80))
+ *   socket.write("Ring, ring!\r\n")
+ */
 class ActiveSocket: Socket, OutputStream {
   
   var remoteAddress  : sockaddr_in?       = nil
@@ -191,13 +206,20 @@ class ActiveSocket: Socket, OutputStream {
     return true
   }
   
-  func asyncWrite(buffer: CChar[], length: Int? = nil) -> Bool {
-    if !isValid { // ps: awesome error handling
-      println("Socket closed, can't do async writes anymore")
+  let debugAsyncWrites = false
+  
+  func asyncWrite<T>(buffer: T[], length: Int? = nil) -> Bool {
+    if !isValid {
+      assert(isValid, "Socket closed, can't do async writes anymore")
+      return false
+    }
+    if closeRequested {
+      assert(!closeRequested, "Socket is being shutdown already!")
       return false
     }
     
-    let bufsize = length ? UInt(length!) : UInt(buffer.count)
+    let writelen = length ? UInt(length!) : UInt(buffer.count)
+    let bufsize  = writelen * UInt(sizeof(T))
     if bufsize < 1 { // Nothing to write ..
       return true
     }
@@ -214,21 +236,35 @@ class ActiveSocket: Socket, OutputStream {
                                      DISPATCH_DATA_DESTRUCTOR_DEFAULT)
     
     sendCount++
+    if debugAsyncWrites {
+      println("async send[\(sendCount)] size \(bufsize) \(buffer)")
+    }
+    
     // in here we capture self, which I think is right.
     dispatch_write(fd!, asyncData, queue) {
       asyncData, error in
+      
+      if self.debugAsyncWrites {
+        println("did send[\(self.sendCount)] size \(bufsize) error \(error)")
+      }
+      
       self.sendCount = self.sendCount - 1 // -- fails?
       
       if self.sendCount == 0 && self.closeRequested {
+        if self.debugAsyncWrites {
+          println("closing after async write ...")
+        }
         self.close()
         self.closeRequested = false
       }
     }
     
+    asyncData = nil
+    
     return true
   }
 
-  func send(buffer: CChar[], length: Int? = nil) -> Int {
+  func send<T>(buffer: T[], length: Int? = nil) -> Int {
     var writeCount : Int = 0
     let bufsize    = length ? UInt(length!) : UInt(buffer.count)
     let fd         = self.fd!
@@ -285,12 +321,13 @@ class ActiveSocket: Socket, OutputStream {
   
   /* OutputStream (if I move this to an Extension => swiftc sefaults */
 
-  var encoding: UInt { return NSUTF8StringEncoding }
-  
   func write(string: String) {
-    if let buffer = string.cStringUsingEncoding(encoding) {
-      if buffer.count > 0 {
-        self.asyncWrite(buffer)
+    string.withCString { (p: CString) -> Void in
+      if let cstr = p.persist() {
+        let len = cstr.count - 1 // remove \0 terminator
+        if len > 0 {
+          self.asyncWrite(cstr, length: len)
+        }
       }
     }
   }
