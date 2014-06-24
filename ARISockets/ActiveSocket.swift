@@ -209,8 +209,12 @@ class ActiveSocket: Socket, OutputStream {
   let debugAsyncWrites = false
   
   func asyncWrite<T>(buffer: T[], length: Int? = nil) -> Bool {
-    if !isValid { // ps: awesome error handling
-      println("Socket closed, can't do async writes anymore")
+    if !isValid {
+      assert(isValid, "Socket closed, can't do async writes anymore")
+      return false
+    }
+    if closeRequested {
+      assert(!closeRequested, "Socket is being shutdown already!")
       return false
     }
     
@@ -233,26 +237,34 @@ class ActiveSocket: Socket, OutputStream {
     
     sendCount++
     if debugAsyncWrites {
-      println("sending data \(sendCount) size \(bufsize)")
+      println("async send[\(sendCount)] size \(bufsize) \(buffer)")
     }
     
     // in here we capture self, which I think is right.
-    dispatch_write(fd!, asyncData, queue) { asyncData, error in
-      self.sendCount = self.sendCount - 1 // -- fails?
+    dispatch_write(fd!, asyncData, queue) {
+      asyncData, error in
+      
       if self.debugAsyncWrites {
-        println("did send data \(self.sendCount) error \(error)")
+        println("did send[\(self.sendCount)] size \(bufsize) error \(error)")
       }
       
+      self.sendCount = self.sendCount - 1 // -- fails?
+      
       if self.sendCount == 0 && self.closeRequested {
+        if self.debugAsyncWrites {
+          println("closing after async write ...")
+        }
         self.close()
         self.closeRequested = false
       }
     }
     
+    asyncData = nil
+    
     return true
   }
 
-  func send(buffer: CChar[], length: Int? = nil) -> Int {
+  func send<T>(buffer: T[], length: Int? = nil) -> Int {
     var writeCount : Int = 0
     let bufsize    = length ? UInt(length!) : UInt(buffer.count)
     let fd         = self.fd!
@@ -312,9 +324,11 @@ class ActiveSocket: Socket, OutputStream {
   var encoding: UInt { return NSUTF8StringEncoding }
   
   func write(string: String) {
+    // FIXME: this actually requires Foundation ...
+    // can also do this using String encoding
     if let buffer = string.cStringUsingEncoding(encoding) {
-      if buffer.count > 0 {
-        self.asyncWrite(buffer)
+      if buffer.count > 1 { // remove \0 terminator
+        self.asyncWrite(buffer, length: buffer.count - 1)
       }
     }
   }
