@@ -88,6 +88,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
 - [x] No NS'ism
 - [ ] Use as many language features Swift provides
   - [ ] Generics (swiftc segfaults)
+    - [x] Generic function
   - [x] Closures
     - [x] weak self
     - [x] trailing closures

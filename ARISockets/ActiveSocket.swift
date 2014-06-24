@@ -206,13 +206,16 @@ class ActiveSocket: Socket, OutputStream {
     return true
   }
   
-  func asyncWrite(buffer: CChar[], length: Int? = nil) -> Bool {
+  let debugAsyncWrites = false
+  
+  func asyncWrite<T>(buffer: T[], length: Int? = nil) -> Bool {
     if !isValid { // ps: awesome error handling
       println("Socket closed, can't do async writes anymore")
       return false
     }
     
-    let bufsize = length ? UInt(length!) : UInt(buffer.count)
+    let writelen = length ? UInt(length!) : UInt(buffer.count)
+    let bufsize  = writelen * UInt(sizeof(T))
     if bufsize < 1 { // Nothing to write ..
       return true
     }
@@ -229,10 +232,16 @@ class ActiveSocket: Socket, OutputStream {
                                      DISPATCH_DATA_DESTRUCTOR_DEFAULT)
     
     sendCount++
+    if debugAsyncWrites {
+      println("sending data \(sendCount) size \(bufsize)")
+    }
+    
     // in here we capture self, which I think is right.
-    dispatch_write(fd!, asyncData, queue) {
-      asyncData, error in
+    dispatch_write(fd!, asyncData, queue) { asyncData, error in
       self.sendCount = self.sendCount - 1 // -- fails?
+      if self.debugAsyncWrites {
+        println("did send data \(self.sendCount) error \(error)")
+      }
       
       if self.sendCount == 0 && self.closeRequested {
         self.close()
