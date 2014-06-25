@@ -301,6 +301,14 @@ class ActiveSocket: Socket, OutputStream {
     return ( readCount, readBuffer )
   }
   
+  var numberOfBytesAvailableForReading : Int? {
+    // Note: this doesn't seem to work, returns 0
+    var count = CInt(0)
+    let rc    = ari_ioctlVip(fd!, FIONREAD, &count);
+    println("rc \(rc)")
+    return rc != -1 ? Int(count) : nil
+  }
+  
   
   // This doesn't work, can't override a stored property
   // Leaving this feature alone for now, doesn't have real-world importance

@@ -92,8 +92,6 @@ class EchoServer {
     // remove from openSockets if all has been read
     let (count, block) = socket.read()
     
-    println("EXPECTED \(expectedCount) got \(count)")
-    
     if count < 1 {
       log("EOF \(socket)")
       socket.close()
