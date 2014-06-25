@@ -48,7 +48,7 @@ socket.onRead {
   }
   println("Answer to ring,ring is: \(count) bytes: \(block)")
 }
-socket.connect(sockaddr_in(address:"127.0.0.1", port: 80))
+socket.connect("127.0.0.1:80")
 socket.write("Ring, ring!\r\n")
 ```
 
@@ -120,6 +120,8 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] Nested classes/types
   - [ ] Patterns
     - [x] Use wildcard pattern to ignore value
+  - [x] Literal Convertibles
+  - [ ] @auto-closure
 
 ###Why?!
 

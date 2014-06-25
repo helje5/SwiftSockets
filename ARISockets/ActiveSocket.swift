@@ -47,7 +47,7 @@ class ActiveSocket: Socket, OutputStream {
   var readSource     : dispatch_source_t? = nil
   var sendCount      : Int                = 0
   var closeRequested : Bool               = false
-  var didCloseRead   = false
+  var didCloseRead   : Bool               = false
   var readCB         : ((ActiveSocket) -> Void)? = nil
   
   var isConnected : Bool {
@@ -79,7 +79,9 @@ class ActiveSocket: Socket, OutputStream {
     //      occur on different threads in GCD?
     if !didCloseRead {
       stopEventHandler()
-      readCB = nil // break potential cycles
+      /* Seen this crash - if close() is called from within the readCB?
+        readCB = nil // break potential cycles
+       */
       Darwin.shutdown(fd!, SHUT_RD);
       
       didCloseRead = true
@@ -328,6 +330,10 @@ class ActiveSocket: Socket, OutputStream {
         if len > 0 {
           self.asyncWrite(cstr, length: len)
         }
+      }
+      else {
+        assert(false, "Could not persist cString")
+        println("FATAL: Could not persist cString?")
       }
     }
   }

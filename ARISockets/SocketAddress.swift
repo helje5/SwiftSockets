@@ -16,6 +16,10 @@ func ==(lhs: in_addr, rhs: in_addr) -> Bool {
   return __uint32_t(lhs.s_addr) == __uint32_t(rhs.s_addr)
 }
 
+/**
+ * in_addr represents an IPv4 address in Unix. We extend that a little bit
+ * to increase it's usability :-)
+ */
 extension in_addr {
 
   init() {
@@ -57,6 +61,20 @@ extension in_addr {
   
 }
 
+extension in_addr: StringLiteralConvertible {
+  // this allows you to do: let addr : in_addr = "192.168.0.1"
+  
+  static func convertFromStringLiteral(value: StringLiteralType) -> in_addr {
+    return in_addr(string: value)
+  }
+  
+  static func convertFromExtendedGraphemeClusterLiteral
+    (value: ExtendedGraphemeClusterType) -> in_addr
+  {
+    return in_addr(string: value)
+  }
+}
+
 extension in_addr: Printable {
   
   var description: String {
@@ -64,6 +82,7 @@ extension in_addr: Printable {
   }
     
 }
+
 
 protocol SocketAddress {
   
@@ -100,6 +119,38 @@ extension sockaddr_in: SocketAddress {
     self.init(address: ipv4, port: port)
   }
   
+  init(string: String?) {
+    if let s = string {
+      if s.isEmpty {
+        self.init(address: INADDR_ANY, port: nil)
+      }
+      else {
+        // split string at colon
+        let comps = split(s, { $0 == ":"}, maxSplit: 1)
+        if comps.count == 2 {
+          self.init(address: comps[0], port: comps[1].toInt())
+        }
+        else {
+          assert(comps.count == 1)
+          let c1 = comps[0]
+          let isWildcard = (c1 == "*" || c1 == "*.*.*.*")
+          if isWildcard {
+            self.init(address: nil, port: nil)
+          }
+          else if let port = c1.toInt() { // it's a number
+            self.init(address: nil, port: port)
+          }
+          else { // it's a host
+            self.init(address: c1, port: nil)
+          }
+        }
+      }
+    }
+    else {
+      self.init(address: INADDR_ANY, port: nil)
+    }
+  }
+  
   var port: Int { // should we make that optional and use wildcard as nil?
     get {
       return Int(ntohs(sin_port))
@@ -121,6 +172,29 @@ extension sockaddr_in: SocketAddress {
   var asString: String {
     let addr = address.asString
     return isWildcardPort ? addr : "\(addr):\(port)"
+  }
+}
+
+/**
+ * This allows you to do: let addr : sockaddr_in = "192.168.0.1:80"
+ *
+ * Adding an IntLiteralConvertible seems a bit too weird and ambigiuous to me.
+ *
+ * Note: this does NOT work:
+ *   let s : sockaddr_in = "*:\(port)"
+ * it requires:
+ *   StringInterpolationConvertible
+ */
+extension sockaddr_in: StringLiteralConvertible {
+  
+  static func convertFromStringLiteral(value:StringLiteralType) -> sockaddr_in {
+    return sockaddr_in(string: value)
+  }
+  
+  static func convertFromExtendedGraphemeClusterLiteral
+    (value: ExtendedGraphemeClusterType) -> sockaddr_in
+  {
+    return sockaddr_in(string: value)
   }
 }
 
