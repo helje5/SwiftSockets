@@ -52,7 +52,7 @@ class EchoServer {
       
       self.sendWelcome(newSock)
       
-      newSock.onRead  { self.handleIncomingData($0) }
+      newSock.onRead  { self.handleIncomingData($0, expectedCount: $1) }
       newSock.onClose { ( fd: CInt ) -> Void in
         // we need to consume the return value to give peace to the closure
         dispatch_async(dispatch_get_global_queue(0, 0)) { () -> Void in
@@ -88,9 +88,11 @@ class EchoServer {
     sock.write("> ")
   }
   
-  func handleIncomingData(socket: ActiveSocket) {
+  func handleIncomingData(socket: ActiveSocket, expectedCount: Int) {
     // remove from openSockets if all has been read
     let (count, block) = socket.read()
+    
+    println("EXPECTED \(expectedCount) got \(count)")
     
     if count < 1 {
       log("EOF \(socket)")
@@ -106,16 +108,6 @@ class EchoServer {
     
     socket.asyncWrite(mblock, length: count)
     socket.write("> ")
-    
-    // LAME HACK around the missing ioctl().
-    // This is going to block at least queue thread? if a buffer is received
-    // which is exactly the size of the readBuffer
-    // TBD: maybe we can use poll() on the descriptor to see if sth is waiting?
-    // TBD: or make the socket itself unblocking
-    if count == socket.readBufferSize {
-      log("Got a full buffer, more data waiting? MIGHT BLOCK")
-      handleIncomingData(socket)
-    }
   }
 
   func logReceivedBlock(block: CChar[], length: Int) {

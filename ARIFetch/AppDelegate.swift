@@ -46,7 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     let s = socket!
     
-    s.onRead  { self.handleIncomingData($0) }
+    s.onRead  { self.handleIncomingData($0, expectedCount: $1) }
     s.onClose { fd in println("Closing \(fd) ..."); }
     
     // connect
@@ -73,7 +73,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
-  func handleIncomingData(socket: ActiveSocket) {
+  func handleIncomingData(socket: ActiveSocket, expectedCount: Int) {
     let (count, block) = socket.read()
     
     println("got bytes: \(count)")
@@ -83,7 +83,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       socket.close()
       return
     }
-
+    
     var data = ""
     block.withUnsafePointerToElements {
       p in
@@ -93,16 +93,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // log to view. Careful, must run in main thread!
     dispatch_async(dispatch_get_main_queue()) {
       self.resultView.appendString(data)
-    }
-    
-    // LAME HACK around the missing ioctl().
-    // This is going to block at least queue thread? if a buffer is received
-    // which is exactly the size of the readBuffer
-    // TBD: maybe we can use poll() on the descriptor to see if sth is waiting?
-    // TBD: or make the socket itself unblocking
-    if count == socket.readBufferSize {
-      println("Got a full buffer, more data waiting? MIGHT BLOCK")
-      socket.readCB?(socket) // recurse
     }
   }
 
