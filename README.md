@@ -120,6 +120,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] Nested classes/types
   - [ ] Patterns
     - [x] Use wildcard pattern to ignore value
+  - [x] Literal Convertibles
 
 ###Why?!
 
