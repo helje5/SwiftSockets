@@ -121,6 +121,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] Patterns
     - [x] Use wildcard pattern to ignore value
   - [x] Literal Convertibles
+  - [ ] @auto-closure
 
 ###Why?!
 
