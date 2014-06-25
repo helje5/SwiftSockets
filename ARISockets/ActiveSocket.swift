@@ -331,6 +331,10 @@ class ActiveSocket: Socket, OutputStream {
           self.asyncWrite(cstr, length: len)
         }
       }
+      else {
+        assert(false, "Could not persist cString")
+        println("FATAL: Could not persist cString?")
+      }
     }
   }
   
