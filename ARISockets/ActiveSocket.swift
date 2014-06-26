@@ -133,7 +133,7 @@ class ActiveSocket: Socket, OutputStream {
   
   /* read */
   
-  func onRead(cb: ((ActiveSocket, Int) -> Void)?) {
+  func onRead(cb: ((ActiveSocket, Int) -> Void)?) -> Self {
     let hadCB = readCB != nil
     
     if cb == nil && hadCB {
@@ -145,6 +145,8 @@ class ActiveSocket: Socket, OutputStream {
     if cb != nil && !hadCB {
       startEventHandler()
     }
+    
+    return self
   }
   
   // let the socket own the read buffer, what is the best buffer type?

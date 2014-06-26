@@ -54,7 +54,7 @@ class EchoServer {
       self.sendWelcome(newSock)
       
       newSock.onRead  { self.handleIncomingData($0, expectedCount: $1) }
-      newSock.onClose { ( fd: CInt ) -> Void in
+             .onClose { ( fd: CInt ) -> Void in
         // we need to consume the return value to give peace to the closure
         dispatch_async(dispatch_get_global_queue(0, 0)) { () -> Void in
           _ = self.openSockets.removeValueForKey(fd)

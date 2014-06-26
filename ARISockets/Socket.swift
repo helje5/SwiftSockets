@@ -73,8 +73,9 @@ class Socket {
     boundAddress = nil
   }
   
-  func onClose(cb: ((CInt) -> Void)?) {
+  func onClose(cb: ((CInt) -> Void)?) -> Self {
     closeCB = cb
+    return self
   }
   
   /* bind the socket. */
