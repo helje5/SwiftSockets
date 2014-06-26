@@ -75,26 +75,42 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func handleIncomingData(socket: ActiveSocket, expectedCount: Int) {
-    let (count, block) = socket.read()
+    do {
+      let (count, block, errno) = socket.read()
+      
+      if count < 0 && errno == EWOULDBLOCK {
+        break
+      }
     
-    println("got bytes: \(count)")
-    
-    if count < 1 {
-      println("EOF \(socket)")
-      socket.close()
-      return
-    }
-    
-    var data = ""
-    block.withUnsafePointerToElements {
-      p in
-      data = String.fromCString(p) // this can fail, will abort()
-    }
-    
-    // log to view. Careful, must run in main thread!
-    dispatch_async(dispatch_get_main_queue()) {
-      self.resultView.appendString(data)
-    }
+      println("got bytes: \(count)")
+      
+      if count < 1 {
+        println("EOF \(socket)")
+        socket.close()
+        return
+      }
+
+      println("BLOCK: \(block)")
+      var data : String = block.withUnsafePointerToElements {
+        p in
+        if p != nil {
+          // Sometimes fails in: Can't unwrap Optional.None (at bufsize==count?)
+          // FIXME: I think I know why. It may happen if the block boundary is
+          //        within a UTF-8 sequence?
+          // The end of the block is 100,-30,-128,0
+          return String.fromCString(p) // this can fail, will abort()
+        }
+        else {
+          println("Could not grab pointer to block \(count) \(block)?")
+          return "<ERROR>"
+        }
+      }
+      
+      // log to view. Careful, must run in main thread!
+      dispatch_async(dispatch_get_main_queue()) {
+        self.resultView.appendString(data)
+      }
+    } while (true)
   }
 
 }

@@ -78,7 +78,8 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] Real error handling
 - [x] Twisted (no blocking reads or writes)
   - [x] Async reads and writes
-    - [ ] Never block :-)
+    - [x] Never block on reads
+    - [ ] Never block on listen
   - [ ] Async connect()
 - [ ] Support all types of Unix sockets & addresses
   - [x] IPv4

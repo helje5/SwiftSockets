@@ -279,10 +279,10 @@ class ActiveSocket: Socket, OutputStream {
     return writeCount
   }
 
-  func read() -> ( Int, CChar[]) {
+  func read() -> ( size: Int, block: CChar[], error: CInt) {
     if !isValid {
       println("Called read() on closed socket \(self)")
-      return ( -42, readBuffer )
+      return ( -42, readBuffer, EBADF )
     }
     
     var readCount: Int = 0
@@ -294,13 +294,12 @@ class ActiveSocket: Socket, OutputStream {
     }
     
     if readCount < 0 {
-      println("Socket error, check errno.")
       readBuffer[0] = 0
-      return ( readCount, readBuffer )
+      return ( readCount, readBuffer, errno )
     }
     
     readBuffer[readCount] = 0 // convenience
-    return ( readCount, readBuffer )
+    return ( readCount, readBuffer, 0 )
   }
   
   var numberOfBytesAvailableForReading : Int? {
