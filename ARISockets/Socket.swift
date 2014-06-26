@@ -269,6 +269,36 @@ class Socket {
   }
   
   
+  /* socket flags */
+  
+  var flags : CInt? {
+    get {
+      let rc = ari_fcntlVi(fd!, F_GETFL, 0)
+      return rc >= 0 ? rc : nil
+    }
+    set {
+      let rc = ari_fcntlVi(fd!, F_SETFL, CInt(newValue!))
+      if rc == -1 {
+        println("Could not set new socket flags \(rc)")
+      }
+    }
+  }
+  
+  var isNonBlocking : Bool {
+    get {
+      return (flags! & O_NONBLOCK) != 0 ? true : false
+    }
+    set {
+      if newValue {
+        flags = flags! | O_NONBLOCK
+      }
+      else {
+        flags = flags! & ~O_NONBLOCK
+      }
+    }
+  }
+  
+  
   /* description */
   
   // must live in the main-class as 'declarations in extensions cannot be

@@ -43,7 +43,8 @@ class EchoServer {
     listenSocket!.listen(queue, backlog: 5) {
       newSock in
       
-      self.log("got new socket: \(newSock)")
+      self.log("got new socket: \(newSock) nio=\(newSock.isNonBlocking)")
+      newSock.isNonBlocking = true
       
       dispatch_async(dispatch_get_global_queue(0, 0)) {
         // Note: we need to keep the socket around!!

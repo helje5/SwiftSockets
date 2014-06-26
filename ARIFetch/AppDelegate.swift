@@ -57,6 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     let ok = s.connect(sockaddr_in(address:host, port:port)) {
       println("connected \(s)")
+      s.isNonBlocking = true
       
       s.write(
         "GET / HTTP/1.0\r\n" +
