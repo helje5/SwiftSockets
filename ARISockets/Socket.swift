@@ -140,6 +140,10 @@ class Socket {
     get { return getSocketOption(SO_REUSEADDR) }
     set { setSocketOption(SO_REUSEADDR, value: newValue) }
   }
+  var isSigPipeDisabled: Bool {
+    get { return getSocketOption(SO_NOSIGPIPE) }
+    set { setSocketOption(SO_NOSIGPIPE, value: newValue) }
+  }
   var keepAlive: Bool {
     get { return getSocketOption(SO_KEEPALIVE) }
     set { setSocketOption(SO_KEEPALIVE, value: newValue) }

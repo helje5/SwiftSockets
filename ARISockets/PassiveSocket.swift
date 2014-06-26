@@ -118,6 +118,7 @@ class PassiveSocket: Socket {
             // queue setup a typical server would want to have
             let newSocket =
               ActiveSocket(fd: newFD, remoteAddress: baddr, queue: queue)
+            newSocket.isSigPipeDisabled = true
             
             accept(newSocket)
           }

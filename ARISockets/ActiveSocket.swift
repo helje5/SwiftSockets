@@ -64,6 +64,10 @@ class ActiveSocket: Socket, OutputStream {
     
     self.remoteAddress  = remoteAddress
     self.queue          = queue
+    
+    if let lfd = fd {
+      isSigPipeDisabled = true
+    }
   }
   
   
@@ -289,7 +293,7 @@ class ActiveSocket: Socket, OutputStream {
     let fd      = self.fd!
 
     // FIXME: If I just close the Terminal which hosts telnet this continues
-    //        to read garbage from the server. SIGPIPE handling missing?
+    //        to read garbage from the server. Even with SIGPIPE off.
     readBuffer.withUnsafePointerToElements {
       p in readCount = Darwin.read(fd, p, bufsize)
     }
