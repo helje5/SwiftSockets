@@ -100,7 +100,7 @@ class PassiveSocket: Socket {
     if listenSource {
       let lfd = fd! // please the closure and don't capture self
       
-      dispatch_source_set_event_handler(listenSource) {
+      listenSource!.onEvent { _, _ in
         do {
           // FIXME: tried to encapsulate this in a sockaddrbuf which does all
           //        the ptr handling, but it ain't work (autoreleasepool issue?)

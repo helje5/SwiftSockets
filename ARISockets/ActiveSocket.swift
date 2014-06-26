@@ -195,10 +195,9 @@ class ActiveSocket: Socket, OutputStream {
       return false
     }
     
-    dispatch_source_set_event_handler(readSource) {
-      [unowned self] in
+    readSource!.onEvent {
+      [unowned self] _, readCount in
       if let cb = self.readCB {
-        let readCount = dispatch_source_get_data(self.readSource)
         cb(self, Int(readCount))
       }
     }
