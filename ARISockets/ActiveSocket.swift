@@ -289,6 +289,8 @@ class ActiveSocket: Socket, OutputStream {
     let bufsize = UInt(readBufferSize)
     let fd      = self.fd!
 
+    // FIXME: If I just close the Terminal which hosts telnet this continues
+    //        to read garbage from the server. SIGPIPE handling missing?
     readBuffer.withUnsafePointerToElements {
       p in readCount = Darwin.read(fd, p, bufsize)
     }

@@ -79,7 +79,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
 - [x] Twisted (no blocking reads or writes)
   - [x] Async reads and writes
     - [x] Never block on reads
-    - [ ] Never block on listen
+    - [x] Never block on listen
   - [ ] Async connect()
 - [ ] Support all types of Unix sockets & addresses
   - [x] IPv4
@@ -98,7 +98,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Extensions on structs
   - [ ] Extensions to organize classes (swiftc segfaults)
   - [x] Protocols on structs
-  - [x] Tuples
+  - [x] Tuples, with labels
   - [x] Trailing closures
   - [ ] @Lazy
   - [x] Pure Swift weak delegates via @class

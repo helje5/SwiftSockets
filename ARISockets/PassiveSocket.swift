@@ -72,7 +72,8 @@ class PassiveSocket: Socket {
     if (rc != 0) {
       return false
     }
-    self.backlog = backlog
+    self.backlog       = backlog
+    self.isNonBlocking = true
     return true
   }
   
@@ -120,15 +121,14 @@ class PassiveSocket: Socket {
             
             accept(newSocket)
           }
+          else if errno == EWOULDBLOCK {
+            break
+          }
           else { // great logging as Paul says
-            println("Failed to accept() socket: \(self)")
+            println("Failed to accept() socket: \(self) \(errno)")
           }
           
-          // FIXME: check whether there are additional sockets waiting in the
-          //        queue? We probably only get one event call even if there is
-          //        a backlog
-          // But there is no ioctl?
-        } while (false);
+        } while (true);
       }
       
       dispatch_resume(listenSource)

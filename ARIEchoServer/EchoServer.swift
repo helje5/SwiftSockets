@@ -92,6 +92,9 @@ class EchoServer {
   func handleIncomingData(socket: ActiveSocket, expectedCount: Int) {
     // remove from openSockets if all has been read
     do {
+      // FIXME: This currently crashes if I just close the Terminal which hosts
+      //        telnet. SIGPIPE?
+      //        It continues to read garbage from the server
       let (count, block, errno) = socket.read()
       
       if count < 0 && errno == EWOULDBLOCK {
