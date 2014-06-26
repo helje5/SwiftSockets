@@ -48,7 +48,7 @@ class ActiveSocket: Socket, OutputStream {
   var sendCount      : Int                = 0
   var closeRequested : Bool               = false
   var didCloseRead   : Bool               = false
-  var readCB         : ((ActiveSocket) -> Void)? = nil
+  var readCB         : ((ActiveSocket, Int) -> Void)? = nil
   
   var isConnected : Bool {
     return isValid ? (remoteAddress != nil) : false
@@ -133,7 +133,7 @@ class ActiveSocket: Socket, OutputStream {
   
   /* read */
   
-  func onRead(cb: ((ActiveSocket) -> Void)?) {
+  func onRead(cb: ((ActiveSocket, Int) -> Void)?) -> Self {
     let hadCB = readCB != nil
     
     if cb == nil && hadCB {
@@ -145,6 +145,8 @@ class ActiveSocket: Socket, OutputStream {
     if cb != nil && !hadCB {
       startEventHandler()
     }
+    
+    return self
   }
   
   // let the socket own the read buffer, what is the best buffer type?
@@ -195,10 +197,9 @@ class ActiveSocket: Socket, OutputStream {
     
     dispatch_source_set_event_handler(readSource) {
       [unowned self] in
-      if self {
-        if let cb = self.readCB {
-          cb(self)
-        }
+      if let cb = self.readCB {
+        let readCount = dispatch_source_get_data(self.readSource)
+        cb(self, Int(readCount))
       }
     }
     
@@ -302,17 +303,12 @@ class ActiveSocket: Socket, OutputStream {
     return ( readCount, readBuffer )
   }
   
-  func numberOfAvailableBytesNoIOCTL() -> Int {
-    var len: Int = 0
-    
-    /* not sure how to get to ioctl
-    while (ioctl(fd!, FIONREAD, &len) == -1) {
-      if (errno == EINTR)
-        continue;
-    }
-    */
-
-    return len
+  var numberOfBytesAvailableForReading : Int? {
+    // Note: this doesn't seem to work, returns 0
+    var count = CInt(0)
+    let rc    = ari_ioctlVip(fd!, FIONREAD, &count);
+    println("rc \(rc)")
+    return rc != -1 ? Int(count) : nil
   }
   
   
