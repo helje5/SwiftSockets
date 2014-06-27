@@ -39,8 +39,7 @@ socket.listen(dispatch_get_global_queue(0, 0), backlog: 5) {
 
 Client Sample:
 ```swift
-let socket = ActiveSocket()
-socket.onRead {
+let socket = ActiveSocket().onRead {
   let (count, block) = $0.read()
   if count < 1 {
     println("EOF, or great error handling.")
@@ -48,8 +47,9 @@ socket.onRead {
   }
   println("Answer to ring,ring is: \(count) bytes: \(block)")
 }
-socket.connect("127.0.0.1:80")
-socket.write("Ring, ring!\r\n")
+socket.connect("127.0.0.1:80") {
+  socket.write("Ring, ring!\r\n")
+}
 ```
 
 ####ARIEchoServer
