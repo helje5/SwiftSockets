@@ -91,21 +91,30 @@ class EchoServer {
   
   func handleIncomingData(socket: ActiveSocket, expectedCount: Int) {
     // remove from openSockets if all has been read
-    let (count, block) = socket.read()
+    do {
+      // FIXME: This currently continues to read garbage if I just close the
+      //        Terminal which hosts telnet. Even with sigpipe off.
+      let (count, block, errno) = socket.read()
+      
+      if count < 0 && errno == EWOULDBLOCK {
+        break
+      }
+      
+      if count < 1 {
+        log("EOF \(socket) (err=\(errno))")
+        socket.close()
+        return
+      }
+      
+      logReceivedBlock(block, length: count)
+      
+      // maps the whole block. asyncWrite does not accept slices, can we add this?
+      // (should adopt sth like IndexedCollection<T>?)
+      let mblock = block.map({ $0 == 83 ? 90 : ($0 == 115 ? 122 : $0) })
+      
+      socket.asyncWrite(mblock, length: count)
+    } while (true)
     
-    if count < 1 {
-      log("EOF \(socket)")
-      socket.close()
-      return
-    }
-    
-    logReceivedBlock(block, length: count)
-    
-    // maps the whole block. asyncWrite does not accept slices, can we add this?
-    // (should adopt sth like IndexedCollection<T>?)
-    let mblock = block.map({ $0 == 83 ? 90 : ($0 == 115 ? 122 : $0) })
-    
-    socket.asyncWrite(mblock, length: count)
     socket.write("> ")
   }
 

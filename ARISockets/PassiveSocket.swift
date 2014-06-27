@@ -72,7 +72,8 @@ class PassiveSocket: Socket {
     if (rc != 0) {
       return false
     }
-    self.backlog = backlog
+    self.backlog       = backlog
+    self.isNonBlocking = true
     return true
   }
   
@@ -99,7 +100,7 @@ class PassiveSocket: Socket {
     if listenSource {
       let lfd = fd! // please the closure and don't capture self
       
-      dispatch_source_set_event_handler(listenSource) {
+      listenSource!.onEvent { _, _ in
         do {
           // FIXME: tried to encapsulate this in a sockaddrbuf which does all
           //        the ptr handling, but it ain't work (autoreleasepool issue?)
@@ -117,18 +118,18 @@ class PassiveSocket: Socket {
             // queue setup a typical server would want to have
             let newSocket =
               ActiveSocket(fd: newFD, remoteAddress: baddr, queue: queue)
+            newSocket.isSigPipeDisabled = true
             
             accept(newSocket)
           }
+          else if errno == EWOULDBLOCK {
+            break
+          }
           else { // great logging as Paul says
-            println("Failed to accept() socket: \(self)")
+            println("Failed to accept() socket: \(self) \(errno)")
           }
           
-          // FIXME: check whether there are additional sockets waiting in the
-          //        queue? We probably only get one event call even if there is
-          //        a backlog
-          // But there is no ioctl?
-        } while (false);
+        } while (true);
       }
       
       dispatch_resume(listenSource)

@@ -64,6 +64,10 @@ class ActiveSocket: Socket, OutputStream {
     
     self.remoteAddress  = remoteAddress
     self.queue          = queue
+    
+    if let lfd = fd {
+      isSigPipeDisabled = true
+    }
   }
   
   
@@ -195,10 +199,9 @@ class ActiveSocket: Socket, OutputStream {
       return false
     }
     
-    dispatch_source_set_event_handler(readSource) {
-      [unowned self] in
+    readSource!.onEvent {
+      [unowned self] _, readCount in
       if let cb = self.readCB {
-        let readCount = dispatch_source_get_data(self.readSource)
         cb(self, Int(readCount))
       }
     }
@@ -279,28 +282,29 @@ class ActiveSocket: Socket, OutputStream {
     return writeCount
   }
 
-  func read() -> ( Int, CChar[]) {
+  func read() -> ( size: Int, block: CChar[], error: CInt) {
     if !isValid {
       println("Called read() on closed socket \(self)")
-      return ( -42, readBuffer )
+      return ( -42, readBuffer, EBADF )
     }
     
     var readCount: Int = 0
     let bufsize = UInt(readBufferSize)
     let fd      = self.fd!
 
+    // FIXME: If I just close the Terminal which hosts telnet this continues
+    //        to read garbage from the server. Even with SIGPIPE off.
     readBuffer.withUnsafePointerToElements {
       p in readCount = Darwin.read(fd, p, bufsize)
     }
     
     if readCount < 0 {
-      println("Socket error, check errno.")
       readBuffer[0] = 0
-      return ( readCount, readBuffer )
+      return ( readCount, readBuffer, errno )
     }
     
     readBuffer[readCount] = 0 // convenience
-    return ( readCount, readBuffer )
+    return ( readCount, readBuffer, 0 )
   }
   
   var numberOfBytesAvailableForReading : Int? {

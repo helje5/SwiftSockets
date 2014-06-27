@@ -39,8 +39,7 @@ socket.listen(dispatch_get_global_queue(0, 0), backlog: 5) {
 
 Client Sample:
 ```swift
-let socket = ActiveSocket()
-socket.onRead {
+let socket = ActiveSocket().onRead {
   let (count, block) = $0.read()
   if count < 1 {
     println("EOF, or great error handling.")
@@ -48,8 +47,9 @@ socket.onRead {
   }
   println("Answer to ring,ring is: \(count) bytes: \(block)")
 }
-socket.connect("127.0.0.1:80")
-socket.write("Ring, ring!\r\n")
+socket.connect("127.0.0.1:80") {
+  socket.write("Ring, ring!\r\n")
+}
 ```
 
 ####ARIEchoServer
@@ -78,7 +78,8 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] Real error handling
 - [x] Twisted (no blocking reads or writes)
   - [x] Async reads and writes
-    - [ ] Never block :-)
+    - [x] Never block on reads
+    - [x] Never block on listen
   - [ ] Async connect()
 - [ ] Support all types of Unix sockets & addresses
   - [x] IPv4
@@ -97,7 +98,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Extensions on structs
   - [ ] Extensions to organize classes (swiftc segfaults)
   - [x] Protocols on structs
-  - [x] Tuples
+  - [x] Tuples, with labels
   - [x] Trailing closures
   - [ ] @Lazy
   - [x] Pure Swift weak delegates via @class
