@@ -40,9 +40,9 @@ socket.listen(dispatch_get_global_queue(0, 0), backlog: 5) {
 Client Sample:
 ```swift
 let socket = ActiveSocket().onRead {
-  let (count, block) = $0.read()
+  let (count, block, errno) = $0.read()
   if count < 1 {
-    println("EOF, or great error handling.")
+    println("EOF, or great error handling \(errno).")
     return
   }
   println("Answer to ring,ring is: \(count) bytes: \(block)")
