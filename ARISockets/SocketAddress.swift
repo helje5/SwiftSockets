@@ -12,10 +12,6 @@ import Darwin
 
 let INADDR_ANY = in_addr(s_addr: 0)
 
-func ==(lhs: in_addr, rhs: in_addr) -> Bool {
-  return __uint32_t(lhs.s_addr) == __uint32_t(rhs.s_addr)
-}
-
 /**
  * in_addr represents an IPv4 address in Unix. We extend that a little bit
  * to increase it's usability :-)
@@ -61,13 +57,10 @@ extension in_addr {
   
 }
 
-/*
- * FIXME: This gives "Invalid redeclaration of '=='". Maybe Swift somehow
- *        aliases the simple struct to an Int32?
-func == (lhs: in_addr, rhs: in_addr) -> Bool {
-  return lhs.s_addr == rhs.s_addr
+func ==(lhs: in_addr, rhs: in_addr) -> Bool {
+  return __uint32_t(lhs.s_addr) == __uint32_t(rhs.s_addr)
 }
-*/
+
 extension in_addr : Equatable, Hashable {
   
   var hashValue: Int {
