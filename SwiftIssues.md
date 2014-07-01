@@ -23,6 +23,7 @@ FIXME: Collect and list all issues :-)
 - no ```let constant = 42``` in extensions, gives 
   "'var' declarations without getter/setter not allowed here" (this ain't
   no var)
+- Cannot implement '==' operation for in_addr? (Invalid redeclaration)
 
 ###How To?
 

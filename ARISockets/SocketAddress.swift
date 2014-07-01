@@ -61,6 +61,22 @@ extension in_addr {
   
 }
 
+/*
+ * FIXME: This gives "Invalid redeclaration of '=='". Maybe Swift somehow
+ *        aliases the simple struct to an Int32?
+func == (lhs: in_addr, rhs: in_addr) -> Bool {
+  return lhs.s_addr == rhs.s_addr
+}
+*/
+extension in_addr : Equatable, Hashable {
+  
+  var hashValue: Int {
+    // Knuth?
+    return Int(UInt32(s_addr) * 2654435761 % (2^32))
+  }
+  
+}
+
 extension in_addr: StringLiteralConvertible {
   // this allows you to do: let addr : in_addr = "192.168.0.1"
   
@@ -173,6 +189,19 @@ extension sockaddr_in: SocketAddress {
     let addr = address.asString
     return isWildcardPort ? addr : "\(addr):\(port)"
   }
+}
+
+func == (lhs: sockaddr_in, rhs: sockaddr_in) -> Bool {
+  return (lhs.sin_addr.s_addr == rhs.sin_addr.s_addr)
+      && (lhs.sin_port        == rhs.sin_port)
+}
+
+extension sockaddr_in: Equatable, Hashable {
+  
+  var hashValue: Int {
+    return sin_addr.hashValue + sin_port.hashValue
+  }
+  
 }
 
 /**
