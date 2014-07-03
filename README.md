@@ -30,26 +30,27 @@ A framework containing the socket classes and relevant extensions. It takes a bi
 Server Sample:
 ```swift
 let socket = PassiveSocket(address: sockaddr_in(port: 4242))
-socket.listen(dispatch_get_global_queue(0, 0), backlog: 5) {
-  println("Wait, someone is attempting to talk to me!")
-  $0.close()
-  println("All good, go ahead!")
-}
+  .listen(dispatch_get_global_queue(0, 0), backlog: 5) {
+    println("Wait, someone is attempting to talk to me!")
+    $0.close()
+    println("All good, go ahead!")
+  }
 ```
 
 Client Sample:
 ```swift
-let socket = ActiveSocket().onRead {
-  let (count, block, errno) = $0.read()
-  if count < 1 {
-    println("EOF, or great error handling \(errno).")
-    return
+let socket = ActiveSocket()
+  .onRead {
+    let (count, block, errno) = $0.read()
+    if count < 1 {
+      println("EOF, or great error handling \(errno).")
+      return
+    }
+    println("Answer to ring,ring is: \(count) bytes: \(block)")
   }
-  println("Answer to ring,ring is: \(count) bytes: \(block)")
-}
-socket.connect("127.0.0.1:80") {
-  socket.write("Ring, ring!\r\n")
-}
+  .connect("127.0.0.1:80") {
+    socket.write("Ring, ring!\r\n")
+  }
 ```
 
 ####ARIEchoServer
@@ -107,11 +108,15 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Class variables on structs
   - [x] CConstPointer, CConstVoidPointer
     - [x] withCString {}
+  - [x] UnsafePointer
   - [x] sizeof()
   - [x] Standard Protocols
     - [x] Printable
     - [x] LogicValue
     - [x] OutputStream
+    - [x] Equatable
+    - [x] Hashable
+    - [x] Sequence (GeneratorOf<T>)
   - [x] Left shift AND right shift
   - [ ] Enums on steroids
   - [ ] Dynamic type system, reflection

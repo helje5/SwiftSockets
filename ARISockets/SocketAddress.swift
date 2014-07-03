@@ -12,10 +12,6 @@ import Darwin
 
 let INADDR_ANY = in_addr(s_addr: 0)
 
-func ==(lhs: in_addr, rhs: in_addr) -> Bool {
-  return __uint32_t(lhs.s_addr) == __uint32_t(rhs.s_addr)
-}
-
 /**
  * in_addr represents an IPv4 address in Unix. We extend that a little bit
  * to increase it's usability :-)
@@ -61,6 +57,19 @@ extension in_addr {
   
 }
 
+func ==(lhs: in_addr, rhs: in_addr) -> Bool {
+  return __uint32_t(lhs.s_addr) == __uint32_t(rhs.s_addr)
+}
+
+extension in_addr : Equatable, Hashable {
+  
+  var hashValue: Int {
+    // Knuth?
+    return Int(UInt32(s_addr) * 2654435761 % (2^32))
+  }
+  
+}
+
 extension in_addr: StringLiteralConvertible {
   // this allows you to do: let addr : in_addr = "192.168.0.1"
   
@@ -96,7 +105,7 @@ protocol SocketAddress {
 extension sockaddr_in: SocketAddress {
   
   static var domain = AF_INET // if you make this a let, swiftc segfaults
-  static var size = __uint8_t(sizeof(sockaddr_in)) // how to refer to self?
+  static var size   = __uint8_t(sizeof(sockaddr_in)) // how to refer to self?
   
   init() {
     sin_len    = sockaddr_in.size
@@ -173,6 +182,19 @@ extension sockaddr_in: SocketAddress {
     let addr = address.asString
     return isWildcardPort ? addr : "\(addr):\(port)"
   }
+}
+
+func == (lhs: sockaddr_in, rhs: sockaddr_in) -> Bool {
+  return (lhs.sin_addr.s_addr == rhs.sin_addr.s_addr)
+      && (lhs.sin_port        == rhs.sin_port)
+}
+
+extension sockaddr_in: Equatable, Hashable {
+  
+  var hashValue: Int {
+    return sin_addr.hashValue + sin_port.hashValue
+  }
+  
 }
 
 /**
@@ -262,4 +284,160 @@ extension sockaddr_un: SocketAddress {
     //         the buffer
     return sockaddr_un.size
   }
+}
+
+
+/* DNS */
+
+extension addrinfo {
+  
+  init() {
+    ai_flags     = 0 // AI_CANONNAME, AI_PASSIVE, AI_NUMERICHOST
+    ai_family    = AF_UNSPEC // AF_INET or AF_INET6 or AF_UNSPEC
+    ai_socktype  = SOCK_STREAM
+    ai_protocol  = 0   // or IPPROTO_xxx for IPv4
+    ai_addrlen   = 0   // length of ai_addr below
+    ai_canonname = nil // UnsafePointer<CChar>
+    ai_addr      = nil // UnsafePointer<sockaddr>
+    ai_next      = nil // UnsafePointer<addrinfo>
+  }
+  
+  init(flags: CInt, family: CInt) {
+    self.init()
+    ai_flags  = flags
+    ai_family = family
+  }
+  
+  var hasNext : Bool {
+    let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
+    return ai_next != nullptr
+  }
+  var next : addrinfo? {
+    return hasNext ? ai_next.memory : nil
+  }
+  
+  var canonicalName : String? {
+    let nullptr : UnsafePointer<CChar> = UnsafePointer.null()
+    if ai_canonname != nullptr && ai_canonname[0] != 0 {
+      return String.fromCString(ai_canonname)
+    }
+    return nil
+  }
+  
+  var hasAddress : Bool {
+    let nullptr : UnsafePointer<sockaddr> = UnsafePointer.null()
+    return ai_addr != nullptr
+  }
+  
+  var isIPv4 : Bool {
+    return hasAddress &&
+           (ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain))
+  }
+  
+  var addressIPv4 : sockaddr_in?  { return address() }
+  var addressIPv6 : sockaddr_in6? { return address() }
+  
+  func address<T: SocketAddress>() -> T? {
+    let nullptr : UnsafePointer<sockaddr> = UnsafePointer.null()
+    if ai_addr == nullptr {
+      return nil
+    }
+    if ai_addr.memory.sa_family != sa_family_t(T.domain) {
+      return nil
+    }
+    let aiptr = UnsafePointer<T>(ai_addr) // cast
+    return aiptr.memory // copies the address to the return value
+  }
+}
+
+extension addrinfo : Printable {
+  
+  var description : String {
+    var s = "<addrinfo"
+    
+    if ai_flags != 0 {
+      var fs = String[]()
+      var f  = ai_flags
+      if f & AI_CANONNAME != 0 {
+        fs.append("canonname")
+        f = f & ~AI_CANONNAME
+      }
+      if f & AI_PASSIVE != 0 {
+        fs.append("passive")
+        f = f & ~AI_PASSIVE
+      }
+      if f & AI_NUMERICHOST != 0 {
+        fs.append("numerichost")
+        f = f & ~AI_NUMERICHOST
+      }
+      if f != 0 {
+        fs.append("flags[\(f)]")
+      }
+      let fss = join(",", fs)
+      s += " flags=" + fss
+    }
+    
+    var noop = ""
+    if ai_family != AF_UNSPEC { s += sa_family_t(ai_family).description }
+    switch ai_socktype {
+      case 0:           noop = "" // really?
+      case SOCK_STREAM: s += " stream"
+      case SOCK_DGRAM:  s += " datagram"
+      default:          s += " type[\(ai_socktype)]"
+    }
+    
+    if let cn = canonicalName {
+      s += " " + cn
+    }
+    
+    if hasAddress {
+      if let a = addressIPv4 {
+        s += " \(a)"
+      }
+      else if let a = addressIPv6 {
+        s += " \(a)"
+      }
+      else {
+        s += " address[len=\(ai_addrlen)]"
+      }
+    }
+    
+    let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
+    s += (ai_next != nullptr ? " +" : "")
+    
+    s += ">"
+    return s
+  }
+}
+
+extension addrinfo : Sequence {
+  
+  func generate() -> GeneratorOf<addrinfo> {
+    var cursor : addrinfo? = self
+    
+    return GeneratorOf<addrinfo> {
+      if let info = cursor {
+        cursor = info.next
+        return info
+      }
+      else {
+        return .None
+      }
+    }
+  }
+}
+
+extension sa_family_t : Printable {
+  
+  var description : String {
+    var noop = ""
+    switch CInt(self) {
+      case AF_UNSPEC: return ""
+      case AF_INET:   return "IPv4"
+      case AF_INET6:  return "IPv6"
+      case AF_LOCAL:  return "local"
+      default:        return "family[\(self)]"
+    }
+  }
+  
 }

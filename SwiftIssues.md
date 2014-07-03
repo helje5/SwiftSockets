@@ -23,6 +23,7 @@ FIXME: Collect and list all issues :-)
 - no ```let constant = 42``` in extensions, gives 
   "'var' declarations without getter/setter not allowed here" (this ain't
   no var)
+- Would be nice if Swift would allow chaining of Void methods (.onRead {} .onWrite {}) - right now all the methods have to return self manually.
 
 ###How To?
 
