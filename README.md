@@ -108,6 +108,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Class variables on structs
   - [x] CConstPointer, CConstVoidPointer
     - [x] withCString {}
+  - [x] UnsafePointer
   - [x] sizeof()
   - [x] Standard Protocols
     - [x] Printable
@@ -115,6 +116,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [x] OutputStream
     - [x] Equatable
     - [x] Hashable
+    - [x] Sequence (GeneratorOf<T>)
   - [x] Left shift AND right shift
   - [ ] Enums on steroids
   - [ ] Dynamic type system, reflection

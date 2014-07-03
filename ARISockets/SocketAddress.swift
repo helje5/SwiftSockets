@@ -290,7 +290,6 @@ extension sockaddr_un: SocketAddress {
 /* DNS */
 
 extension addrinfo {
-  // FIXME: presumably we could make this a Sequence?!
   
   init() {
     ai_flags     = 0 // AI_CANONNAME, AI_PASSIVE, AI_NUMERICHOST
@@ -310,10 +309,11 @@ extension addrinfo {
   }
   
   var hasNext : Bool {
-    return ai_next != nil
+    let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
+    return ai_next != nullptr
   }
-  var next : addrinfo {
-    return ai_next.memory // I think this will copy the memory
+  var next : addrinfo? {
+    return hasNext ? ai_next.memory : nil
   }
   
   var canonicalName : String? {
@@ -357,16 +357,16 @@ extension addrinfo : Printable {
     
     if ai_flags != 0 {
       var fs = String[]()
-      var f = ai_flags
-      if f & AI_CANONNAME {
+      var f  = ai_flags
+      if f & AI_CANONNAME != 0 {
         fs.append("canonname")
         f = f & ~AI_CANONNAME
       }
-      if f & AI_PASSIVE {
+      if f & AI_PASSIVE != 0 {
         fs.append("passive")
         f = f & ~AI_PASSIVE
       }
-      if f & AI_NUMERICHOST {
+      if f & AI_NUMERICHOST != 0 {
         fs.append("numerichost")
         f = f & ~AI_NUMERICHOST
       }
@@ -407,6 +407,23 @@ extension addrinfo : Printable {
     
     s += ">"
     return s
+  }
+}
+
+extension addrinfo : Sequence {
+  
+  func generate() -> GeneratorOf<addrinfo> {
+    var cursor : addrinfo? = self
+    
+    return GeneratorOf<addrinfo> {
+      if let info = cursor {
+        cursor = info.next
+        return info
+      }
+      else {
+        return .None
+      }
+    }
   }
 }
 
