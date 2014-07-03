@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E81DC1F81965A42600BD826B /* DNS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81DC1F71965A42600BD826B /* DNS.swift */; };
 		E8305D75194B06E20073740A /* ActiveSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D70194B06E20073740A /* ActiveSocket.swift */; };
 		E8305D76194B06E20073740A /* PassiveSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D71194B06E20073740A /* PassiveSocket.swift */; };
 		E8305D77194B06E20073740A /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D72194B06E20073740A /* Socket.swift */; };
@@ -46,6 +47,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E81DC1F71965A42600BD826B /* DNS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DNS.swift; sourceTree = "<group>"; };
 		E8305D70194B06E20073740A /* ActiveSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActiveSocket.swift; sourceTree = "<group>"; };
 		E8305D71194B06E20073740A /* PassiveSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PassiveSocket.swift; sourceTree = "<group>"; };
 		E8305D72194B06E20073740A /* Socket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Socket.swift; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 				E8305D71194B06E20073740A /* PassiveSocket.swift */,
 				E8305D70194B06E20073740A /* ActiveSocket.swift */,
 				E8305D74194B06E20073740A /* UnixUtils.swift */,
+				E81DC1F71965A42600BD826B /* DNS.swift */,
 				E88A0EDB195B955A00B840A5 /* ARISockets-Bridging-Header.h */,
 				E83305A6195B92FB00CCBDF5 /* UnixBridge.h */,
 				E83305A4195B92D100CCBDF5 /* UnixBridge.c */,
@@ -337,6 +340,7 @@
 			files = (
 				E8305D76194B06E20073740A /* PassiveSocket.swift in Sources */,
 				E8305D78194B06E20073740A /* SocketAddress.swift in Sources */,
+				E81DC1F81965A42600BD826B /* DNS.swift in Sources */,
 				E8305D79194B06E20073740A /* UnixUtils.swift in Sources */,
 				E8305D75194B06E20073740A /* ActiveSocket.swift in Sources */,
 				E83305A5195B92D100CCBDF5 /* UnixBridge.c in Sources */,
