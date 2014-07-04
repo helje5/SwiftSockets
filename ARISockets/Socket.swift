@@ -95,6 +95,8 @@ class Socket {
     // CAST: Hope this works, essentially cast to void and then take the rawptr
     let bvptr: CConstVoidPointer = &addr
     let bptr = CConstPointer<sockaddr>(nil, bvptr.value)
+    // Would this work?:
+    // let bptr : CConstPointer<sockaddr> = reinterpretCast(&baddr)
     
     // bind!
     let rc = Darwin.bind(fd!, bptr, socklen_t(addr.len));
@@ -120,6 +122,8 @@ class Socket {
     // CAST: Hope this works, essentially cast to void and then take the rawptr
     let bvptr : CMutableVoidPointer = &baddr
     let bptr  = CMutablePointer<sockaddr>(owner: nil, value: bvptr.value)
+    // Would this work?:
+    // let bptr : CConstPointer<sockaddr> = reinterpretCast(&baddr)
     
     // Note: we are not interested in the length here, would be relevant
     //       for AF_UNIX sockets

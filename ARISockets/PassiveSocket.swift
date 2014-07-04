@@ -110,6 +110,8 @@ class PassiveSocket: Socket {
           // CAST: Hope this works, esntly cast to void and then take the rawptr
           let bvptr: CMutableVoidPointer = &baddr
           let bptr = CMutablePointer<sockaddr>(owner: nil, value: bvptr.value)
+          // Would this work?:
+          // let bptr : CMutablePointer<sockaddr> = reinterpretCast(&baddr)
           
           let newFD = Darwin.accept(lfd, bptr, &baddrlen)
           

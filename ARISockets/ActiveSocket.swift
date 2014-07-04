@@ -121,6 +121,8 @@ class ActiveSocket: Socket, OutputStream {
     // CAST: Hope this works, essentially cast to void and then take the rawptr
     let bvptr: CConstVoidPointer = &addr
     let bptr = CConstPointer<sockaddr>(nil, bvptr.value)
+    // Would this work?:
+    // let bptr : CConstPointer<sockaddr> = reinterpretCast(&baddr)
     
     // connect!
     let rc = Darwin.connect(fd!, bptr, socklen_t(addr.len));
