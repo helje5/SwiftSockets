@@ -52,7 +52,7 @@ extension in_addr {
     var selfCopy = self // &self doesn't work, because it can be const?
     let cs = inet_ntop(AF_INET, &selfCopy, &buf, socklen_t(len))
     
-    return String.fromCString(cs)
+    return String.fromCString(cs)!
   }
   
 }
@@ -297,7 +297,7 @@ extension addrinfo {
     ai_socktype  = SOCK_STREAM
     ai_protocol  = 0   // or IPPROTO_xxx for IPv4
     ai_addrlen   = 0   // length of ai_addr below
-    ai_canonname = nil // UnsafePointer<CChar>
+    ai_canonname = nil // UnsafePointer<Int8>
     ai_addr      = nil // UnsafePointer<sockaddr>
     ai_next      = nil // UnsafePointer<addrinfo>
   }
@@ -319,7 +319,7 @@ extension addrinfo {
   var canonicalName : String? {
     let nullptr : UnsafePointer<CChar> = UnsafePointer.null()
     if ai_canonname != nullptr && ai_canonname[0] != 0 {
-      return String.fromCString(ai_canonname)
+      return String.fromCString(CString(ai_canonname))
     }
     return nil
   }
