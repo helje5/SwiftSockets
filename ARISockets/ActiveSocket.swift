@@ -240,8 +240,7 @@ class ActiveSocket: Socket, OutputStream {
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
     var asyncData  : dispatch_data_t? = nil
-    asyncData = dispatch_data_create(buffer, bufsize, queue,
-                                     DISPATCH_DATA_DESTRUCTOR_DEFAULT)
+    asyncData = dispatch_data_create(buffer, bufsize, queue, nil)
     
     sendCount++
     if debugAsyncWrites {
