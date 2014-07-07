@@ -26,6 +26,7 @@ class Socket {
   var fd           : CInt?             = nil
   var boundAddress : sockaddr_in?      = nil
   var closeCB      : ((CInt) -> Void)? = nil
+  var closedFD     : CInt?             = nil // for delayed callback
   var isValid      : Bool { return fd           != nil }
   var isBound      : Bool { return boundAddress != nil }
   
@@ -60,13 +61,13 @@ class Socket {
   
   func close() {
     if fd {
-      let closedFD = fd!
+      closedFD = fd
       Darwin.close(fd!)
-      fd = nil
-
+      fd       = nil
+      
       if let cb = closeCB {
         // can be used to unregister socket etc when the socket is really closed
-        cb(closedFD)
+        cb(closedFD!)
         closeCB = nil // break potential cycles
       }
     }
@@ -74,7 +75,17 @@ class Socket {
   }
   
   func onClose(cb: ((CInt) -> Void)?) -> Self {
-    closeCB = cb
+    if let fd = closedFD { // socket got closed before event-handler attached
+      if let lcb = cb {
+        lcb(fd)
+      }
+      else {
+        closeCB = nil
+      }
+    }
+    else {
+      closeCB = cb
+    }
     return self
   }
   
