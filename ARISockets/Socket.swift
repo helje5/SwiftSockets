@@ -103,14 +103,11 @@ class Socket {
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
     
-    // CAST: Hope this works, essentially cast to void and then take the rawptr
-    let bvptr: CConstVoidPointer = &addr
-    let bptr = CConstPointer<sockaddr>(nil, bvptr.value)
-    // Would this work?:
-    // let bptr : CConstPointer<sockaddr> = reinterpretCast(&baddr)
-    
-    // bind!
-    let rc = Darwin.bind(fd!, bptr, socklen_t(addr.len));
+    let rc = withUnsafePointer(&addr) {
+      (ptr: UnsafePointer<sockaddr_in>) -> Int32 in
+      let bptr = ConstUnsafePointer<sockaddr>(ptr) // cast
+      return Darwin.bind(self.fd!, bptr, socklen_t(addr.len))
+    }
     
     if rc == 0 {
       /* if it was a wildcard port bind, get the address */
@@ -130,20 +127,22 @@ class Socket {
     var baddr    = sockaddr_in()
     var baddrlen = socklen_t(baddr.len)
     
-    // CAST: Hope this works, essentially cast to void and then take the rawptr
-    let bvptr : CMutableVoidPointer = &baddr
-    let bptr  = CMutablePointer<sockaddr>(owner: nil, value: bvptr.value)
-    // Would this work?:
-    // let bptr : CConstPointer<sockaddr> = reinterpretCast(&baddr)
-    
     // Note: we are not interested in the length here, would be relevant
     //       for AF_UNIX sockets
-    let buflenptr: CMutablePointer<socklen_t> = &baddrlen
+    let rc = withUnsafePointer(&baddr) {
+      (ptr: UnsafePointer<sockaddr_in>) -> Int32 in
+      let bptr = UnsafePointer<sockaddr>(ptr) // cast
+      return withUnsafePointer(&baddrlen) {
+        (buflenptr: UnsafePointer<socklen_t>) -> Int32 in
+        return Darwin.getsockname(self.fd!, bptr, buflenptr)
+      }
+    }
     
-    let rc = Darwin.getsockname(fd!, bptr, buflenptr)
     if (rc != 0) {
+      println("Could not get sockname? \(rc)")
       return nil
     }
+    
     // println("PORT: \(baddr.sin_port)")
     return baddr
   }
