@@ -3,7 +3,7 @@
 //  TestSwiftyCocoa
 //
 //  Created by Helge Hess on 6/11/14.
-//  Copyright (c) 2014 Helge Hess. All rights reserved.
+//  Copyright (c) 2014 Always Right Institute. All rights reserved.
 //
 
 import Darwin
@@ -118,14 +118,14 @@ class ActiveSocket: Socket, OutputStream {
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
     
-    // CAST: Hope this works, essentially cast to void and then take the rawptr
-    let bvptr: CConstVoidPointer = &addr
-    let bptr = CConstPointer<sockaddr>(nil, bvptr.value)
-    // Would this work?:
-    // let bptr : CConstPointer<sockaddr> = reinterpretCast(&baddr)
+    let rc = withUnsafePointer(&addr) {
+      (ptr: UnsafePointer<sockaddr_in>) -> Int32 in
+      let bptr = ConstUnsafePointer<sockaddr>(ptr) // cast
+      
+      // connect!
+      return Darwin.connect(self.fd!, bptr, socklen_t(addr.len))
+    }
     
-    // connect!
-    let rc = Darwin.connect(fd!, bptr, socklen_t(addr.len));
     if rc != 0 {
       println("Could not connect \(self) to \(addr)")
       return false
