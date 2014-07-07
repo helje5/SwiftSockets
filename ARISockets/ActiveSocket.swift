@@ -140,15 +140,22 @@ class ActiveSocket: Socket, OutputStream {
   /* read */
   
   func onRead(cb: ((ActiveSocket, Int) -> Void)?) -> Self {
-    let hadCB = readCB != nil
+    var hadCB = false // this doesn't work anymore: let hadCB = readCB != nil
+    if let cb = readCB {
+      hadCB = true
+    }
+    var hasNewCB = false // doesn't work anymore: if cb == nil
+    if let ncb = cb {
+      hasNewCB = true
+    }
     
-    if cb == nil && hadCB {
+    if !hasNewCB && hadCB {
       stopEventHandler()
     }
     
     readCB = cb
     
-    if cb != nil && !hadCB {
+    if hasNewCB && !hadCB {
       startEventHandler()
     }
     
