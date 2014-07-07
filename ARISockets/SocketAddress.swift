@@ -47,7 +47,7 @@ extension in_addr {
     }
     
     let len   = Int(INET_ADDRSTRLEN) + 2
-    var buf   = CChar[](count: len, repeatedValue: 0)
+    var buf   = [CChar](count: len, repeatedValue: 0)
     
     var selfCopy = self // &self doesn't work, because it can be const?
     let cs = inet_ntop(AF_INET, &selfCopy, &buf, socklen_t(len))
@@ -356,7 +356,7 @@ extension addrinfo : Printable {
     var s = "<addrinfo"
     
     if ai_flags != 0 {
-      var fs = String[]()
+      var fs = [String]()
       var f  = ai_flags
       if f & AI_CANONNAME != 0 {
         fs.append("canonname")

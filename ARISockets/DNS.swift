@@ -46,7 +46,7 @@ func gethoztbyname<T: SocketAddress>
 /* swiftc crashes, can't get this right (array of tuples)
 func gethostzbyname<T: SocketAddress>
   (name : String, flags : CInt = AI_CANONNAME,
-   cb   : ( String, ( cn: String?, address: T?)[]? ) -> Void)
+   cb   : [( String, ( cn: String?, address: T?)]? ) -> Void)
 {
   // Note: I can't just provide a name and a cb, swiftc will complain.
   var hints = addrinfo()

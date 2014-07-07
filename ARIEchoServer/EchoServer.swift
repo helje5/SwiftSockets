@@ -13,7 +13,7 @@ class EchoServer {
   let port         : Int
   var listenSocket : PassiveSocket?
   let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
-  var openSockets  = Dictionary<CInt, ActiveSocket>(minimumCapacity: 8)
+  var openSockets  = [CInt:ActiveSocket](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
   
   init(port: Int) {
@@ -119,7 +119,7 @@ class EchoServer {
     socket.write("> ")
   }
 
-  func logReceivedBlock(block: CChar[], length: Int) {
+  func logReceivedBlock(block: [CChar], length: Int) {
     var s: String = ""
     block.withUnsafePointerToElements {
       p in

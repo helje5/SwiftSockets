@@ -156,11 +156,11 @@ class ActiveSocket: Socket, OutputStream {
   }
   
   // let the socket own the read buffer, what is the best buffer type?
-  var readBuffer     : CChar[] =  CChar[](count: 4096 + 2, repeatedValue: 42)
+  var readBuffer     : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
       if readBufferSize != oldValue {
-        readBuffer = CChar[](count: readBufferSize + 2, repeatedValue: 42)
+        readBuffer = [CChar](count: readBufferSize + 2, repeatedValue: 42)
       }
     }
   }
@@ -216,7 +216,7 @@ class ActiveSocket: Socket, OutputStream {
   
   let debugAsyncWrites = false
   
-  func asyncWrite<T>(buffer: T[], length: Int? = nil) -> Bool {
+  func asyncWrite<T>(buffer: [T], length: Int? = nil) -> Bool {
     if !isValid {
       assert(isValid, "Socket closed, can't do async writes anymore")
       return false
@@ -272,7 +272,7 @@ class ActiveSocket: Socket, OutputStream {
     return true
   }
 
-  func send<T>(buffer: T[], length: Int? = nil) -> Int {
+  func send<T>(buffer: [T], length: Int? = nil) -> Int {
     var writeCount : Int = 0
     let bufsize    = length ? UInt(length!) : UInt(buffer.count)
     let fd         = self.fd!
@@ -284,7 +284,7 @@ class ActiveSocket: Socket, OutputStream {
     return writeCount
   }
 
-  func read() -> ( size: Int, block: CChar[], error: CInt) {
+  func read() -> ( size: Int, block: [CChar], error: CInt) {
     if !isValid {
       println("Called read() on closed socket \(self)")
       return ( -42, readBuffer, EBADF )
