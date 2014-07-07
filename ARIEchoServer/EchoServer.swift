@@ -12,6 +12,7 @@ class EchoServer {
 
   let port         : Int
   var listenSocket : PassiveSocket?
+  let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
   var openSockets  = Dictionary<CInt, ActiveSocket>(minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
   
@@ -46,7 +47,7 @@ class EchoServer {
       self.log("got new socket: \(newSock) nio=\(newSock.isNonBlocking)")
       newSock.isNonBlocking = true
       
-      dispatch_async(dispatch_get_global_queue(0, 0)) {
+      dispatch_async(self.lockQueue) {
         // Note: we need to keep the socket around!!
         self.openSockets[newSock.fd!] = newSock
       }
@@ -56,7 +57,7 @@ class EchoServer {
       newSock.onRead  { self.handleIncomingData($0, expectedCount: $1) }
              .onClose { ( fd: CInt ) -> Void in
         // we need to consume the return value to give peace to the closure
-        dispatch_async(dispatch_get_global_queue(0, 0)) { () -> Void in
+        dispatch_async(self.lockQueue) { [unowned self] in
           _ = self.openSockets.removeValueForKey(fd)
         }
       }

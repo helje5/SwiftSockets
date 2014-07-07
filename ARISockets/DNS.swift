@@ -23,6 +23,10 @@ func gethoztbyname<T: SocketAddress>
   var rc = name.withCString { (cs : CString) -> CInt in
     getaddrinfo(cs, CString(nil), &hints, &ptr)
   }
+  if rc != 0 {
+    cb(name, nil, nil)
+    return
+  }
   
   /* copy results - we just take the first match */
   var cn   : String? = nil

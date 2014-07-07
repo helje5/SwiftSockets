@@ -26,6 +26,7 @@ class Socket {
   var fd           : CInt?             = nil
   var boundAddress : sockaddr_in?      = nil
   var closeCB      : ((CInt) -> Void)? = nil
+  var closedFD     : CInt?             = nil // for delayed callback
   var isValid      : Bool { return fd           != nil }
   var isBound      : Bool { return boundAddress != nil }
   
@@ -60,13 +61,13 @@ class Socket {
   
   func close() {
     if fd {
-      let closedFD = fd!
+      closedFD = fd
       Darwin.close(fd!)
-      fd = nil
-
+      fd       = nil
+      
       if let cb = closeCB {
         // can be used to unregister socket etc when the socket is really closed
-        cb(closedFD)
+        cb(closedFD!)
         closeCB = nil // break potential cycles
       }
     }
@@ -74,7 +75,17 @@ class Socket {
   }
   
   func onClose(cb: ((CInt) -> Void)?) -> Self {
-    closeCB = cb
+    if let fd = closedFD { // socket got closed before event-handler attached
+      if let lcb = cb {
+        lcb(fd)
+      }
+      else {
+        closeCB = nil
+      }
+    }
+    else {
+      closeCB = cb
+    }
     return self
   }
   
@@ -95,6 +106,8 @@ class Socket {
     // CAST: Hope this works, essentially cast to void and then take the rawptr
     let bvptr: CConstVoidPointer = &addr
     let bptr = CConstPointer<sockaddr>(nil, bvptr.value)
+    // Would this work?:
+    // let bptr : CConstPointer<sockaddr> = reinterpretCast(&baddr)
     
     // bind!
     let rc = Darwin.bind(fd!, bptr, socklen_t(addr.len));
@@ -120,6 +133,8 @@ class Socket {
     // CAST: Hope this works, essentially cast to void and then take the rawptr
     let bvptr : CMutableVoidPointer = &baddr
     let bptr  = CMutablePointer<sockaddr>(owner: nil, value: bvptr.value)
+    // Would this work?:
+    // let bptr : CConstPointer<sockaddr> = reinterpretCast(&baddr)
     
     // Note: we are not interested in the length here, would be relevant
     //       for AF_UNIX sockets
