@@ -68,7 +68,7 @@ class PassiveSocket: Socket {
       return true
     }
     
-    let rc = Darwin.listen(fd!, CInt(backlog))
+    let rc = Darwin.listen(fd!, Int32(backlog))
     if (rc != 0) {
       return false
     }
@@ -113,6 +113,7 @@ class PassiveSocket: Socket {
           // Would this work?:
           // let bptr : CMutablePointer<sockaddr> = reinterpretCast(&baddr)
           
+          // accept(<#Int32#>, <#UnsafePointer<sockaddr>#>, <#UnsafePointer<socklen_t>#>)
           let newFD = Darwin.accept(lfd, bptr, &baddrlen)
           
           if newFD != -1 {

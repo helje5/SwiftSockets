@@ -23,27 +23,27 @@ import Dispatch
  */
 class Socket {
   
-  var fd           : CInt?             = nil
-  var boundAddress : sockaddr_in?      = nil
-  var closeCB      : ((CInt) -> Void)? = nil
-  var closedFD     : CInt?             = nil // for delayed callback
+  var fd           : Int32?             = nil
+  var boundAddress : sockaddr_in?       = nil
+  var closeCB      : ((Int32) -> Void)? = nil
+  var closedFD     : Int32?             = nil // for delayed callback
   var isValid      : Bool { return fd           != nil }
   var isBound      : Bool { return boundAddress != nil }
   
   
   /* initializer / deinitializer */
   
-  init(fd: CInt?) {
+  init(fd: Int32?) {
     self.fd = fd
   }
   deinit {
     close() // TBD: is this OK/safe?
   }
   
-  convenience init(domain: CInt = AF_INET, type: CInt = SOCK_STREAM) {
+  convenience init(domain: Int32 = AF_INET, type: Int32 = SOCK_STREAM) {
     // Generics: let lfd = socket(T.domain, type, 0)
     let lfd = socket(domain, type, 0)
-    var fd:  CInt?
+    var fd:  Int32?
     if lfd != -1 {
       fd = lfd
     }
@@ -74,7 +74,7 @@ class Socket {
     boundAddress = nil
   }
   
-  func onClose(cb: ((CInt) -> Void)?) -> Self {
+  func onClose(cb: ((Int32) -> Void)?) -> Self {
     if let fd = closedFD { // socket got closed before event-handler attached
       if let lcb = cb {
         lcb(fd)
@@ -172,32 +172,32 @@ class Socket {
     set { setSocketOption(SO_DEBUG, value: newValue) }
   }
   
-  var sendBufferSize: CInt {
+  var sendBufferSize: Int32 {
     get {
-      let v: CInt? = getSocketOption(SO_SNDBUF)
+      let v: Int32? = getSocketOption(SO_SNDBUF)
       if v { return v! } else { return -42 }
     }
     set { setSocketOption(SO_SNDBUF, value: newValue) }
   }
-  var receiveBufferSize: CInt {
+  var receiveBufferSize: Int32 {
     get {
-      let v: CInt? = getSocketOption(SO_RCVBUF)
+      let v: Int32? = getSocketOption(SO_RCVBUF)
       if v { return v! } else { return -42 }
     }
     set { setSocketOption(SO_RCVBUF, value: newValue) }
   }
-  var socketError: CInt {
-    let v: CInt? = getSocketOption(SO_ERROR)
+  var socketError: Int32 {
+    let v: Int32? = getSocketOption(SO_ERROR)
     if v { return v! } else { return -42 }
   }
   
-  func setSocketOption(option: CInt, value: CInt) -> Bool {
+  func setSocketOption(option: Int32, value: Int32) -> Bool {
     if !isValid {
       return false
     }
     
     var buf = value
-    let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf, socklen_t(sizeof(CInt)))
+    let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf, socklen_t(sizeof(Int32)))
     
     if rc != 0 { // ps: Great Error Handling
       println("Could not set option \(option) on socket \(self)")
@@ -206,14 +206,14 @@ class Socket {
   }
   
   // TBD: Can't overload optionals in a useful way?
-  // func getSocketOption(option: CInt) -> CInt
-  func getSocketOption(option: CInt) -> CInt? {
+  // func getSocketOption(option: Int32) -> Int32
+  func getSocketOption(option: Int32) -> Int32? {
     if !isValid {
       return nil
     }
     
-    var buf    = CInt(0)
-    var buflen = socklen_t(sizeof(CInt))
+    var buf    = Int32(0)
+    var buflen = socklen_t(sizeof(Int32))
     
     let rc = getsockopt(fd!, SOL_SOCKET, option, &buf, &buflen)
     if rc != 0 { // ps: Great Error Handling
@@ -223,11 +223,11 @@ class Socket {
     return buf
   }
   
-  func setSocketOption(option: CInt, value: Bool) -> Bool {
+  func setSocketOption(option: Int32, value: Bool) -> Bool {
     return setSocketOption(option, value: value ? 1 : 0)
   }
-  func getSocketOption(option: CInt) -> Bool {
-    let v: CInt? = getSocketOption(option)
+  func getSocketOption(option: Int32) -> Bool {
+    let v: Int32? = getSocketOption(option)
     return v ? (v! == 0 ? false : true) : false
   }
   
@@ -236,8 +236,8 @@ class Socket {
   
   var isDataAvailable: Bool { return pollFlag(POLLRDNORM) }
   
-  func pollFlag(flag: CInt) -> Bool {
-    let rc: CInt? = poll(flag, timeout: 0)
+  func pollFlag(flag: Int32) -> Bool {
+    let rc: Int32? = poll(flag, timeout: 0)
     if let flags = rc {
       if (flags & flag) != 0 {
         return true
@@ -246,19 +246,19 @@ class Socket {
     return false
   }
   
-  let pollEverythingMask: CInt = ( POLLIN | POLLPRI | POLLOUT
+  let pollEverythingMask: Int32 = ( POLLIN | POLLPRI | POLLOUT
     | POLLRDNORM | POLLWRNORM
     | POLLRDBAND | POLLWRBAND)
   
   let debugPoll = false // put here to avoid 'will never be executed' warning
   
-  func poll(events: CInt, timeout: UInt? = 0) -> CInt? {
-    // This is declared as CInt because the POLLRDNORM and such are
+  func poll(events: Int32, timeout: UInt? = 0) -> Int32? {
+    // This is declared as Int32 because the POLLRDNORM and such are
     if !isValid {
       return nil
     }
     
-    let ctimeout = timeout ? CInt(timeout!) : -1 /* wait forever */
+    let ctimeout = timeout ? Int32(timeout!) : -1 /* wait forever */
     
     var fds = pollfd(fd: fd!, events: CShort(events), revents: 0)
     let rc  = Darwin.poll(&fds, 1, ctimeout)
@@ -270,7 +270,7 @@ class Socket {
     
     if debugPoll {
       var s = ""
-      let mask = CInt(fds.revents)
+      let mask = Int32(fds.revents)
       if 0 != (mask & POLLIN)     { s += " IN"  }
       if 0 != (mask & POLLPRI)    { s += " PRI" }
       if 0 != (mask & POLLOUT)    { s += " OUT" }
@@ -285,19 +285,19 @@ class Socket {
       return nil
     }
     
-    return CInt(fds.revents)
+    return Int32(fds.revents)
   }
   
   
   /* socket flags */
   
-  var flags : CInt? {
+  var flags : Int32? {
     get {
       let rc = ari_fcntlVi(fd!, F_GETFL, 0)
       return rc >= 0 ? rc : nil
     }
     set {
-      let rc = ari_fcntlVi(fd!, F_SETFL, CInt(newValue!))
+      let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
       if rc == -1 {
         println("Could not set new socket flags \(rc)")
       }

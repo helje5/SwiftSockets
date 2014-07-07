@@ -57,7 +57,7 @@ class ActiveSocket: Socket, OutputStream {
   
   /* init */
   
-  convenience init(fd: CInt?, remoteAddress: sockaddr_in?,
+  convenience init(fd: Int32?, remoteAddress: sockaddr_in?,
                    queue: dispatch_queue_t? = nil)
   {
     self.init(fd: fd)
@@ -284,7 +284,7 @@ class ActiveSocket: Socket, OutputStream {
     return writeCount
   }
 
-  func read() -> ( size: Int, block: [CChar], error: CInt) {
+  func read() -> ( size: Int, block: [CChar], error: Int32) {
     if !isValid {
       println("Called read() on closed socket \(self)")
       return ( -42, readBuffer, EBADF )
@@ -311,7 +311,7 @@ class ActiveSocket: Socket, OutputStream {
   
   var numberOfBytesAvailableForReading : Int? {
     // Note: this doesn't seem to work, returns 0
-    var count = CInt(0)
+    var count = Int32(0)
     let rc    = ari_ioctlVip(fd!, FIONREAD, &count);
     println("rc \(rc)")
     return rc != -1 ? Int(count) : nil

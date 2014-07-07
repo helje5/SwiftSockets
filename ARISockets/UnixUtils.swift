@@ -26,7 +26,7 @@ let IOC_OUT  : CUnsignedLong = 0x40000000
 // hh: not sure this is producing the right value
 let FIONREAD : CUnsignedLong =
   ( IOC_OUT
-  | ((CUnsignedLong(sizeof(CInt)) & CUnsignedLong(IOCPARM_MASK)) << 16)
+  | ((CUnsignedLong(sizeof(Int32)) & CUnsignedLong(IOCPARM_MASK)) << 16)
   | (102 /* 'f' */ << 8) | 127)
 
 

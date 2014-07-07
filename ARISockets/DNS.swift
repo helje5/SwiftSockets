@@ -8,7 +8,7 @@
 import Darwin
 
 func gethoztbyname<T: SocketAddress>
-  (name : String, flags : CInt = AI_CANONNAME,
+  (name : String, flags : Int32 = AI_CANONNAME,
    cb   : ( String, String?, T? ) -> Void)
 {
   // Note: I can't just provide a name and a cb, swiftc will complain.
@@ -20,7 +20,7 @@ func gethoztbyname<T: SocketAddress>
   let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
   
   /* run lookup (synchronously, can be slow!) */
-  var rc = name.withCString { (cs : CString) -> CInt in
+  var rc = name.withCString { (cs : CString) -> Int32 in
     getaddrinfo(cs, CString(nil), &hints, &ptr)
   }
   if rc != 0 {
@@ -45,7 +45,7 @@ func gethoztbyname<T: SocketAddress>
 
 /* swiftc crashes, can't get this right (array of tuples)
 func gethostzbyname<T: SocketAddress>
-  (name : String, flags : CInt = AI_CANONNAME,
+  (name : String, flags : Int32 = AI_CANONNAME,
    cb   : [( String, ( cn: String?, address: T?)]? ) -> Void)
 {
   // Note: I can't just provide a name and a cb, swiftc will complain.
@@ -57,7 +57,7 @@ func gethostzbyname<T: SocketAddress>
   let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
   
   /* run lookup (synchronously, can be slow!) */
-  var rc = name.withCString { (cs : CString) -> CInt in
+  var rc = name.withCString { (cs : CString) -> Int32 in
     getaddrinfo(cs, CString(nil), &hints, &ptr)
   }
   

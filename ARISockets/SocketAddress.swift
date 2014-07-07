@@ -95,7 +95,7 @@ extension in_addr: Printable {
 
 protocol SocketAddress {
   
-  class var domain: CInt { get }
+  class var domain: Int32 { get }
   
   init() // create empty address, to be filled by eg getsockname()
   
@@ -302,7 +302,7 @@ extension addrinfo {
     ai_next      = nil // UnsafePointer<addrinfo>
   }
   
-  init(flags: CInt, family: CInt) {
+  init(flags: Int32, family: Int32) {
     self.init()
     ai_flags  = flags
     ai_family = family
@@ -431,7 +431,7 @@ extension sa_family_t : Printable {
   
   var description : String {
     var noop = ""
-    switch CInt(self) {
+    switch Int32(self) {
       case AF_UNSPEC: return ""
       case AF_INET:   return "IPv4"
       case AF_INET6:  return "IPv6"
