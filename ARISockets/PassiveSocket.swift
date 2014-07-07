@@ -68,7 +68,7 @@ class PassiveSocket: Socket {
       return true
     }
     
-    let rc = Darwin.listen(fd!, CInt(backlog))
+    let rc = Darwin.listen(fd!, Int32(backlog))
     if (rc != 0) {
       return false
     }
@@ -107,13 +107,14 @@ class PassiveSocket: Socket {
           var baddr    = sockaddr_in()
           var baddrlen = socklen_t(baddr.len)
           
-          // CAST: Hope this works, esntly cast to void and then take the rawptr
-          let bvptr: CMutableVoidPointer = &baddr
-          let bptr = CMutablePointer<sockaddr>(owner: nil, value: bvptr.value)
-          // Would this work?:
-          // let bptr : CMutablePointer<sockaddr> = reinterpretCast(&baddr)
-          
-          let newFD = Darwin.accept(lfd, bptr, &baddrlen)
+          let newFD = withUnsafePointer(&baddr) {
+            (ptr: UnsafePointer<sockaddr_in>) -> Int32 in
+            let bptr = UnsafePointer<sockaddr>(ptr) // cast
+            return withUnsafePointer(&baddrlen) {
+              (buflenptr: UnsafePointer<socklen_t>) -> Int32 in
+              return Darwin.accept(lfd, bptr, buflenptr)
+            }
+          }
           
           if newFD != -1 {
             // we pass over the queue, seems convenient. Not sure what kind of

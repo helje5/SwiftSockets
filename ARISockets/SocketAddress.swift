@@ -47,12 +47,12 @@ extension in_addr {
     }
     
     let len   = Int(INET_ADDRSTRLEN) + 2
-    var buf   = CChar[](count: len, repeatedValue: 0)
+    var buf   = [CChar](count: len, repeatedValue: 0)
     
     var selfCopy = self // &self doesn't work, because it can be const?
     let cs = inet_ntop(AF_INET, &selfCopy, &buf, socklen_t(len))
     
-    return String.fromCString(cs)
+    return String.fromCString(cs)!
   }
   
 }
@@ -95,7 +95,7 @@ extension in_addr: Printable {
 
 protocol SocketAddress {
   
-  class var domain: CInt { get }
+  class var domain: Int32 { get }
   
   init() // create empty address, to be filled by eg getsockname()
   
@@ -297,12 +297,12 @@ extension addrinfo {
     ai_socktype  = SOCK_STREAM
     ai_protocol  = 0   // or IPPROTO_xxx for IPv4
     ai_addrlen   = 0   // length of ai_addr below
-    ai_canonname = nil // UnsafePointer<CChar>
+    ai_canonname = nil // UnsafePointer<Int8>
     ai_addr      = nil // UnsafePointer<sockaddr>
     ai_next      = nil // UnsafePointer<addrinfo>
   }
   
-  init(flags: CInt, family: CInt) {
+  init(flags: Int32, family: Int32) {
     self.init()
     ai_flags  = flags
     ai_family = family
@@ -319,7 +319,7 @@ extension addrinfo {
   var canonicalName : String? {
     let nullptr : UnsafePointer<CChar> = UnsafePointer.null()
     if ai_canonname != nullptr && ai_canonname[0] != 0 {
-      return String.fromCString(ai_canonname)
+      return String.fromCString(CString(ai_canonname))
     }
     return nil
   }
@@ -356,7 +356,7 @@ extension addrinfo : Printable {
     var s = "<addrinfo"
     
     if ai_flags != 0 {
-      var fs = String[]()
+      var fs = [String]()
       var f  = ai_flags
       if f & AI_CANONNAME != 0 {
         fs.append("canonname")
@@ -431,7 +431,7 @@ extension sa_family_t : Printable {
   
   var description : String {
     var noop = ""
-    switch CInt(self) {
+    switch Int32(self) {
       case AF_UNSPEC: return ""
       case AF_INET:   return "IPv4"
       case AF_INET6:  return "IPv6"

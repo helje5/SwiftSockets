@@ -93,17 +93,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       println("BLOCK: \(block)")
       var data : String = block.withUnsafePointerToElements {
         p in
-        if p != nil {
-          // Sometimes fails in: Can't unwrap Optional.None (at bufsize==count?)
-          // FIXME: I think I know why. It may happen if the block boundary is
-          //        within a UTF-8 sequence?
-          // The end of the block is 100,-30,-128,0
-          return String.fromCString(p) // this can fail, will abort()
-        }
-        else {
-          println("Could not grab pointer to block \(count) \(block)?")
-          return "<ERROR>"
-        }
+        // Sometimes fails in: Can't unwrap Optional.None (at bufsize==count?)
+        // FIXME: I think I know why. It may happen if the block boundary is
+        //        within a UTF-8 sequence?
+        // The end of the block is 100,-30,-128,0
+        return String.fromCString(CString(p))! // ignore error, abort
       }
       
       // log to view. Careful, must run in main thread!

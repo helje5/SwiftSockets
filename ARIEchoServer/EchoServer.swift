@@ -13,7 +13,7 @@ class EchoServer {
   let port         : Int
   var listenSocket : PassiveSocket?
   let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
-  var openSockets  = Dictionary<CInt, ActiveSocket>(minimumCapacity: 8)
+  var openSockets  = [Int32:ActiveSocket](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
   
   init(port: Int) {
@@ -55,7 +55,7 @@ class EchoServer {
       self.sendWelcome(newSock)
       
       newSock.onRead  { self.handleIncomingData($0, expectedCount: $1) }
-             .onClose { ( fd: CInt ) -> Void in
+             .onClose { ( fd: Int32 ) -> Void in
         // we need to consume the return value to give peace to the closure
         dispatch_async(self.lockQueue) { [unowned self] in
           _ = self.openSockets.removeValueForKey(fd)
@@ -119,14 +119,18 @@ class EchoServer {
     socket.write("> ")
   }
 
-  func logReceivedBlock(block: CChar[], length: Int) {
-    var s: String = ""
-    block.withUnsafePointerToElements {
-      p in
-      s = String.fromCString(p)
+  func logReceivedBlock(block: [CChar], length: Int) {
+    var s: String? = nil
+    
+    s = block.withUnsafePointerToElements {
+      (p : UnsafePointer<CChar>) -> String in
+      return String.fromCString(CString(p))!
     }
-    if s.hasSuffix("\r\n") {
-      s = s.substringToIndex(countElements(s) - 2)
+    
+    if let m = s {
+      if m.hasSuffix("\r\n") {
+        s = m.substringToIndex(countElements(m) - 2)
+      }
     }
     
     log("read string: \(s)")

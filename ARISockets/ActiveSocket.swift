@@ -3,7 +3,7 @@
 //  TestSwiftyCocoa
 //
 //  Created by Helge Hess on 6/11/14.
-//  Copyright (c) 2014 Helge Hess. All rights reserved.
+//  Copyright (c) 2014 Always Right Institute. All rights reserved.
 //
 
 import Darwin
@@ -57,7 +57,7 @@ class ActiveSocket: Socket, OutputStream {
   
   /* init */
   
-  convenience init(fd: CInt?, remoteAddress: sockaddr_in?,
+  convenience init(fd: Int32?, remoteAddress: sockaddr_in?,
                    queue: dispatch_queue_t? = nil)
   {
     self.init(fd: fd)
@@ -118,14 +118,14 @@ class ActiveSocket: Socket, OutputStream {
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
     
-    // CAST: Hope this works, essentially cast to void and then take the rawptr
-    let bvptr: CConstVoidPointer = &addr
-    let bptr = CConstPointer<sockaddr>(nil, bvptr.value)
-    // Would this work?:
-    // let bptr : CConstPointer<sockaddr> = reinterpretCast(&baddr)
+    let rc = withUnsafePointer(&addr) {
+      (ptr: UnsafePointer<sockaddr_in>) -> Int32 in
+      let bptr = ConstUnsafePointer<sockaddr>(ptr) // cast
+      
+      // connect!
+      return Darwin.connect(self.fd!, bptr, socklen_t(addr.len))
+    }
     
-    // connect!
-    let rc = Darwin.connect(fd!, bptr, socklen_t(addr.len));
     if rc != 0 {
       println("Could not connect \(self) to \(addr)")
       return false
@@ -140,15 +140,18 @@ class ActiveSocket: Socket, OutputStream {
   /* read */
   
   func onRead(cb: ((ActiveSocket, Int) -> Void)?) -> Self {
-    let hadCB = readCB != nil
+    var hadCB    = false // this doesn't work anymore: let hadCB = readCB != nil
+    var hasNewCB = false // doesn't work anymore: if cb == nil
+    if let cb  = readCB { hadCB    = true }
+    if let ncb = cb     { hasNewCB = true }
     
-    if cb == nil && hadCB {
+    if !hasNewCB && hadCB {
       stopEventHandler()
     }
     
     readCB = cb
     
-    if cb != nil && !hadCB {
+    if hasNewCB && !hadCB {
       startEventHandler()
     }
     
@@ -156,11 +159,11 @@ class ActiveSocket: Socket, OutputStream {
   }
   
   // let the socket own the read buffer, what is the best buffer type?
-  var readBuffer     : CChar[] =  CChar[](count: 4096 + 2, repeatedValue: 42)
+  var readBuffer     : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
       if readBufferSize != oldValue {
-        readBuffer = CChar[](count: readBufferSize + 2, repeatedValue: 42)
+        readBuffer = [CChar](count: readBufferSize + 2, repeatedValue: 42)
       }
     }
   }
@@ -216,7 +219,7 @@ class ActiveSocket: Socket, OutputStream {
   
   let debugAsyncWrites = false
   
-  func asyncWrite<T>(buffer: T[], length: Int? = nil) -> Bool {
+  func asyncWrite<T>(buffer: [T], length: Int? = nil) -> Bool {
     if !isValid {
       assert(isValid, "Socket closed, can't do async writes anymore")
       return false
@@ -240,8 +243,7 @@ class ActiveSocket: Socket, OutputStream {
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
     var asyncData  : dispatch_data_t? = nil
-    asyncData = dispatch_data_create(buffer, bufsize, queue,
-                                     DISPATCH_DATA_DESTRUCTOR_DEFAULT)
+    asyncData = dispatch_data_create(buffer, bufsize, queue, nil)
     
     sendCount++
     if debugAsyncWrites {
@@ -272,7 +274,7 @@ class ActiveSocket: Socket, OutputStream {
     return true
   }
 
-  func send<T>(buffer: T[], length: Int? = nil) -> Int {
+  func send<T>(buffer: [T], length: Int? = nil) -> Int {
     var writeCount : Int = 0
     let bufsize    = length ? UInt(length!) : UInt(buffer.count)
     let fd         = self.fd!
@@ -284,7 +286,7 @@ class ActiveSocket: Socket, OutputStream {
     return writeCount
   }
 
-  func read() -> ( size: Int, block: CChar[], error: CInt) {
+  func read() -> ( size: Int, block: [CChar], error: Int32) {
     if !isValid {
       println("Called read() on closed socket \(self)")
       return ( -42, readBuffer, EBADF )
@@ -311,7 +313,7 @@ class ActiveSocket: Socket, OutputStream {
   
   var numberOfBytesAvailableForReading : Int? {
     // Note: this doesn't seem to work, returns 0
-    var count = CInt(0)
+    var count = Int32(0)
     let rc    = ari_ioctlVip(fd!, FIONREAD, &count);
     println("rc \(rc)")
     return rc != -1 ? Int(count) : nil
