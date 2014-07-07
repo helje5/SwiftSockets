@@ -120,13 +120,17 @@ class EchoServer {
   }
 
   func logReceivedBlock(block: [CChar], length: Int) {
-    var s: String = ""
-    block.withUnsafePointerToElements {
-      p in
-      s = String.fromCString(p)
+    var s: String? = nil
+    
+    s = block.withUnsafePointerToElements {
+      (p : UnsafePointer<CChar>) -> String in
+      return String.fromCString(CString(p))!
     }
-    if s.hasSuffix("\r\n") {
-      s = s.substringToIndex(countElements(s) - 2)
+    
+    if let m = s {
+      if m.hasSuffix("\r\n") {
+        s = m.substringToIndex(countElements(m) - 2)
+      }
     }
     
     log("read string: \(s)")
