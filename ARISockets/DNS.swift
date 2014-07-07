@@ -3,12 +3,12 @@
 //  ARISockets
 //
 //  Created by Helge Hess on 7/3/14.
-//
+//  Copyright (c) 2014 Always Right Institute. All rights reserved.
 //
 import Darwin
 
 func gethoztbyname<T: SocketAddress>
-  (name : String, flags : CInt = AI_CANONNAME,
+  (name : String, flags : Int32 = AI_CANONNAME,
    cb   : ( String, String?, T? ) -> Void)
 {
   // Note: I can't just provide a name and a cb, swiftc will complain.
@@ -20,8 +20,10 @@ func gethoztbyname<T: SocketAddress>
   let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
   
   /* run lookup (synchronously, can be slow!) */
-  var rc = name.withCString { (cs : CString) -> CInt in
-    getaddrinfo(cs, CString(nil), &hints, &ptr)
+  // b3: (cs : CString) doesn't pick up the right overload?
+  var rc = name.withCString { (cs : UnsafePointer<CChar>) -> Int32 in
+    let ncs = CString(UnsafePointer<CChar>.null())
+    return getaddrinfo(CString(cs), ncs, &hints, &ptr)
   }
   if rc != 0 {
     cb(name, nil, nil)
@@ -45,8 +47,8 @@ func gethoztbyname<T: SocketAddress>
 
 /* swiftc crashes, can't get this right (array of tuples)
 func gethostzbyname<T: SocketAddress>
-  (name : String, flags : CInt = AI_CANONNAME,
-   cb   : ( String, ( cn: String?, address: T?)[]? ) -> Void)
+  (name : String, flags : Int32 = AI_CANONNAME,
+   cb   : [( String, ( cn: String?, address: T?)]? ) -> Void)
 {
   // Note: I can't just provide a name and a cb, swiftc will complain.
   var hints = addrinfo()
@@ -57,7 +59,7 @@ func gethostzbyname<T: SocketAddress>
   let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
   
   /* run lookup (synchronously, can be slow!) */
-  var rc = name.withCString { (cs : CString) -> CInt in
+  var rc = name.withCString { (cs : CString) -> Int32 in
     getaddrinfo(cs, CString(nil), &hints, &ptr)
   }
   
