@@ -56,7 +56,7 @@ let socket = ActiveSocket<sockaddr_in>()
 ####ARIEchoServer
 
 Great echo server. This is actually a Cocoa app. Compile it, run it, then
-connect to it in the Terminal.app via ```telnet 8042```.
+connect to it in the Terminal.app via ```telnet 1337```.
 
 ![](http://i.imgur.com/874ovtE.png)
 

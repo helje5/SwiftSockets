@@ -22,7 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   var echod : EchoServer?
   
   func applicationDidFinishLaunching(aNotification: NSNotification?) {
-    let port = 8042
+    let port = 1337
     
     echod = EchoServer(port: port)
     echod!.appLog = { self.log($0) }
