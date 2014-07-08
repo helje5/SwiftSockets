@@ -346,6 +346,24 @@ extension addrinfo {
     let aiptr = UnsafePointer<T>(ai_addr) // cast
     return aiptr.memory // copies the address to the return value
   }
+  
+  var dynamicAddress : SocketAddress? {
+    if !hasAddress {
+      return nil
+    }
+    
+    if ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain) {
+      let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
+      return aiptr.memory // copies the address to the return value
+    }
+    
+    if ai_addr.memory.sa_family == sa_family_t(sockaddr_in6.domain) {
+      let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
+      return aiptr.memory // copies the address to the return value
+    }
+    
+    return nil
+  }
 }
 
 extension addrinfo : Printable {
