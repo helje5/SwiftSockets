@@ -84,6 +84,7 @@ class Socket<T: SocketAddress> {
     return self
   }
   
+  
   /* bind the socket. */
   
   func bind(address: T) -> Bool {
@@ -145,8 +146,55 @@ class Socket<T: SocketAddress> {
   }
   
   
-  /* socket options (TBD: would we use subscripts for such?) */
+  /* description */
   
+  // must live in the main-class as 'declarations in extensions cannot be
+  // overridden yet'
+  func descriptionAttributes() -> String {
+    var s = fd ? " fd=\(fd!)" : " closed"
+    if boundAddress {
+      s += " \(boundAddress!)"
+    }
+    return s
+  }
+  
+}
+
+
+extension Socket { // Socket Flags
+  
+  var flags : Int32? {
+    get {
+      let rc = ari_fcntlVi(fd!, F_GETFL, 0)
+      return rc >= 0 ? rc : nil
+    }
+    set {
+      let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
+      if rc == -1 {
+        println("Could not set new socket flags \(rc)")
+      }
+    }
+  }
+  
+  var isNonBlocking : Bool {
+    get {
+      return (flags! & O_NONBLOCK) != 0 ? true : false
+    }
+    set {
+      if newValue {
+        flags = flags! | O_NONBLOCK
+      }
+      else {
+        flags = flags! & ~O_NONBLOCK
+      }
+    }
+  }
+  
+}
+
+
+extension Socket { // Socket Options
+
   var reuseAddress: Bool {
     get { return getSocketOption(SO_REUSEADDR) }
     set { setSocketOption(SO_REUSEADDR, value: newValue) }
@@ -186,6 +234,9 @@ class Socket<T: SocketAddress> {
     let v: Int32? = getSocketOption(SO_ERROR)
     if v { return v! } else { return -42 }
   }
+  
+  /* socket options (TBD: would we use subscripts for such?) */
+  
   
   func setSocketOption(option: Int32, value: Int32) -> Bool {
     if !isValid {
@@ -227,8 +278,10 @@ class Socket<T: SocketAddress> {
     return v ? (v! == 0 ? false : true) : false
   }
   
-  
-  /* poll */
+}
+
+
+extension Socket { // poll()
   
   var isDataAvailable: Bool { return pollFlag(POLLRDNORM) }
   
@@ -242,11 +295,15 @@ class Socket<T: SocketAddress> {
     return false
   }
   
-  let pollEverythingMask: Int32 = ( POLLIN | POLLPRI | POLLOUT
+  // Swift doesn't allow let's in here?!
+  var pollEverythingMask : Int32 { return (
+      POLLIN | POLLPRI | POLLOUT
     | POLLRDNORM | POLLWRNORM
     | POLLRDBAND | POLLWRBAND)
+  }
   
-  let debugPoll = false // put here to avoid 'will never be executed' warning
+  // Swift doesn't allow let's in here?!
+  var debugPoll : Bool { return false }
   
   func poll(events: Int32, timeout: UInt? = 0) -> Int32? {
     // This is declared as Int32 because the POLLRDNORM and such are
@@ -284,60 +341,6 @@ class Socket<T: SocketAddress> {
     return Int32(fds.revents)
   }
   
-  
-  /* socket flags */
-  
-  var flags : Int32? {
-    get {
-      let rc = ari_fcntlVi(fd!, F_GETFL, 0)
-      return rc >= 0 ? rc : nil
-    }
-    set {
-      let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
-      if rc == -1 {
-        println("Could not set new socket flags \(rc)")
-      }
-    }
-  }
-  
-  var isNonBlocking : Bool {
-    get {
-      return (flags! & O_NONBLOCK) != 0 ? true : false
-    }
-    set {
-      if newValue {
-        flags = flags! | O_NONBLOCK
-      }
-      else {
-        flags = flags! & ~O_NONBLOCK
-      }
-    }
-  }
-  
-  
-  /* description */
-  
-  // must live in the main-class as 'declarations in extensions cannot be
-  // overridden yet'
-  func descriptionAttributes() -> String {
-    var s = fd ? " fd=\(fd!)" : " closed"
-    if boundAddress {
-      s += " \(boundAddress!)"
-    }
-    return s
-  }
-  
-}
-
-/* Swift compiler crashes when I structure the code using extensions w/o
- * protocols (or when I have more than two Extensions per compilation unit?
- *
- * Segfaults swiftc when I move in reuseAddress property.
- * extension Socket { // Socket Options
- * }
- */
-extension Socket {
-  // can't put socket option methods in here, or the swiftc dies
 }
 
 
