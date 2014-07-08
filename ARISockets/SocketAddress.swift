@@ -3,7 +3,7 @@
 //  TestSwiftyCocoa
 //
 //  Created by Helge Heß on 6/12/14.
-//  Copyright (c) 2014 Helge Hess. All rights reserved.
+//  Copyright (c) 2014 Always Right Institute. All rights reserved.
 //
 
 import Darwin
@@ -30,9 +30,7 @@ extension in_addr {
       else {
         var buf = INADDR_ANY // Swift wants some initialization
         
-        // maybe only required on 10.10? crashes w/o forcing a copy
-        var sc = s + ""
-        sc.withCString { cs in inet_pton(AF_INET, cs, &buf) }
+        s.withCString { cs in inet_pton(AF_INET, cs, &buf) }
         s_addr = buf.s_addr
       }
     }

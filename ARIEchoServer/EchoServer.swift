@@ -3,7 +3,7 @@
 //  ARISockets
 //
 //  Created by Helge Hess on 6/13/14.
-//
+//  Copyright (c) 2014 Always Right Institute. All rights reserved.
 //
 
 import ARISockets
@@ -11,9 +11,9 @@ import ARISockets
 class EchoServer {
 
   let port         : Int
-  var listenSocket : PassiveSocket?
+  var listenSocket : PassiveSocketIPv4?
   let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
-  var openSockets  = [Int32:ActiveSocket](minimumCapacity: 8)
+  var openSockets  = [Int32:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
   
   init(port: Int) {
@@ -41,8 +41,7 @@ class EchoServer {
     let queue = dispatch_get_global_queue(0, 0)
     
     // Note: capturing self here
-    listenSocket!.listen(queue, backlog: 5) {
-      newSock in
+    listenSocket!.listen(queue, backlog: 5) { newSock in
       
       self.log("got new socket: \(newSock) nio=\(newSock.isNonBlocking)")
       newSock.isNonBlocking = true
@@ -73,7 +72,7 @@ class EchoServer {
     listenSocket = nil
   }
   
-  func sendWelcome(sock: ActiveSocket) {
+  func sendWelcome<T: OutputStream>(var sock: T) {
     // Hm, how to use println(), this doesn't work for me:
     //   println(s, target: sock)
     // (just writes the socket as a value, likely a tuple)
@@ -90,7 +89,7 @@ class EchoServer {
     sock.write("> ")
   }
   
-  func handleIncomingData(socket: ActiveSocket, expectedCount: Int) {
+  func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
     // remove from openSockets if all has been read
     do {
       // FIXME: This currently continues to read garbage if I just close the

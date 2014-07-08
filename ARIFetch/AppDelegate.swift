@@ -29,7 +29,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
   
   
-  var socket: ActiveSocket?
+  var socket: ActiveSocketIPv4?
 
   @IBAction func fetch(sender: NSTextField?) {
     if let oldSock = socket {
@@ -74,7 +74,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
-  func handleIncomingData(socket: ActiveSocket, expectedCount: Int) {
+  func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
     do {
       let (count, block, errno) = socket.read()
       
