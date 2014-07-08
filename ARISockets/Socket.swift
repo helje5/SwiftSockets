@@ -3,7 +3,7 @@
 //  TestSwiftyCocoa
 //
 //  Created by Helge Heß on 6/9/14.
-//  Copyright (c) 2014 Helge Hess. All rights reserved.
+//  Copyright (c) 2014 Always Right Institute. All rights reserved.
 //
 
 import Darwin
@@ -13,22 +13,18 @@ import Dispatch
  * Simple Socket classes for Swift.
  *
  * PassiveSockets are 'listening' sockets, ActiveSockets are open connections.
- *
- * NOTE: Those would work with Generics on any type of (constant length for now)
- *       socket, but this got my swiftc crash on unimplemented features ;-)
- *
- *        Socket<T: SocketAddress>
- *
- *      and then PassiveSocket<sockaddr_in> etc. Unfinished.
  */
-class Socket {
+class Socket<T: SocketAddress> {
   
   var fd           : Int32?             = nil
-  var boundAddress : sockaddr_in?       = nil
+  var boundAddress : T?                 = nil
   var closeCB      : ((Int32) -> Void)? = nil
   var closedFD     : Int32?             = nil // for delayed callback
-  var isValid      : Bool { return fd           != nil }
-  var isBound      : Bool { return boundAddress != nil }
+  var isValid      : Bool { return fd != nil }
+  var isBound      : Bool {
+    // fails: return boundAddress != nil
+    if let a = boundAddress { return true } else { return false }
+  }
   
   
   /* initializer / deinitializer */
@@ -40,9 +36,8 @@ class Socket {
     close() // TBD: is this OK/safe?
   }
   
-  convenience init(domain: Int32 = AF_INET, type: Int32 = SOCK_STREAM) {
-    // Generics: let lfd = socket(T.domain, type, 0)
-    let lfd = socket(domain, type, 0)
+  convenience init(type: Int32 = SOCK_STREAM) {
+    let lfd = socket(T.domain, type, 0)
     var fd:  Int32?
     if lfd != -1 {
       fd = lfd
@@ -91,7 +86,7 @@ class Socket {
   
   /* bind the socket. */
   
-  func bind(address: sockaddr_in) -> Bool {
+  func bind(address: T) -> Bool {
     if !isValid {
       return false
     }
@@ -104,33 +99,35 @@ class Socket {
     var addr = address
     
     let rc = withUnsafePointer(&addr) {
-      (ptr: UnsafePointer<sockaddr_in>) -> Int32 in
+      (ptr: UnsafePointer<T>) -> Int32 in
       let bptr = ConstUnsafePointer<sockaddr>(ptr) // cast
       return Darwin.bind(self.fd!, bptr, socklen_t(addr.len))
     }
     
     if rc == 0 {
+      // Generics TBD: cannot check for isWildcardPort, always grab the name
+      boundAddress = getsockname()
       /* if it was a wildcard port bind, get the address */
-      boundAddress = addr.isWildcardPort ? getsockname() : addr
+      // boundAddress = addr.isWildcardPort ? getsockname() : addr
     }
     
     return rc == 0 ? true : false
   }
   
-  func getsockname() -> sockaddr_in? {
+  func getsockname() -> T? {
     if !isValid {
       return nil
     }
     
     // FIXME: tried to encapsulate this in a sockaddrbuf which does all the
     //        ptr handling, but it ain't work (autoreleasepool issue?)
-    var baddr    = sockaddr_in()
+    var baddr    = T()
     var baddrlen = socklen_t(baddr.len)
     
     // Note: we are not interested in the length here, would be relevant
     //       for AF_UNIX sockets
     let rc = withUnsafePointer(&baddr) {
-      (ptr: UnsafePointer<sockaddr_in>) -> Int32 in
+      (ptr: UnsafePointer<T>) -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
       return withUnsafePointer(&baddrlen) {
         (buflenptr: UnsafePointer<socklen_t>) -> Int32 in

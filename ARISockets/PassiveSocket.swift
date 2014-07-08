@@ -3,11 +3,13 @@
 //  TestSwiftyCocoa
 //
 //  Created by Helge Hess on 6/11/14.
-//  Copyright (c) 2014 Helge Hess. All rights reserved.
+//  Copyright (c) 2014 Always Right Institute. All rights reserved.
 //
 
 import Darwin
 import Dispatch
+
+typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
 
 /*
  * Represents a STREAM server socket based on the standard Unix sockets library.
@@ -29,7 +31,7 @@ import Dispatch
  *     println("All good, go ahead!")
  *   }
  */
-class PassiveSocket: Socket {
+class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   var backlog      : Int? = nil
   var isListening  : Bool { return backlog ? true : false; }
@@ -37,8 +39,28 @@ class PassiveSocket: Socket {
   
   /* init */
   
-  convenience init(address: sockaddr_in) {
-    self.init(domain: sockaddr_in.domain, type: SOCK_STREAM)
+  init(fd: Int32?) { // required, otherwise the convenience one fails to compile
+    super.init(fd: fd)
+  }
+  
+  convenience init(type: Int32 = SOCK_STREAM) {
+    // NOTE: this is a DUPE to Socket. It fails to inherit from Socket<T>
+    let lfd = socket(T.domain, type, 0)
+    var fd:  Int32?
+    if lfd != -1 {
+      fd = lfd
+    }
+    else {
+      // This is lame. Would like to 'return nil' ...
+      // TBD: How to do proper error handling in Swift?
+      println("Could not create socket.")
+    }
+    
+    self.init(fd: fd)
+  }
+  
+  convenience init(address: T) {
+    self.init(type: SOCK_STREAM)
     
     if isValid {
       reuseAddress = true
@@ -77,8 +99,10 @@ class PassiveSocket: Socket {
     return true
   }
   
+  typealias TypedActiveSocket = ActiveSocket<T>
+  
   func listen(queue: dispatch_queue_t, backlog: Int = 5,
-              accept: (ActiveSocket) -> Void)
+              accept: ( TypedActiveSocket ) -> Void)
     -> Bool
   {
     if !isValid {
@@ -104,11 +128,11 @@ class PassiveSocket: Socket {
         do {
           // FIXME: tried to encapsulate this in a sockaddrbuf which does all
           //        the ptr handling, but it ain't work (autoreleasepool issue?)
-          var baddr    = sockaddr_in()
+          var baddr    = T()
           var baddrlen = socklen_t(baddr.len)
           
           let newFD = withUnsafePointer(&baddr) {
-            (ptr: UnsafePointer<sockaddr_in>) -> Int32 in
+            (ptr: UnsafePointer<T>) -> Int32 in
             let bptr = UnsafePointer<sockaddr>(ptr) // cast
             return withUnsafePointer(&baddrlen) {
               (buflenptr: UnsafePointer<socklen_t>) -> Int32 in
@@ -120,7 +144,7 @@ class PassiveSocket: Socket {
             // we pass over the queue, seems convenient. Not sure what kind of
             // queue setup a typical server would want to have
             let newSocket =
-              ActiveSocket(fd: newFD, remoteAddress: baddr, queue: queue)
+              TypedActiveSocket(fd: newFD, remoteAddress: baddr, queue: queue)
             newSocket.isSigPipeDisabled = true
             
             accept(newSocket)

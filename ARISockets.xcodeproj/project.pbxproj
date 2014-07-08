@@ -13,6 +13,7 @@
 		E8305D77194B06E20073740A /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D72194B06E20073740A /* Socket.swift */; };
 		E8305D78194B06E20073740A /* SocketAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D73194B06E20073740A /* SocketAddress.swift */; };
 		E8305D79194B06E20073740A /* UnixUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D74194B06E20073740A /* UnixUtils.swift */; };
+		E8312C93196C019200162EF7 /* ARISockets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E88984B4194A751E00A831A3 /* ARISockets.framework */; };
 		E83305A5195B92D100CCBDF5 /* UnixBridge.c in Sources */ = {isa = PBXBuildFile; fileRef = E83305A4195B92D100CCBDF5 /* UnixBridge.c */; };
 		E83305A7195B92FB00CCBDF5 /* UnixBridge.h in Headers */ = {isa = PBXBuildFile; fileRef = E83305A6195B92FB00CCBDF5 /* UnixBridge.h */; };
 		E85D5FDD194B8C6200ECC32A /* ARISockets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E88984B4194A751E00A831A3 /* ARISockets.framework */; };
@@ -79,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8312C93196C019200162EF7 /* ARISockets.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,6 +9,8 @@
 import Darwin
 import Dispatch
 
+typealias ActiveSocketIPv4 = ActiveSocket<sockaddr_in>
+
 /**
  * Represents an active STREAM socket based on the standard Unix sockets
  * library.
@@ -40,9 +42,9 @@ import Dispatch
  *   socket.connect(sockaddr_in(address:"127.0.0.1", port: 80))
  *   socket.write("Ring, ring!\r\n")
  */
-class ActiveSocket: Socket, OutputStream {
+class ActiveSocket<T: SocketAddress>: Socket<T>, OutputStream {
   
-  var remoteAddress  : sockaddr_in?       = nil
+  var remoteAddress  : T?                 = nil
   var queue          : dispatch_queue_t?  = nil
   var readSource     : dispatch_source_t? = nil
   var sendCount      : Int                = 0
@@ -51,14 +53,19 @@ class ActiveSocket: Socket, OutputStream {
   var readCB         : ((ActiveSocket, Int) -> Void)? = nil
   
   var isConnected : Bool {
-    return isValid ? (remoteAddress != nil) : false
+    // doesn't work: return isValid ? (remoteAddress != nil) : false
+    if !isValid { return false }
+    if let a = remoteAddress { return true } else { return false }
   }
   
   
   /* init */
   
-  convenience init(fd: Int32?, remoteAddress: sockaddr_in?,
-                   queue: dispatch_queue_t? = nil)
+  init(fd: Int32?) { // required, otherwise the convenience one fails to compile
+    super.init(fd: fd)
+  }
+  
+  convenience init(fd: Int32?, remoteAddress: T?, queue: dispatch_queue_t? = nil)
   {
     self.init(fd: fd)
     
@@ -104,7 +111,7 @@ class ActiveSocket: Socket, OutputStream {
   
   /* connect */
   
-  func connect(address: sockaddr_in, onConnect: () -> Void) -> Bool {
+  func connect(address: T, onConnect: () -> Void) -> Bool {
     // FIXME: make connect() asynchronous via GCD
     if !isValid {
       return false
@@ -119,7 +126,7 @@ class ActiveSocket: Socket, OutputStream {
     var addr = address
     
     let rc = withUnsafePointer(&addr) {
-      (ptr: UnsafePointer<sockaddr_in>) -> Int32 in
+      (ptr: UnsafePointer<T>) -> Int32 in
       let bptr = ConstUnsafePointer<sockaddr>(ptr) // cast
       
       // connect!
@@ -322,7 +329,7 @@ class ActiveSocket: Socket, OutputStream {
   
   // This doesn't work, can't override a stored property
   // Leaving this feature alone for now, doesn't have real-world importance
-  // @lazy override var boundAddress: sockaddr_in? = getRawAddress()
+  // @lazy override var boundAddress: T? = getRawAddress()
   
   
   /* OutputStream (if I move this to an Extension => swiftc sefaults */
