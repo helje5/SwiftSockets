@@ -54,17 +54,25 @@ class Socket<T: SocketAddress> {
   
   /* explicitly close the socket */
   
+  let debugClose = false
+  
   func close() {
     if fd {
       closedFD = fd
+      if debugClose { println("Closing socket \(closedFD) for good ...") }
       Darwin.close(fd!)
       fd       = nil
       
       if let cb = closeCB {
         // can be used to unregister socket etc when the socket is really closed
+        if debugClose { println("  let closeCB \(closedFD) know ...") }
         cb(closedFD!)
         closeCB = nil // break potential cycles
       }
+      if debugClose { println("done closing \(closedFD)") }
+    }
+    else if debugClose {
+      println("socket \(closedFD) already closed.")
     }
     boundAddress = nil
   }
@@ -151,7 +159,7 @@ class Socket<T: SocketAddress> {
   // must live in the main-class as 'declarations in extensions cannot be
   // overridden yet'
   func descriptionAttributes() -> String {
-    var s = fd ? " fd=\(fd!)" : " closed"
+    var s = fd ? " fd=\(fd!)" : (closedFD ? " closed[\(closedFD)]" :" not-open")
     if boundAddress {
       s += " \(boundAddress!)"
     }

@@ -92,7 +92,9 @@ class ActiveSocket<T: SocketAddress>: Socket<T> {
   /* close */
   
   override func close() {
+    if debugClose { println("closing socket \(self)") }
     if !isValid { // already closed
+      if debugClose { println("   already closed.") }
       return
     }
     
@@ -100,22 +102,25 @@ class ActiveSocket<T: SocketAddress>: Socket<T> {
     // TBD: not sure whether we have a locking issue here, can read&write
     //      occur on different threads in GCD?
     if !didCloseRead {
+      if debugClose { println("   stopping events ...") }
       stopEventHandler()
-      /* Seen this crash - if close() is called from within the readCB?
-        readCB = nil // break potential cycles
-       */
+      // Seen this crash - if close() is called from within the readCB?
+      readCB = nil // break potential cycles
+      if debugClose { println("   shutdown read channel ...") }
       Darwin.shutdown(fd!, SHUT_RD);
       
       didCloseRead = true
     }
     
     if sendCount > 0 {
+      if debugClose { println("   sends pending, requesting close ...") }
       closeRequested = true
       return
     }
     
     queue = nil // explicitly release, might be a good idea ;-)
     
+    if debugClose { println("   super close.") }
     super.close()
   }
   
