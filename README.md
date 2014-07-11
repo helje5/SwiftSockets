@@ -142,3 +142,5 @@ wrapped Objective-C? :-)
 ###Contact
 
 [@helje5](http://twitter.com/helje5) | helge@alwaysrightinstitute.com
+
+![](http://www.alwaysrightinstitute.com/ARI.png)
