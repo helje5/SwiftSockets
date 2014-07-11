@@ -9,6 +9,8 @@
 import Darwin
 import Dispatch
 
+typealias ActiveSocketIPv4 = ActiveSocket<sockaddr_in>
+
 /**
  * Represents an active STREAM socket based on the standard Unix sockets
  * library.
@@ -40,9 +42,9 @@ import Dispatch
  *   socket.connect(sockaddr_in(address:"127.0.0.1", port: 80))
  *   socket.write("Ring, ring!\r\n")
  */
-class ActiveSocket: Socket, OutputStream {
+class ActiveSocket<T: SocketAddress>: Socket<T> {
   
-  var remoteAddress  : sockaddr_in?       = nil
+  var remoteAddress  : T?                 = nil
   var queue          : dispatch_queue_t?  = nil
   var readSource     : dispatch_source_t? = nil
   var sendCount      : Int                = 0
@@ -50,15 +52,31 @@ class ActiveSocket: Socket, OutputStream {
   var didCloseRead   : Bool               = false
   var readCB         : ((ActiveSocket, Int) -> Void)? = nil
   
+  // let the socket own the read buffer, what is the best buffer type?
+  var readBuffer     : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
+  var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
+    didSet {
+      if readBufferSize != oldValue {
+        readBuffer = [CChar](count: readBufferSize + 2, repeatedValue: 42)
+      }
+    }
+  }
+  
+  
   var isConnected : Bool {
-    return isValid ? (remoteAddress != nil) : false
+    // doesn't work: return isValid ? (remoteAddress != nil) : false
+    if !isValid { return false }
+    if let a = remoteAddress { return true } else { return false }
   }
   
   
   /* init */
   
-  convenience init(fd: Int32?, remoteAddress: sockaddr_in?,
-                   queue: dispatch_queue_t? = nil)
+  init(fd: Int32?) { // required, otherwise the convenience one fails to compile
+    super.init(fd: fd)
+  }
+  
+  convenience init(fd: Int32?, remoteAddress: T?, queue: dispatch_queue_t? = nil)
   {
     self.init(fd: fd)
     
@@ -74,7 +92,9 @@ class ActiveSocket: Socket, OutputStream {
   /* close */
   
   override func close() {
+    if debugClose { println("closing socket \(self)") }
     if !isValid { // already closed
+      if debugClose { println("   already closed.") }
       return
     }
     
@@ -82,29 +102,32 @@ class ActiveSocket: Socket, OutputStream {
     // TBD: not sure whether we have a locking issue here, can read&write
     //      occur on different threads in GCD?
     if !didCloseRead {
+      if debugClose { println("   stopping events ...") }
       stopEventHandler()
-      /* Seen this crash - if close() is called from within the readCB?
-        readCB = nil // break potential cycles
-       */
+      // Seen this crash - if close() is called from within the readCB?
+      readCB = nil // break potential cycles
+      if debugClose { println("   shutdown read channel ...") }
       Darwin.shutdown(fd!, SHUT_RD);
       
       didCloseRead = true
     }
     
     if sendCount > 0 {
+      if debugClose { println("   sends pending, requesting close ...") }
       closeRequested = true
       return
     }
     
     queue = nil // explicitly release, might be a good idea ;-)
     
+    if debugClose { println("   super close.") }
     super.close()
   }
   
   
   /* connect */
   
-  func connect(address: sockaddr_in, onConnect: () -> Void) -> Bool {
+  func connect(address: T, onConnect: () -> Void) -> Bool {
     // FIXME: make connect() asynchronous via GCD
     if !isValid {
       return false
@@ -119,7 +142,7 @@ class ActiveSocket: Socket, OutputStream {
     var addr = address
     
     let rc = withUnsafePointer(&addr) {
-      (ptr: UnsafePointer<sockaddr_in>) -> Int32 in
+      (ptr: UnsafePointer<T>) -> Int32 in
       let bptr = ConstUnsafePointer<sockaddr>(ptr) // cast
       
       // connect!
@@ -158,66 +181,28 @@ class ActiveSocket: Socket, OutputStream {
     return self
   }
   
-  // let the socket own the read buffer, what is the best buffer type?
-  var readBuffer     : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
-  var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
-    didSet {
-      if readBufferSize != oldValue {
-        readBuffer = [CChar](count: readBufferSize + 2, repeatedValue: 42)
-      }
+  // This doesn't work, can't override a stored property
+  // Leaving this feature alone for now, doesn't have real-world importance
+  // @lazy override var boundAddress: T? = getRawAddress()
+  
+  
+  /* description */
+  
+  override func descriptionAttributes() -> String {
+    // must be in main class, override not available in extensions
+    var s = super.descriptionAttributes()
+    if remoteAddress {
+      s += " remote=\(remoteAddress)"
     }
+    return s
   }
+}
+
+
+extension ActiveSocket : OutputStream { // writing
   
-  
-  /* setup event handler */
-  
-  func stopEventHandler() {
-    if readSource {
-      dispatch_source_cancel(readSource)
-      readSource = nil // abort()s if source is not resumed ...
-    }
-  }
-  
-  func startEventHandler() -> Bool {
-    if readSource {
-      println("Read source already setup?")
-      return true // already setup
-    }
-    
-    /* do we have a queue? */
-    
-    if queue == nil {
-      println("No queue set, using main queue")
-      queue = dispatch_get_main_queue()
-    }
-    
-    /* setup GCD dispatch source */
-    
-    readSource = dispatch_source_create(
-      DISPATCH_SOURCE_TYPE_READ,
-      UInt(fd!), // is this going to bite us?
-      0,
-      queue
-    )
-    if !readSource {
-      println("Could not create dispatch source for socket \(self)")
-      return false
-    }
-    
-    readSource!.onEvent {
-      [unowned self] _, readCount in
-      if let cb = self.readCB {
-        cb(self, Int(readCount))
-      }
-    }
-    
-    /* actually start listening ... */
-    dispatch_resume(readSource)
-    
-    return true
-  }
-  
-  let debugAsyncWrites = false
+  // no let in extensions: let debugAsyncWrites = false
+  var debugAsyncWrites : Bool { return false }
   
   func asyncWrite<T>(buffer: [T], length: Int? = nil) -> Bool {
     if !isValid {
@@ -273,60 +258,19 @@ class ActiveSocket: Socket, OutputStream {
     
     return true
   }
-
+  
   func send<T>(buffer: [T], length: Int? = nil) -> Int {
     var writeCount : Int = 0
     let bufsize    = length ? UInt(length!) : UInt(buffer.count)
     let fd         = self.fd!
-
+    
     buffer.withUnsafePointerToElements {
       p in
       writeCount = Darwin.write(fd, p, bufsize)
     }
     return writeCount
   }
-
-  func read() -> ( size: Int, block: [CChar], error: Int32) {
-    if !isValid {
-      println("Called read() on closed socket \(self)")
-      return ( -42, readBuffer, EBADF )
-    }
-    
-    var readCount: Int = 0
-    let bufsize = UInt(readBufferSize)
-    let fd      = self.fd!
-
-    // FIXME: If I just close the Terminal which hosts telnet this continues
-    //        to read garbage from the server. Even with SIGPIPE off.
-    readBuffer.withUnsafePointerToElements {
-      p in readCount = Darwin.read(fd, p, bufsize)
-    }
-    
-    if readCount < 0 {
-      readBuffer[0] = 0
-      return ( readCount, readBuffer, errno )
-    }
-    
-    readBuffer[readCount] = 0 // convenience
-    return ( readCount, readBuffer, 0 )
-  }
   
-  var numberOfBytesAvailableForReading : Int? {
-    // Note: this doesn't seem to work, returns 0
-    var count = Int32(0)
-    let rc    = ari_ioctlVip(fd!, FIONREAD, &count);
-    println("rc \(rc)")
-    return rc != -1 ? Int(count) : nil
-  }
-  
-  
-  // This doesn't work, can't override a stored property
-  // Leaving this feature alone for now, doesn't have real-world importance
-  // @lazy override var boundAddress: sockaddr_in? = getRawAddress()
-  
-  
-  /* OutputStream (if I move this to an Extension => swiftc sefaults */
-
   func write(string: String) {
     string.withCString { (p: CString) -> Void in
       if let cstr = p.persist() {
@@ -342,14 +286,97 @@ class ActiveSocket: Socket, OutputStream {
     }
   }
   
+}
+
+
+extension ActiveSocket { // Reading
   
-  /* description */
+  // Note: Swift doesn't allow the readBuffer in here.
   
-  override func descriptionAttributes() -> String {
-    var s = super.descriptionAttributes()
-    if remoteAddress {
-      s += " remote=\(remoteAddress)"
+  func read() -> ( size: Int, block: [CChar], error: Int32) {
+    if !isValid {
+      println("Called read() on closed socket \(self)")
+      return ( -42, readBuffer, EBADF )
     }
-    return s
+    
+    var readCount: Int = 0
+    let bufsize = UInt(readBufferSize)
+    let fd      = self.fd!
+    
+    // FIXME: If I just close the Terminal which hosts telnet this continues
+    //        to read garbage from the server. Even with SIGPIPE off.
+    readBuffer.withUnsafePointerToElements {
+      p in readCount = Darwin.read(fd, p, bufsize)
+    }
+    
+    if readCount < 0 {
+      readBuffer[0] = 0
+      return ( readCount, readBuffer, errno )
+    }
+    
+    readBuffer[readCount] = 0 // convenience
+    return ( readCount, readBuffer, 0 )
   }
+  
+  
+  /* setup read event handler */
+  
+  func stopEventHandler() {
+    if readSource {
+      dispatch_source_cancel(readSource)
+      readSource = nil // abort()s if source is not resumed ...
+    }
+  }
+  
+  func startEventHandler() -> Bool {
+    if readSource {
+      println("Read source already setup?")
+      return true // already setup
+    }
+    
+    /* do we have a queue? */
+    
+    if queue == nil {
+      println("No queue set, using main queue")
+      queue = dispatch_get_main_queue()
+    }
+    
+    /* setup GCD dispatch source */
+    
+    readSource = dispatch_source_create(
+      DISPATCH_SOURCE_TYPE_READ,
+      UInt(fd!), // is this going to bite us?
+      0,
+      queue
+    )
+    if !readSource {
+      println("Could not create dispatch source for socket \(self)")
+      return false
+    }
+    
+    readSource!.onEvent {
+      [unowned self] _, readCount in
+      if let cb = self.readCB {
+        cb(self, Int(readCount))
+      }
+    }
+    
+    /* actually start listening ... */
+    dispatch_resume(readSource)
+    
+    return true
+  }
+  
+}
+
+extension ActiveSocket { // ioctl
+  
+  var numberOfBytesAvailableForReading : Int? {
+    // Note: this doesn't seem to work, returns 0
+    var count = Int32(0)
+    let rc    = ari_ioctlVip(fd!, FIONREAD, &count);
+    println("rc \(rc)")
+    return rc != -1 ? Int(count) : nil
+  }
+  
 }

@@ -45,10 +45,26 @@ func gethoztbyname<T: SocketAddress>
   cb(name, cn, addr)
 }
 
-/* swiftc crashes, can't get this right (array of tuples)
+
+/**
+ * This is awkward :-) But it actually works. Though it is not what you want,
+ * the address here should be dynamic depending on the domain of the C struct.
+ *
+ * Whatever, this runs:
+ *   let hhost : String = "mail.google.com" // why is this necessary?
+ *   gethostzbyname(hhost, flags: Int32(AI_CANONNAME)) {
+ *     ( cn: String, infos: [ ( cn: String?, address: sockaddr_in? )]? ) -> Void
+ *     in
+ *     println("result \(cn): \(infos)")
+ *   }
+ *
+ * TBD: The 'flags' has to be provided, otherwise the trailing closure is not
+ *      detected right?
+ */
 func gethostzbyname<T: SocketAddress>
   (name : String, flags : Int32 = AI_CANONNAME,
-   cb   : [( String, ( cn: String?, address: T?)]? ) -> Void)
+   cb   : ( String, [ ( cn: String?, address: T? ) ]? ) -> Void
+  ) -> Void
 {
   // Note: I can't just provide a name and a cb, swiftc will complain.
   var hints = addrinfo()
@@ -60,7 +76,12 @@ func gethostzbyname<T: SocketAddress>
   
   /* run lookup (synchronously, can be slow!) */
   var rc = name.withCString { (cs : CString) -> Int32 in
-    getaddrinfo(cs, CString(nil), &hints, &ptr)
+    let ncs = CString(UnsafePointer<CChar>.null())
+    return getaddrinfo(cs, ncs, &hints, &ptr)
+  }
+  if rc != 0 {
+    cb(name, nil)
+    return
   }
   
   /* copy results - we just take the first match */
@@ -68,11 +89,12 @@ func gethostzbyname<T: SocketAddress>
   var results : Array<hapair>! = nil
   
   if rc == 0 && ptr != nullptr {
-    results = Array<hapair>()
+    var pairs = Array<hapair>()
     for info in ptr.memory {
       let pair : hapair = ( info.canonicalName, info.address() )
-      results!.append(pair)
+      pairs.append(pair)
     }
+    results = pairs
   }
   
   /* free OS resources */
@@ -82,4 +104,3 @@ func gethostzbyname<T: SocketAddress>
   
   cb(name, results)
 }
-*/

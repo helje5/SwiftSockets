@@ -3,7 +3,7 @@
 //  TestSwiftyCocoa
 //
 //  Created by Helge Heß on 6/12/14.
-//  Copyright (c) 2014 Helge Hess. All rights reserved.
+//  Copyright (c) 2014 Always Right Institute. All rights reserved.
 //
 
 import Darwin
@@ -30,9 +30,7 @@ extension in_addr {
       else {
         var buf = INADDR_ANY // Swift wants some initialization
         
-        // maybe only required on 10.10? crashes w/o forcing a copy
-        var sc = s + ""
-        sc.withCString { cs in inet_pton(AF_INET, cs, &buf) }
+        s.withCString { cs in inet_pton(AF_INET, cs, &buf) }
         s_addr = buf.s_addr
       }
     }
@@ -347,6 +345,24 @@ extension addrinfo {
     }
     let aiptr = UnsafePointer<T>(ai_addr) // cast
     return aiptr.memory // copies the address to the return value
+  }
+  
+  var dynamicAddress : SocketAddress? {
+    if !hasAddress {
+      return nil
+    }
+    
+    if ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain) {
+      let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
+      return aiptr.memory // copies the address to the return value
+    }
+    
+    if ai_addr.memory.sa_family == sa_family_t(sockaddr_in6.domain) {
+      let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
+      return aiptr.memory // copies the address to the return value
+    }
+    
+    return nil
   }
 }
 
