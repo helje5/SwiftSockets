@@ -98,7 +98,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [x] implicit parameters
   - [ ] Unowned
   - [x] Extensions on structs
-  - [ ] Extensions to organize classes (swiftc segfaults)
+  - [x] Extensions to organize classes
   - [x] Protocols on structs
   - [x] Tuples, with labels
   - [x] Trailing closures
