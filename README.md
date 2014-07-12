@@ -130,6 +130,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Literal Convertibles
   - [ ] @auto-closure
   - [ ] reinterpretCast()
+  - [x] @final
 
 ###Why?!
 
