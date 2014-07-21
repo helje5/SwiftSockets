@@ -135,5 +135,5 @@ class EchoServer {
     log("read string: \(s)")
   }
   
-  @final let alwaysRight = "Yes, indeed!"
+  final let alwaysRight = "Yes, indeed!"
 }

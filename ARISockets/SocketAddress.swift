@@ -55,13 +55,13 @@ extension in_addr {
   
 }
 
-func ==(lhs: in_addr, rhs: in_addr) -> Bool {
+public func ==(lhs: in_addr, rhs: in_addr) -> Bool {
   return __uint32_t(lhs.s_addr) == __uint32_t(rhs.s_addr)
 }
 
 extension in_addr : Equatable, Hashable {
   
-  var hashValue: Int {
+  public var hashValue: Int {
     // Knuth?
     return Int(UInt32(s_addr) * 2654435761 % (2^32))
   }
@@ -71,11 +71,11 @@ extension in_addr : Equatable, Hashable {
 extension in_addr: StringLiteralConvertible {
   // this allows you to do: let addr : in_addr = "192.168.0.1"
   
-  static func convertFromStringLiteral(value: StringLiteralType) -> in_addr {
+  public static func convertFromStringLiteral(value: StringLiteralType) -> in_addr {
     return in_addr(string: value)
   }
   
-  static func convertFromExtendedGraphemeClusterLiteral
+  public static func convertFromExtendedGraphemeClusterLiteral
     (value: ExtendedGraphemeClusterType) -> in_addr
   {
     return in_addr(string: value)
@@ -84,7 +84,7 @@ extension in_addr: StringLiteralConvertible {
 
 extension in_addr: Printable {
   
-  var description: String {
+  public var description: String {
     return asString
   }
     
@@ -182,14 +182,14 @@ extension sockaddr_in: SocketAddress {
   }
 }
 
-func == (lhs: sockaddr_in, rhs: sockaddr_in) -> Bool {
+public func == (lhs: sockaddr_in, rhs: sockaddr_in) -> Bool {
   return (lhs.sin_addr.s_addr == rhs.sin_addr.s_addr)
       && (lhs.sin_port        == rhs.sin_port)
 }
 
 extension sockaddr_in: Equatable, Hashable {
   
-  var hashValue: Int {
+  public var hashValue: Int {
     return sin_addr.hashValue + sin_port.hashValue
   }
   
@@ -207,11 +207,11 @@ extension sockaddr_in: Equatable, Hashable {
  */
 extension sockaddr_in: StringLiteralConvertible {
   
-  static func convertFromStringLiteral(value:StringLiteralType) -> sockaddr_in {
+  public static func convertFromStringLiteral(value:StringLiteralType) -> sockaddr_in {
     return sockaddr_in(string: value)
   }
   
-  static func convertFromExtendedGraphemeClusterLiteral
+  public static func convertFromExtendedGraphemeClusterLiteral
     (value: ExtendedGraphemeClusterType) -> sockaddr_in
   {
     return sockaddr_in(string: value)
@@ -220,7 +220,7 @@ extension sockaddr_in: StringLiteralConvertible {
 
 extension sockaddr_in: Printable {
   
-  var description: String {
+  public var description: String {
     return asString
   }
   
@@ -368,7 +368,7 @@ extension addrinfo {
 
 extension addrinfo : Printable {
   
-  var description : String {
+  public var description : String {
     var s = "<addrinfo"
     
     if ai_flags != 0 {
@@ -428,7 +428,7 @@ extension addrinfo : Printable {
 
 extension addrinfo : Sequence {
   
-  func generate() -> GeneratorOf<addrinfo> {
+  public func generate() -> GeneratorOf<addrinfo> {
     var cursor : addrinfo? = self
     
     return GeneratorOf<addrinfo> {
@@ -445,7 +445,7 @@ extension addrinfo : Sequence {
 
 extension sa_family_t : Printable {
   
-  var description : String {
+  public var description : String {
     var noop = ""
     switch Int32(self) {
       case AF_UNSPEC: return ""

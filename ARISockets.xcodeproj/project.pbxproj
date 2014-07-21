@@ -27,7 +27,6 @@
 		E88984EF194A760300A831A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88984EE194A760300A831A3 /* AppDelegate.swift */; };
 		E88984F1194A760300A831A3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E88984F0194A760300A831A3 /* Images.xcassets */; };
 		E88984F4194A760300A831A3 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E88984F2194A760300A831A3 /* MainMenu.xib */; };
-		E88A0EDC195B955A00B840A5 /* ARISockets-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = E88A0EDB195B955A00B840A5 /* ARISockets-Bridging-Header.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,7 +71,6 @@
 		E88984EE194A760300A831A3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E88984F0194A760300A831A3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		E88984F3194A760300A831A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		E88A0EDB195B955A00B840A5 /* ARISockets-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ARISockets-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,7 +150,6 @@
 				E8305D70194B06E20073740A /* ActiveSocket.swift */,
 				E8305D74194B06E20073740A /* UnixUtils.swift */,
 				E81DC1F71965A42600BD826B /* DNS.swift */,
-				E88A0EDB195B955A00B840A5 /* ARISockets-Bridging-Header.h */,
 				E83305A6195B92FB00CCBDF5 /* UnixBridge.h */,
 				E83305A4195B92D100CCBDF5 /* UnixBridge.c */,
 				E88984B7194A751E00A831A3 /* Supporting Files */,
@@ -197,7 +194,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E88984BA194A751E00A831A3 /* ARISockets.h in Headers */,
-				E88A0EDC195B955A00B840A5 /* ARISockets-Bridging-Header.h in Headers */,
 				E83305A7195B92FB00CCBDF5 /* UnixBridge.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -545,7 +541,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx10.10;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "ARISockets/ARISockets-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -595,7 +590,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx10.10;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "ARISockets/ARISockets-Bridging-Header.h";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
