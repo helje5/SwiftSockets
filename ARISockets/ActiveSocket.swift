@@ -244,6 +244,7 @@ extension ActiveSocket : OutputStream { // writing
     
   }
   
+  /* [T] is always convertible to ConstUnsafePointer<T>?
   public func asyncWrite<T>(buffer: [T], length: Int? = nil) -> Bool {
     if !canWrite { return false }
     
@@ -265,6 +266,7 @@ extension ActiveSocket : OutputStream { // writing
     
     return true
   }
+  */
   
   public func asyncWrite<T>(buffer: ConstUnsafePointer<T>, length: Int) -> Bool {
     // FIXME: can we remove this dupe of the [T] version?
