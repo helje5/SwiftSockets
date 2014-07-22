@@ -28,17 +28,15 @@ public typealias ActiveSocketIPv4 = ActiveSocket<sockaddr_in>
  * closed.
  *
  * Sample:
- *   let socket = ActiveSocket()
- *
- *   socket.onRead {
- *     let (count, block) = $0.read()
- *     if count < 1 {
- *       println("EOF, or great error handling.")
- *       return
+ *   let socket = ActiveSocket<sockaddr_in>()
+ *     .onRead {
+ *       let (count, block) = $0.read()
+ *       if count < 1 {
+ *         println("EOF, or great error handling.")
+ *         return
+ *       }
+ *       println("Answer to ring,ring is: \(count) bytes: \(block)")
  *     }
- *     println("Answer to ring,ring is: \(count) bytes: \(block)")
- *   }
- *
  *   socket.connect(sockaddr_in(address:"127.0.0.1", port: 80))
  *   socket.write("Ring, ring!\r\n")
  */
@@ -46,6 +44,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   public var remoteAddress  : T?                 = nil
   public var queue          : dispatch_queue_t?  = nil
+  
   var readSource     : dispatch_source_t? = nil
   var sendCount      : Int                = 0
   var closeRequested : Bool               = false
@@ -72,7 +71,8 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   /* init */
   
-  public init(fd: Int32?) { // required, otherwise the convenience one fails to compile
+  public init(fd: Int32?) {
+    // required, otherwise the convenience one fails to compile
     super.init(fd: fd)
   }
   
@@ -244,11 +244,12 @@ extension ActiveSocket : OutputStream { // writing
     
   }
   
-  /* [T] is always convertible to ConstUnsafePointer<T>?
-  public func asyncWrite<T>(buffer: [T], length: Int? = nil) -> Bool {
+  public func asyncWrite<T>(buffer: [T]) -> Bool {
+    // While [T] seems to convert to ConstUnsafePointer<T>, this method
+    // has the added benefit of being able to derive the buffer length
     if !canWrite { return false }
     
-    let writelen = length ? UInt(length!) : UInt(buffer.count)
+    let writelen = UInt(buffer.count)
     let bufsize  = writelen * UInt(sizeof(T))
     if bufsize < 1 { // Nothing to write ..
       return true
@@ -261,12 +262,11 @@ extension ActiveSocket : OutputStream { // writing
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-    let asyncData  = dispatch_data_create(buffer, bufsize, queue, nil)
+    let asyncData = dispatch_data_create(buffer, bufsize, queue, nil)
     write(asyncData!)
     
     return true
   }
-  */
   
   public func asyncWrite<T>(buffer: ConstUnsafePointer<T>, length:Int) -> Bool {
     // FIXME: can we remove this dupe of the [T] version?
