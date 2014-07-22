@@ -244,12 +244,12 @@ extension ActiveSocket : OutputStream { // writing
     
   }
   
-  public func asyncWrite<T>(buffer: [T], length: Int? = nil) -> Bool {
+  public func asyncWrite<T>(buffer: [T]) -> Bool {
     // While [T] seems to convert to ConstUnsafePointer<T>, this method
     // has the added benefit of being able to derive the buffer length
     if !canWrite { return false }
     
-    let writelen = length ? UInt(length!) : UInt(buffer.count)
+    let writelen = UInt(buffer.count)
     let bufsize  = writelen * UInt(sizeof(T))
     if bufsize < 1 { // Nothing to write ..
       return true
