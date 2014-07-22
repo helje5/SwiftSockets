@@ -244,8 +244,9 @@ extension ActiveSocket : OutputStream { // writing
     
   }
   
-  /* [T] is always convertible to ConstUnsafePointer<T>?
   public func asyncWrite<T>(buffer: [T], length: Int? = nil) -> Bool {
+    // While [T] seems to convert to ConstUnsafePointer<T>, this method
+    // has the added benefit of being able to derive the buffer length
     if !canWrite { return false }
     
     let writelen = length ? UInt(length!) : UInt(buffer.count)
@@ -261,12 +262,11 @@ extension ActiveSocket : OutputStream { // writing
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-    let asyncData  = dispatch_data_create(buffer, bufsize, queue, nil)
+    let asyncData = dispatch_data_create(buffer, bufsize, queue, nil)
     write(asyncData!)
     
     return true
   }
-  */
   
   public func asyncWrite<T>(buffer: ConstUnsafePointer<T>, length:Int) -> Bool {
     // FIXME: can we remove this dupe of the [T] version?
