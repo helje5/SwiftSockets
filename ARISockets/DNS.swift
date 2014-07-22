@@ -22,8 +22,8 @@ func gethoztbyname<T: SocketAddress>
   /* run lookup (synchronously, can be slow!) */
   // b3: (cs : CString) doesn't pick up the right overload?
   var rc = name.withCString { (cs : UnsafePointer<CChar>) -> Int32 in
-    let ncs = CString(UnsafePointer<CChar>.null())
-    return getaddrinfo(CString(cs), ncs, &hints, &ptr)
+    let ncs = UnsafePointer<CChar>.null()
+    return getaddrinfo(cs, ncs, &hints, &ptr)
   }
   if rc != 0 {
     cb(name, nil, nil)
@@ -75,8 +75,8 @@ func gethostzbyname<T: SocketAddress>
   let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
   
   /* run lookup (synchronously, can be slow!) */
-  var rc = name.withCString { (cs : CString) -> Int32 in
-    let ncs = CString(UnsafePointer<CChar>.null())
+  var rc = name.withCString { (cs : ConstUnsafePointer<CChar>) -> Int32 in
+    let ncs = UnsafePointer<CChar>.null()
     return getaddrinfo(cs, ncs, &hints, &ptr)
   }
   if rc != 0 {

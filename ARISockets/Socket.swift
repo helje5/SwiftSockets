@@ -14,29 +14,30 @@ import Dispatch
  *
  * PassiveSockets are 'listening' sockets, ActiveSockets are open connections.
  */
-class Socket<T: SocketAddress> {
+public class Socket<T: SocketAddress> {
   
-  var fd           : Int32?             = nil
-  var boundAddress : T?                 = nil
-  var closeCB      : ((Int32) -> Void)? = nil
-  var closedFD     : Int32?             = nil // for delayed callback
-  var isValid      : Bool { return fd != nil }
-  var isBound      : Bool {
+  public var fd           : Int32?             = nil
+  public var boundAddress : T?                 = nil
+  public var isValid      : Bool { return fd != nil }
+  public var isBound      : Bool {
     // fails: return boundAddress != nil
     if let a = boundAddress { return true } else { return false }
   }
   
+  var closeCB  : ((Int32) -> Void)? = nil
+  var closedFD : Int32?             = nil // for delayed callback
+  
   
   /* initializer / deinitializer */
   
-  init(fd: Int32?) {
+  public init(fd: Int32?) {
     self.fd = fd
   }
   deinit {
     close() // TBD: is this OK/safe?
   }
   
-  convenience init(type: Int32 = SOCK_STREAM) {
+  public convenience init(type: Int32 = SOCK_STREAM) {
     let lfd = socket(T.domain, type, 0)
     var fd:  Int32?
     if lfd != -1 {
@@ -56,7 +57,7 @@ class Socket<T: SocketAddress> {
   
   let debugClose = false
   
-  func close() {
+  public func close() {
     if fd {
       closedFD = fd
       if debugClose { println("Closing socket \(closedFD) for good ...") }
@@ -77,7 +78,7 @@ class Socket<T: SocketAddress> {
     boundAddress = nil
   }
   
-  func onClose(cb: ((Int32) -> Void)?) -> Self {
+  public func onClose(cb: ((Int32) -> Void)?) -> Self {
     if let fd = closedFD { // socket got closed before event-handler attached
       if let lcb = cb {
         lcb(fd)
@@ -95,7 +96,7 @@ class Socket<T: SocketAddress> {
   
   /* bind the socket. */
   
-  func bind(address: T) -> Bool {
+  public func bind(address: T) -> Bool {
     if !isValid {
       return false
     }
@@ -123,7 +124,7 @@ class Socket<T: SocketAddress> {
     return rc == 0 ? true : false
   }
   
-  func getsockname() -> T? {
+  public func getsockname() -> T? {
     if !isValid {
       return nil
     }
@@ -171,10 +172,11 @@ class Socket<T: SocketAddress> {
 
 extension Socket { // Socket Flags
   
-  var flags : Int32? {
+  public var flags : Int32? {
     get {
       let rc = ari_fcntlVi(fd!, F_GETFL, 0)
       return rc >= 0 ? rc : nil
+      // return nil
     }
     set {
       let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
@@ -184,13 +186,24 @@ extension Socket { // Socket Flags
     }
   }
   
-  var isNonBlocking : Bool {
+  public var isNonBlocking : Bool {
     get {
-      return (flags! & O_NONBLOCK) != 0 ? true : false
+      if let f = flags {
+        return (f & O_NONBLOCK) != 0 ? true : false
+      }
+      else {
+        println("ERROR: could not get non-blocking socket property!")
+        return false
+      }
     }
     set {
       if newValue {
-        flags = flags! | O_NONBLOCK
+        if let f = flags {
+          flags = f | O_NONBLOCK
+        }
+        else {
+          flags = O_NONBLOCK
+        }
       }
       else {
         flags = flags! & ~O_NONBLOCK
@@ -203,42 +216,42 @@ extension Socket { // Socket Flags
 
 extension Socket { // Socket Options
 
-  var reuseAddress: Bool {
+  public var reuseAddress: Bool {
     get { return getSocketOption(SO_REUSEADDR) }
     set { setSocketOption(SO_REUSEADDR, value: newValue) }
   }
-  var isSigPipeDisabled: Bool {
+  public var isSigPipeDisabled: Bool {
     get { return getSocketOption(SO_NOSIGPIPE) }
     set { setSocketOption(SO_NOSIGPIPE, value: newValue) }
   }
-  var keepAlive: Bool {
+  public var keepAlive: Bool {
     get { return getSocketOption(SO_KEEPALIVE) }
     set { setSocketOption(SO_KEEPALIVE, value: newValue) }
   }
-  var dontRoute: Bool {
+  public var dontRoute: Bool {
     get { return getSocketOption(SO_DONTROUTE) }
     set { setSocketOption(SO_DONTROUTE, value: newValue) }
   }
-  var socketDebug: Bool {
+  public var socketDebug: Bool {
     get { return getSocketOption(SO_DEBUG) }
     set { setSocketOption(SO_DEBUG, value: newValue) }
   }
   
-  var sendBufferSize: Int32 {
+  public var sendBufferSize: Int32 {
     get {
       let v: Int32? = getSocketOption(SO_SNDBUF)
       if v { return v! } else { return -42 }
     }
     set { setSocketOption(SO_SNDBUF, value: newValue) }
   }
-  var receiveBufferSize: Int32 {
+  public var receiveBufferSize: Int32 {
     get {
       let v: Int32? = getSocketOption(SO_RCVBUF)
       if v { return v! } else { return -42 }
     }
     set { setSocketOption(SO_RCVBUF, value: newValue) }
   }
-  var socketError: Int32 {
+  public var socketError: Int32 {
     let v: Int32? = getSocketOption(SO_ERROR)
     if v { return v! } else { return -42 }
   }
@@ -246,13 +259,13 @@ extension Socket { // Socket Options
   /* socket options (TBD: would we use subscripts for such?) */
   
   
-  func setSocketOption(option: Int32, value: Int32) -> Bool {
+  public func setSocketOption(option: Int32, value: Int32) -> Bool {
     if !isValid {
       return false
     }
     
     var buf = value
-    let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf, socklen_t(sizeof(Int32)))
+    let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf,socklen_t(sizeof(Int32)))
     
     if rc != 0 { // ps: Great Error Handling
       println("Could not set option \(option) on socket \(self)")
@@ -262,7 +275,7 @@ extension Socket { // Socket Options
   
   // TBD: Can't overload optionals in a useful way?
   // func getSocketOption(option: Int32) -> Int32
-  func getSocketOption(option: Int32) -> Int32? {
+  public func getSocketOption(option: Int32) -> Int32? {
     if !isValid {
       return nil
     }
@@ -278,10 +291,10 @@ extension Socket { // Socket Options
     return buf
   }
   
-  func setSocketOption(option: Int32, value: Bool) -> Bool {
+  public func setSocketOption(option: Int32, value: Bool) -> Bool {
     return setSocketOption(option, value: value ? 1 : 0)
   }
-  func getSocketOption(option: Int32) -> Bool {
+  public func getSocketOption(option: Int32) -> Bool {
     let v: Int32? = getSocketOption(option)
     return v ? (v! == 0 ? false : true) : false
   }
@@ -291,9 +304,9 @@ extension Socket { // Socket Options
 
 extension Socket { // poll()
   
-  var isDataAvailable: Bool { return pollFlag(POLLRDNORM) }
+  public var isDataAvailable: Bool { return pollFlag(POLLRDNORM) }
   
-  func pollFlag(flag: Int32) -> Bool {
+  public func pollFlag(flag: Int32) -> Bool {
     let rc: Int32? = poll(flag, timeout: 0)
     if let flags = rc {
       if (flags & flag) != 0 {
@@ -313,7 +326,7 @@ extension Socket { // poll()
   // Swift doesn't allow let's in here?!
   var debugPoll : Bool { return false }
   
-  func poll(events: Int32, timeout: UInt? = 0) -> Int32? {
+  public func poll(events: Int32, timeout: UInt? = 0) -> Int32? {
     // This is declared as Int32 because the POLLRDNORM and such are
     if !isValid {
       return nil
@@ -354,7 +367,7 @@ extension Socket { // poll()
 
 extension Socket: Printable {
   
-  var description: String {
+  public var description: String {
     return "<Socket:" + descriptionAttributes() + ">"
   }
   
@@ -363,7 +376,7 @@ extension Socket: Printable {
 
 extension Socket: LogicValue {
   
-  func getLogicValue() -> Bool {
+  public func getLogicValue() -> Bool {
     return isValid
   }
   

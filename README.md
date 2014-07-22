@@ -25,7 +25,9 @@ I suggest you start out looking at the ARIEchoServer.
 
 ####ARISockets
 
-A framework containing the socket classes and relevant extensions. It takes a bit of inspiration from the [SOPE](http://sope.opengroupware.org) NGStreams library.
+A framework containing the socket classes and relevant extensions. It takes a
+bit of inspiration from the [SOPE](http://sope.opengroupware.org) NGStreams
+library.
 
 Server Sample:
 ```swift

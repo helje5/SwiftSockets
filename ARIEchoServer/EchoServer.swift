@@ -30,7 +30,7 @@ class EchoServer {
   }
   
   func start() {
-    listenSocket = PassiveSocket(address: sockaddr_in(port: port))
+    listenSocket = PassiveSocketIPv4(address: sockaddr_in(port: port))
     if !listenSocket || !listenSocket! { // neat, eh? ;-)
       log("ERROR: could not create socket ...")
       return
@@ -108,7 +108,8 @@ class EchoServer {
       
       logReceivedBlock(block, length: count)
       
-      // maps the whole block. asyncWrite does not accept slices, can we add this?
+      // maps the whole block. asyncWrite does not accept slices,
+      // can we add this?
       // (should adopt sth like IndexedCollection<T>?)
       let mblock = block.map({ $0 == 83 ? 90 : ($0 == 115 ? 122 : $0) })
       
@@ -119,21 +120,32 @@ class EchoServer {
   }
 
   func logReceivedBlock(block: [CChar], length: Int) {
-    var s: String? = nil
-    
-    s = block.withUnsafePointerToElements {
+    var s: String = block.withUnsafePointerToElements {
       (p : UnsafePointer<CChar>) -> String in
-      return String.fromCString(CString(p))!
+      if let k = String.fromCString(p) {
+        return k
+      }
+      else {
+        return "Could not process result block \(block) length \(length)"
+      }
     }
     
-    if let m = s {
-      if m.hasSuffix("\r\n") {
-        s = m.substringToIndex(countElements(m) - 2)
+    if s.hasSuffix("\r\n") {
+      // No more substringToIndex()
+      let len = countElements(s) - 2
+      var endIdx = s.startIndex
+      for var i = 0; i < len; i++ {
+        endIdx = endIdx.successor()
       }
+      
+      
+      s = s[s.startIndex..<endIdx]
+      // doesn't work anymore:
+      // s = m.substringToIndex(countElements(m) - 2)
     }
     
     log("read string: \(s)")
   }
   
-  @final let alwaysRight = "Yes, indeed!"
+  final let alwaysRight = "Yes, indeed!"
 }

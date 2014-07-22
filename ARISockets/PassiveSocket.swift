@@ -9,7 +9,7 @@
 import Darwin
 import Dispatch
 
-typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
+public typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
 
 /*
  * Represents a STREAM server socket based on the standard Unix sockets library.
@@ -31,19 +31,20 @@ typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
  *     println("All good, go ahead!")
  *   }
  */
-class PassiveSocket<T: SocketAddress>: Socket<T> {
+public class PassiveSocket<T: SocketAddress>: Socket<T> {
   
-  var backlog      : Int? = nil
-  var isListening  : Bool { return backlog ? true : false; }
-  var listenSource : dispatch_source_t? = nil
+  public var backlog      : Int? = nil
+  public var isListening  : Bool { return backlog ? true : false; }
+  public var listenSource : dispatch_source_t? = nil
   
   /* init */
   
-  init(fd: Int32?) { // required, otherwise the convenience one fails to compile
+  public init(fd: Int32?) {
+    // required, otherwise the convenience one fails to compile
     super.init(fd: fd)
   }
   
-  convenience init(type: Int32 = SOCK_STREAM) {
+  public convenience init(type: Int32 = SOCK_STREAM) {
     // NOTE: this is a DUPE to Socket. It fails to inherit from Socket<T>
     let lfd = socket(T.domain, type, 0)
     var fd:  Int32?
@@ -59,7 +60,7 @@ class PassiveSocket<T: SocketAddress>: Socket<T> {
     self.init(fd: fd)
   }
   
-  convenience init(address: T) {
+  public convenience init(address: T) {
     self.init(type: SOCK_STREAM)
     
     if isValid {
@@ -72,7 +73,7 @@ class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   /* proper close */
   
-  override func close() {
+  override public func close() {
     if listenSource {
       dispatch_source_cancel(listenSource)
       listenSource = nil
@@ -82,7 +83,7 @@ class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   /* start listening */
   
-  func listen(backlog: Int = 5) -> Bool {
+  public func listen(backlog: Int = 5) -> Bool {
     if !isValid {
       return false
     }
@@ -101,8 +102,8 @@ class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   typealias TypedActiveSocket = ActiveSocket<T>
   
-  func listen(queue: dispatch_queue_t, backlog: Int = 5,
-              accept: ( TypedActiveSocket ) -> Void)
+  public func listen(queue: dispatch_queue_t, backlog: Int = 5,
+                     accept: ( TypedActiveSocket ) -> Void)
     -> Bool
   {
     if !isValid {
