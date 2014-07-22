@@ -266,7 +266,7 @@ extension Socket { // Socket Options
     }
     
     var buf = value
-    let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf, socklen_t(sizeof(Int32)))
+    let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf,socklen_t(sizeof(Int32)))
     
     if rc != 0 { // ps: Great Error Handling
       println("Could not set option \(option) on socket \(self)")

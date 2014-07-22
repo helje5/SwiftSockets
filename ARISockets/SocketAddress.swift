@@ -71,7 +71,9 @@ extension in_addr : Equatable, Hashable {
 extension in_addr: StringLiteralConvertible {
   // this allows you to do: let addr : in_addr = "192.168.0.1"
   
-  public static func convertFromStringLiteral(value: StringLiteralType) -> in_addr {
+  public static func convertFromStringLiteral(value: StringLiteralType)
+    -> in_addr
+  {
     return in_addr(string: value)
   }
   
@@ -103,7 +105,8 @@ public protocol SocketAddress {
 extension sockaddr_in: SocketAddress {
   
   public static var domain = AF_INET // if you make this a let, swiftc segfaults
-  public static var size   = __uint8_t(sizeof(sockaddr_in)) // how to refer to self?
+  public static var size   = __uint8_t(sizeof(sockaddr_in))
+    // how to refer to self?
   
   public init() {
     sin_len    = sockaddr_in.size
@@ -158,7 +161,7 @@ extension sockaddr_in: SocketAddress {
     }
   }
   
-  public var port: Int { // should we make that optional and use wildcard as nil?
+  public var port: Int { // should we make that optional and use wildcard as nil
     get {
       return Int(ntohs(sin_port))
     }
@@ -207,7 +210,9 @@ extension sockaddr_in: Equatable, Hashable {
  */
 extension sockaddr_in: StringLiteralConvertible {
   
-  public static func convertFromStringLiteral(value:StringLiteralType) -> sockaddr_in {
+  public static func convertFromStringLiteral(value:StringLiteralType)
+    -> sockaddr_in
+  {
     return sockaddr_in(string: value)
   }
   

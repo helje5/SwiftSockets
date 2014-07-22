@@ -108,7 +108,8 @@ class EchoServer {
       
       logReceivedBlock(block, length: count)
       
-      // maps the whole block. asyncWrite does not accept slices, can we add this?
+      // maps the whole block. asyncWrite does not accept slices,
+      // can we add this?
       // (should adopt sth like IndexedCollection<T>?)
       let mblock = block.map({ $0 == 83 ? 90 : ($0 == 115 ? 122 : $0) })
       

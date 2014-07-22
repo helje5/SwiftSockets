@@ -268,7 +268,7 @@ extension ActiveSocket : OutputStream { // writing
   }
   */
   
-  public func asyncWrite<T>(buffer: ConstUnsafePointer<T>, length: Int) -> Bool {
+  public func asyncWrite<T>(buffer: ConstUnsafePointer<T>, length:Int) -> Bool {
     // FIXME: can we remove this dupe of the [T] version?
     if !canWrite { return false }
     
