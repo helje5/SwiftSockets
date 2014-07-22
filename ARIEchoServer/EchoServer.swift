@@ -122,7 +122,12 @@ class EchoServer {
   func logReceivedBlock(block: [CChar], length: Int) {
     var s: String = block.withUnsafePointerToElements {
       (p : UnsafePointer<CChar>) -> String in
-      return String.fromCString(p)!
+      if let k = String.fromCString(p) {
+        return k
+      }
+      else {
+        return "Could not process result block \(block) length \(length)"
+      }
     }
     
     if s.hasSuffix("\r\n") {
