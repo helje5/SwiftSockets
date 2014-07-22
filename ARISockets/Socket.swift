@@ -193,7 +193,12 @@ extension Socket { // Socket Flags
     }
     set {
       if newValue {
-        flags = flags! | O_NONBLOCK
+        if let f = flags {
+          flags = f | O_NONBLOCK
+        }
+        else {
+          flags = O_NONBLOCK
+        }
       }
       else {
         flags = flags! & ~O_NONBLOCK
