@@ -317,7 +317,7 @@ extension addrinfo {
   var canonicalName : String? {
     let nullptr : UnsafePointer<CChar> = UnsafePointer.null()
     if ai_canonname != nullptr && ai_canonname[0] != 0 {
-      return String.fromCString(CString(ai_canonname))
+      return String.fromCString(ai_canonname)
     }
     return nil
   }
