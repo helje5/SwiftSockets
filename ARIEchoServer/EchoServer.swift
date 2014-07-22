@@ -30,7 +30,7 @@ class EchoServer {
   }
   
   func start() {
-    listenSocket = PassiveSocket(address: sockaddr_in(port: port))
+    listenSocket = PassiveSocketIPv4(address: sockaddr_in(port: port))
     if !listenSocket || !listenSocket! { // neat, eh? ;-)
       log("ERROR: could not create socket ...")
       return
@@ -123,12 +123,13 @@ class EchoServer {
     
     s = block.withUnsafePointerToElements {
       (p : UnsafePointer<CChar>) -> String in
-      return String.fromCString(CString(p))!
+      return String.fromCString(p)!
     }
     
     if let m = s {
       if m.hasSuffix("\r\n") {
-        s = m.substringToIndex(countElements(m) - 2)
+        // doesn't work anymore:
+        // s = m.substringToIndex(countElements(m) - 2)
       }
     }
     
