@@ -16,6 +16,7 @@
 		E8312C93196C019200162EF7 /* ARISockets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E88984B4194A751E00A831A3 /* ARISockets.framework */; };
 		E83305A5195B92D100CCBDF5 /* UnixBridge.c in Sources */ = {isa = PBXBuildFile; fileRef = E83305A4195B92D100CCBDF5 /* UnixBridge.c */; };
 		E83305A7195B92FB00CCBDF5 /* UnixBridge.h in Headers */ = {isa = PBXBuildFile; fileRef = E83305A6195B92FB00CCBDF5 /* UnixBridge.h */; };
+		E83FFF34197DF00E00A51E6F /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = E83FFF33197DF00E00A51E6F /* README.md */; };
 		E85D5FDD194B8C6200ECC32A /* ARISockets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E88984B4194A751E00A831A3 /* ARISockets.framework */; };
 		E85D5FE9194B917900ECC32A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85D5FE8194B917900ECC32A /* main.swift */; };
 		E85D5FEB194B917900ECC32A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85D5FEA194B917900ECC32A /* AppDelegate.swift */; };
@@ -55,6 +56,7 @@
 		E8305D74194B06E20073740A /* UnixUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnixUtils.swift; sourceTree = "<group>"; };
 		E83305A4195B92D100CCBDF5 /* UnixBridge.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UnixBridge.c; sourceTree = "<group>"; };
 		E83305A6195B92FB00CCBDF5 /* UnixBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnixBridge.h; sourceTree = "<group>"; };
+		E83FFF33197DF00E00A51E6F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E85D5FE4194B917900ECC32A /* ARIFetch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIFetch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E85D5FE7194B917900ECC32A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E85D5FE8194B917900ECC32A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 		E88984A8194A74C400A831A3 = {
 			isa = PBXGroup;
 			children = (
+				E83FFF33197DF00E00A51E6F /* README.md */,
 				E88984B6194A751E00A831A3 /* ARISockets */,
 				E88984E9194A760300A831A3 /* ARIEchoServer */,
 				E85D5FE5194B917900ECC32A /* ARIFetch */,
@@ -342,6 +345,7 @@
 				E8305D79194B06E20073740A /* UnixUtils.swift in Sources */,
 				E8305D75194B06E20073740A /* ActiveSocket.swift in Sources */,
 				E83305A5195B92D100CCBDF5 /* UnixBridge.c in Sources */,
+				E83FFF34197DF00E00A51E6F /* README.md in Sources */,
 				E8305D77194B06E20073740A /* Socket.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

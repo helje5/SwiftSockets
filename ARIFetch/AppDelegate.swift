@@ -97,7 +97,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // FIXME: I think I know why. It may happen if the block boundary is
         //        within a UTF-8 sequence?
         // The end of the block is 100,-30,-128,0
-        return String.fromCString(CString(p))! // ignore error, abort
+        return String.fromCString(p)! // ignore error, abort
       }
       
       // log to view. Careful, must run in main thread!

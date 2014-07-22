@@ -91,7 +91,7 @@ extension in_addr: Printable {
 }
 
 
-protocol SocketAddress {
+public protocol SocketAddress {
   
   class var domain: Int32 { get }
   
@@ -102,10 +102,10 @@ protocol SocketAddress {
 
 extension sockaddr_in: SocketAddress {
   
-  static var domain = AF_INET // if you make this a let, swiftc segfaults
-  static var size   = __uint8_t(sizeof(sockaddr_in)) // how to refer to self?
+  public static var domain = AF_INET // if you make this a let, swiftc segfaults
+  public static var size   = __uint8_t(sizeof(sockaddr_in)) // how to refer to self?
   
-  init() {
+  public init() {
     sin_len    = sockaddr_in.size
     sin_family = sa_family_t(sockaddr_in.domain)
     sin_port   = 0
@@ -113,20 +113,20 @@ extension sockaddr_in: SocketAddress {
     sin_zero   = (0,0,0,0,0,0,0,0)
   }
   
-  init(address: in_addr = INADDR_ANY, port: Int?) {
+  public init(address: in_addr = INADDR_ANY, port: Int?) {
     self.init()
     
     sin_port = port ? in_port_t(htons(CUnsignedShort(port!))) : 0
     sin_addr = address
   }
   
-  init(address: String?, port: Int?) {
+  public init(address: String?, port: Int?) {
     let isWildcard = address ? (address! == "*" || address! == "*.*.*.*"):true;
     let ipv4       = isWildcard ? INADDR_ANY : in_addr(string: address)
     self.init(address: ipv4, port: port)
   }
   
-  init(string: String?) {
+  public init(string: String?) {
     if let s = string {
       if s.isEmpty {
         self.init(address: INADDR_ANY, port: nil)
@@ -158,7 +158,7 @@ extension sockaddr_in: SocketAddress {
     }
   }
   
-  var port: Int { // should we make that optional and use wildcard as nil?
+  public var port: Int { // should we make that optional and use wildcard as nil?
     get {
       return Int(ntohs(sin_port))
     }
@@ -167,16 +167,16 @@ extension sockaddr_in: SocketAddress {
     }
   }
   
-  var address: in_addr {
+  public var address: in_addr {
     return sin_addr
   }
   
-  var isWildcardPort:    Bool { return sin_port == 0 }
-  var isWildcardAddress: Bool { return sin_addr == INADDR_ANY }
+  public var isWildcardPort:    Bool { return sin_port == 0 }
+  public var isWildcardAddress: Bool { return sin_addr == INADDR_ANY }
   
-  var len: __uint8_t { return sockaddr_in.size }
+  public var len: __uint8_t { return sockaddr_in.size }
 
-  var asString: String {
+  public var asString: String {
     let addr = address.asString
     return isWildcardPort ? addr : "\(addr):\(port)"
   }
@@ -260,10 +260,10 @@ extension sockaddr_un: SocketAddress {
   // TBD: sockaddr_un would be interesting as the size of the structure is
   //      technically dynamic (embedded string)
   
-  static var domain = AF_UNIX
-  static var size   = __uint8_t(sizeof(sockaddr_un)) // CAREFUL
+  public static var domain = AF_UNIX
+  public static var size   = __uint8_t(sizeof(sockaddr_un)) // CAREFUL
   
-  init() {
+  public init() {
     sun_len    = sockaddr_un.size // CAREFUL - kinda wrong
     sun_family = sa_family_t(sockaddr_un.domain)
     
@@ -279,7 +279,7 @@ extension sockaddr_un: SocketAddress {
     );
   }
   
-  var len: __uint8_t {
+  public var len: __uint8_t {
     // FIXME?: this is wrong. It needs to be the base size + string length in
     //         the buffer
     return sockaddr_un.size

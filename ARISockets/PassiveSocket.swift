@@ -9,7 +9,7 @@
 import Darwin
 import Dispatch
 
-typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
+public typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
 
 /*
  * Represents a STREAM server socket based on the standard Unix sockets library.
@@ -31,11 +31,11 @@ typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
  *     println("All good, go ahead!")
  *   }
  */
-class PassiveSocket<T: SocketAddress>: Socket<T> {
+public class PassiveSocket<T: SocketAddress>: Socket<T> {
   
-  var backlog      : Int? = nil
-  var isListening  : Bool { return backlog ? true : false; }
-  var listenSource : dispatch_source_t? = nil
+  public var backlog      : Int? = nil
+  public var isListening  : Bool { return backlog ? true : false; }
+  public var listenSource : dispatch_source_t? = nil
   
   /* init */
   
@@ -72,7 +72,7 @@ class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   /* proper close */
   
-  override func close() {
+  override public func close() {
     if listenSource {
       dispatch_source_cancel(listenSource)
       listenSource = nil
@@ -82,7 +82,7 @@ class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   /* start listening */
   
-  func listen(backlog: Int = 5) -> Bool {
+  public func listen(backlog: Int = 5) -> Bool {
     if !isValid {
       return false
     }
@@ -101,8 +101,8 @@ class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   typealias TypedActiveSocket = ActiveSocket<T>
   
-  func listen(queue: dispatch_queue_t, backlog: Int = 5,
-              accept: ( TypedActiveSocket ) -> Void)
+  public func listen(queue: dispatch_queue_t, backlog: Int = 5,
+                     accept: ( TypedActiveSocket ) -> Void)
     -> Bool
   {
     if !isValid {
