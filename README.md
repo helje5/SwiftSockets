@@ -16,6 +16,8 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
+Updated to use Swift v0.0.4.
+
 The project includes three targets:
 - ARISockets
 - ARIEchoServer
@@ -25,7 +27,9 @@ I suggest you start out looking at the ARIEchoServer.
 
 ####ARISockets
 
-A framework containing the socket classes and relevant extensions. It takes a bit of inspiration from the [SOPE](http://sope.opengroupware.org) NGStreams library.
+A framework containing the socket classes and relevant extensions. It takes a
+bit of inspiration from the [SOPE](http://sope.opengroupware.org) NGStreams
+library.
 
 Server Sample:
 ```swift
@@ -98,7 +102,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [x] implicit parameters
   - [ ] Unowned
   - [x] Extensions on structs
-  - [ ] Extensions to organize classes (swiftc segfaults)
+  - [x] Extensions to organize classes
   - [x] Protocols on structs
   - [x] Tuples, with labels
   - [x] Trailing closures
@@ -130,6 +134,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Literal Convertibles
   - [ ] @auto-closure
   - [ ] reinterpretCast()
+  - [x] @final
 
 ###Why?!
 

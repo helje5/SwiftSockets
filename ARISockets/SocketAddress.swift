@@ -18,11 +18,11 @@ let INADDR_ANY = in_addr(s_addr: 0)
  */
 extension in_addr {
 
-  init() {
+  public init() {
     s_addr = INADDR_ANY.s_addr
   }
   
-  init(string: String?) {
+  public init(string: String?) {
     if let s = string {
       if s.isEmpty {
         s_addr = INADDR_ANY.s_addr
@@ -39,7 +39,7 @@ extension in_addr {
     }
   }
   
-  var asString: String {
+  public var asString: String {
     if self == INADDR_ANY {
       return "*.*.*.*"
     }
@@ -55,13 +55,13 @@ extension in_addr {
   
 }
 
-func ==(lhs: in_addr, rhs: in_addr) -> Bool {
+public func ==(lhs: in_addr, rhs: in_addr) -> Bool {
   return __uint32_t(lhs.s_addr) == __uint32_t(rhs.s_addr)
 }
 
 extension in_addr : Equatable, Hashable {
   
-  var hashValue: Int {
+  public var hashValue: Int {
     // Knuth?
     return Int(UInt32(s_addr) * 2654435761 % (2^32))
   }
@@ -71,11 +71,13 @@ extension in_addr : Equatable, Hashable {
 extension in_addr: StringLiteralConvertible {
   // this allows you to do: let addr : in_addr = "192.168.0.1"
   
-  static func convertFromStringLiteral(value: StringLiteralType) -> in_addr {
+  public static func convertFromStringLiteral(value: StringLiteralType)
+    -> in_addr
+  {
     return in_addr(string: value)
   }
   
-  static func convertFromExtendedGraphemeClusterLiteral
+  public static func convertFromExtendedGraphemeClusterLiteral
     (value: ExtendedGraphemeClusterType) -> in_addr
   {
     return in_addr(string: value)
@@ -84,14 +86,14 @@ extension in_addr: StringLiteralConvertible {
 
 extension in_addr: Printable {
   
-  var description: String {
+  public var description: String {
     return asString
   }
     
 }
 
 
-protocol SocketAddress {
+public protocol SocketAddress {
   
   class var domain: Int32 { get }
   
@@ -102,10 +104,11 @@ protocol SocketAddress {
 
 extension sockaddr_in: SocketAddress {
   
-  static var domain = AF_INET // if you make this a let, swiftc segfaults
-  static var size   = __uint8_t(sizeof(sockaddr_in)) // how to refer to self?
+  public static var domain = AF_INET // if you make this a let, swiftc segfaults
+  public static var size   = __uint8_t(sizeof(sockaddr_in))
+    // how to refer to self?
   
-  init() {
+  public init() {
     sin_len    = sockaddr_in.size
     sin_family = sa_family_t(sockaddr_in.domain)
     sin_port   = 0
@@ -113,20 +116,20 @@ extension sockaddr_in: SocketAddress {
     sin_zero   = (0,0,0,0,0,0,0,0)
   }
   
-  init(address: in_addr = INADDR_ANY, port: Int?) {
+  public init(address: in_addr = INADDR_ANY, port: Int?) {
     self.init()
     
     sin_port = port ? in_port_t(htons(CUnsignedShort(port!))) : 0
     sin_addr = address
   }
   
-  init(address: String?, port: Int?) {
+  public init(address: String?, port: Int?) {
     let isWildcard = address ? (address! == "*" || address! == "*.*.*.*"):true;
     let ipv4       = isWildcard ? INADDR_ANY : in_addr(string: address)
     self.init(address: ipv4, port: port)
   }
   
-  init(string: String?) {
+  public init(string: String?) {
     if let s = string {
       if s.isEmpty {
         self.init(address: INADDR_ANY, port: nil)
@@ -158,7 +161,7 @@ extension sockaddr_in: SocketAddress {
     }
   }
   
-  var port: Int { // should we make that optional and use wildcard as nil?
+  public var port: Int { // should we make that optional and use wildcard as nil
     get {
       return Int(ntohs(sin_port))
     }
@@ -167,29 +170,29 @@ extension sockaddr_in: SocketAddress {
     }
   }
   
-  var address: in_addr {
+  public var address: in_addr {
     return sin_addr
   }
   
-  var isWildcardPort:    Bool { return sin_port == 0 }
-  var isWildcardAddress: Bool { return sin_addr == INADDR_ANY }
+  public var isWildcardPort:    Bool { return sin_port == 0 }
+  public var isWildcardAddress: Bool { return sin_addr == INADDR_ANY }
   
-  var len: __uint8_t { return sockaddr_in.size }
+  public var len: __uint8_t { return sockaddr_in.size }
 
-  var asString: String {
+  public var asString: String {
     let addr = address.asString
     return isWildcardPort ? addr : "\(addr):\(port)"
   }
 }
 
-func == (lhs: sockaddr_in, rhs: sockaddr_in) -> Bool {
+public func == (lhs: sockaddr_in, rhs: sockaddr_in) -> Bool {
   return (lhs.sin_addr.s_addr == rhs.sin_addr.s_addr)
       && (lhs.sin_port        == rhs.sin_port)
 }
 
 extension sockaddr_in: Equatable, Hashable {
   
-  var hashValue: Int {
+  public var hashValue: Int {
     return sin_addr.hashValue + sin_port.hashValue
   }
   
@@ -207,11 +210,13 @@ extension sockaddr_in: Equatable, Hashable {
  */
 extension sockaddr_in: StringLiteralConvertible {
   
-  static func convertFromStringLiteral(value:StringLiteralType) -> sockaddr_in {
+  public static func convertFromStringLiteral(value:StringLiteralType)
+    -> sockaddr_in
+  {
     return sockaddr_in(string: value)
   }
   
-  static func convertFromExtendedGraphemeClusterLiteral
+  public static func convertFromExtendedGraphemeClusterLiteral
     (value: ExtendedGraphemeClusterType) -> sockaddr_in
   {
     return sockaddr_in(string: value)
@@ -220,12 +225,13 @@ extension sockaddr_in: StringLiteralConvertible {
 
 extension sockaddr_in: Printable {
   
-  var description: String {
+  public var description: String {
     return asString
   }
   
 }
 
+/* Not working anymore in b4
 extension sockaddr_in6: SocketAddress {
   
   static var domain = AF_INET6
@@ -253,15 +259,16 @@ extension sockaddr_in6: SocketAddress {
   
   var len: __uint8_t { return sockaddr_in6.size }
 }
+*/
 
 extension sockaddr_un: SocketAddress {
   // TBD: sockaddr_un would be interesting as the size of the structure is
   //      technically dynamic (embedded string)
   
-  static var domain = AF_UNIX
-  static var size   = __uint8_t(sizeof(sockaddr_un)) // CAREFUL
+  public static var domain = AF_UNIX
+  public static var size   = __uint8_t(sizeof(sockaddr_un)) // CAREFUL
   
-  init() {
+  public init() {
     sun_len    = sockaddr_un.size // CAREFUL - kinda wrong
     sun_family = sa_family_t(sockaddr_un.domain)
     
@@ -277,7 +284,7 @@ extension sockaddr_un: SocketAddress {
     );
   }
   
-  var len: __uint8_t {
+  public var len: __uint8_t {
     // FIXME?: this is wrong. It needs to be the base size + string length in
     //         the buffer
     return sockaddr_un.size
@@ -289,7 +296,7 @@ extension sockaddr_un: SocketAddress {
 
 extension addrinfo {
   
-  init() {
+  public init() {
     ai_flags     = 0 // AI_CANONNAME, AI_PASSIVE, AI_NUMERICHOST
     ai_family    = AF_UNSPEC // AF_INET or AF_INET6 or AF_UNSPEC
     ai_socktype  = SOCK_STREAM
@@ -300,42 +307,44 @@ extension addrinfo {
     ai_next      = nil // UnsafePointer<addrinfo>
   }
   
-  init(flags: Int32, family: Int32) {
+  public init(flags: Int32, family: Int32) {
     self.init()
     ai_flags  = flags
     ai_family = family
   }
   
-  var hasNext : Bool {
+  public var hasNext : Bool {
     let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
     return ai_next != nullptr
   }
-  var next : addrinfo? {
+  public var next : addrinfo? {
     return hasNext ? ai_next.memory : nil
   }
   
-  var canonicalName : String? {
+  public var canonicalName : String? {
     let nullptr : UnsafePointer<CChar> = UnsafePointer.null()
     if ai_canonname != nullptr && ai_canonname[0] != 0 {
-      return String.fromCString(CString(ai_canonname))
+      return String.fromCString(ai_canonname)
     }
     return nil
   }
   
-  var hasAddress : Bool {
+  public var hasAddress : Bool {
     let nullptr : UnsafePointer<sockaddr> = UnsafePointer.null()
     return ai_addr != nullptr
   }
   
-  var isIPv4 : Bool {
+  public var isIPv4 : Bool {
     return hasAddress &&
            (ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain))
   }
   
-  var addressIPv4 : sockaddr_in?  { return address() }
-  var addressIPv6 : sockaddr_in6? { return address() }
+  public var addressIPv4 : sockaddr_in?  { return address() }
+  /* Not working anymore in b4
+  public var addressIPv6 : sockaddr_in6? { return address() }
+   */
   
-  func address<T: SocketAddress>() -> T? {
+  public func address<T: SocketAddress>() -> T? {
     let nullptr : UnsafePointer<sockaddr> = UnsafePointer.null()
     if ai_addr == nullptr {
       return nil
@@ -347,7 +356,7 @@ extension addrinfo {
     return aiptr.memory // copies the address to the return value
   }
   
-  var dynamicAddress : SocketAddress? {
+  public var dynamicAddress : SocketAddress? {
     if !hasAddress {
       return nil
     }
@@ -357,10 +366,12 @@ extension addrinfo {
       return aiptr.memory // copies the address to the return value
     }
     
+    /* Not working anymore in b4
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in6.domain) {
       let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
       return aiptr.memory // copies the address to the return value
     }
+    */
     
     return nil
   }
@@ -368,7 +379,7 @@ extension addrinfo {
 
 extension addrinfo : Printable {
   
-  var description : String {
+  public var description : String {
     var s = "<addrinfo"
     
     if ai_flags != 0 {
@@ -410,9 +421,11 @@ extension addrinfo : Printable {
       if let a = addressIPv4 {
         s += " \(a)"
       }
+      /* Not working anymore in b4
       else if let a = addressIPv6 {
         s += " \(a)"
       }
+      */
       else {
         s += " address[len=\(ai_addrlen)]"
       }
@@ -428,7 +441,7 @@ extension addrinfo : Printable {
 
 extension addrinfo : Sequence {
   
-  func generate() -> GeneratorOf<addrinfo> {
+  public func generate() -> GeneratorOf<addrinfo> {
     var cursor : addrinfo? = self
     
     return GeneratorOf<addrinfo> {
@@ -445,7 +458,7 @@ extension addrinfo : Sequence {
 
 extension sa_family_t : Printable {
   
-  var description : String {
+  public var description : String {
     var noop = ""
     switch Int32(self) {
       case AF_UNSPEC: return ""
