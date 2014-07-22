@@ -28,17 +28,15 @@ public typealias ActiveSocketIPv4 = ActiveSocket<sockaddr_in>
  * closed.
  *
  * Sample:
- *   let socket = ActiveSocket()
- *
- *   socket.onRead {
- *     let (count, block) = $0.read()
- *     if count < 1 {
- *       println("EOF, or great error handling.")
- *       return
+ *   let socket = ActiveSocket<sockaddr_in>()
+ *     .onRead {
+ *       let (count, block) = $0.read()
+ *       if count < 1 {
+ *         println("EOF, or great error handling.")
+ *         return
+ *       }
+ *       println("Answer to ring,ring is: \(count) bytes: \(block)")
  *     }
- *     println("Answer to ring,ring is: \(count) bytes: \(block)")
- *   }
- *
  *   socket.connect(sockaddr_in(address:"127.0.0.1", port: 80))
  *   socket.write("Ring, ring!\r\n")
  */
@@ -46,6 +44,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   public var remoteAddress  : T?                 = nil
   public var queue          : dispatch_queue_t?  = nil
+  
   var readSource     : dispatch_source_t? = nil
   var sendCount      : Int                = 0
   var closeRequested : Bool               = false
@@ -72,7 +71,8 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   /* init */
   
-  public init(fd: Int32?) { // required, otherwise the convenience one fails to compile
+  public init(fd: Int32?) {
+    // required, otherwise the convenience one fails to compile
     super.init(fd: fd)
   }
   
