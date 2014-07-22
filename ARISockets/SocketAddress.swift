@@ -226,6 +226,7 @@ extension sockaddr_in: Printable {
   
 }
 
+/* Not working anymore in b4
 extension sockaddr_in6: SocketAddress {
   
   static var domain = AF_INET6
@@ -253,6 +254,7 @@ extension sockaddr_in6: SocketAddress {
   
   var len: __uint8_t { return sockaddr_in6.size }
 }
+*/
 
 extension sockaddr_un: SocketAddress {
   // TBD: sockaddr_un would be interesting as the size of the structure is
@@ -333,7 +335,9 @@ extension addrinfo {
   }
   
   var addressIPv4 : sockaddr_in?  { return address() }
+  /* Not working anymore in b4
   var addressIPv6 : sockaddr_in6? { return address() }
+   */
   
   func address<T: SocketAddress>() -> T? {
     let nullptr : UnsafePointer<sockaddr> = UnsafePointer.null()
@@ -357,10 +361,12 @@ extension addrinfo {
       return aiptr.memory // copies the address to the return value
     }
     
+    /* Not working anymore in b4
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in6.domain) {
       let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
       return aiptr.memory // copies the address to the return value
     }
+    */
     
     return nil
   }
@@ -410,9 +416,11 @@ extension addrinfo : Printable {
       if let a = addressIPv4 {
         s += " \(a)"
       }
+      /* Not working anymore in b4
       else if let a = addressIPv6 {
         s += " \(a)"
       }
+      */
       else {
         s += " address[len=\(ai_addrlen)]"
       }
