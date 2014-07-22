@@ -189,7 +189,13 @@ extension Socket { // Socket Flags
   
   public var isNonBlocking : Bool {
     get {
-      return (flags! & O_NONBLOCK) != 0 ? true : false
+      if let f = flags {
+        return (f & O_NONBLOCK) != 0 ? true : false
+      }
+      else {
+        println("ERROR: could not get non-blocking socket property!")
+        return false
+      }
     }
     set {
       if newValue {
