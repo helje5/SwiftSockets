@@ -395,8 +395,6 @@ extension ActiveSocket { // Reading
   
 }
 
-/* no more bridging in frameworks???
-
 extension ActiveSocket { // ioctl
   
   var numberOfBytesAvailableForReading : Int? {
@@ -408,4 +406,3 @@ extension ActiveSocket { // ioctl
   }
   
 }
-*/

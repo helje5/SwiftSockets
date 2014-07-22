@@ -174,13 +174,12 @@ extension Socket { // Socket Flags
   
   public var flags : Int32? {
     get {
-      // FIXME b4: let rc = ari_fcntlVi(fd!, F_GETFL, 0)
-      // return rc >= 0 ? rc : nil
-      return nil
+      let rc = ari_fcntlVi(fd!, F_GETFL, 0)
+      return rc >= 0 ? rc : nil
+      // return nil
     }
     set {
-      // FIXME b4: let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
-      let rc = -1
+      let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
       if rc == -1 {
         println("Could not set new socket flags \(rc)")
       }
