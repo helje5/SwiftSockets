@@ -204,7 +204,7 @@ extension ActiveSocket : OutputStream { // writing
   // no let in extensions: let debugAsyncWrites = false
   var debugAsyncWrites : Bool { return false }
   
-  func asyncWrite<T>(buffer: [T], length: Int? = nil) -> Bool {
+  var canWrite : Bool {
     if !isValid {
       assert(isValid, "Socket closed, can't do async writes anymore")
       return false
@@ -213,6 +213,38 @@ extension ActiveSocket : OutputStream { // writing
       assert(!closeRequested, "Socket is being shutdown already!")
       return false
     }
+    return true
+  }
+  
+  func write(data: dispatch_data_t) {
+    sendCount++
+    if debugAsyncWrites {
+      println("async send[\(data)]")
+    }
+    
+    // in here we capture self, which I think is right.
+    dispatch_write(fd!, data, queue) {
+      asyncData, error in
+      
+      if self.debugAsyncWrites {
+        println("did send[\(self.sendCount)] data \(data) error \(error)")
+      }
+      
+      self.sendCount = self.sendCount - 1 // -- fails?
+      
+      if self.sendCount == 0 && self.closeRequested {
+        if self.debugAsyncWrites {
+          println("closing after async write ...")
+        }
+        self.close()
+        self.closeRequested = false
+      }
+    }
+    
+  }
+  
+  func asyncWrite<T>(buffer: [T], length: Int? = nil) -> Bool {
+    if !canWrite { return false }
     
     let writelen = length ? UInt(length!) : UInt(buffer.count)
     let bufsize  = writelen * UInt(sizeof(T))
@@ -227,34 +259,31 @@ extension ActiveSocket : OutputStream { // writing
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-    var asyncData  : dispatch_data_t? = nil
-    asyncData = dispatch_data_create(buffer, bufsize, queue, nil)
+    let asyncData  = dispatch_data_create(buffer, bufsize, queue, nil)
+    write(asyncData!)
     
-    sendCount++
-    if debugAsyncWrites {
-      println("async send[\(sendCount)] size \(bufsize) \(buffer)")
+    return true
+  }
+  
+  func asyncWrite<T>(buffer: ConstUnsafePointer<T>, length: Int) -> Bool {
+    // FIXME: can we remove this dupe of the [T] version?
+    if !canWrite { return false }
+    
+    let writelen = UInt(length)
+    let bufsize  = writelen * UInt(sizeof(T))
+    if bufsize < 1 { // Nothing to write ..
+      return true
     }
     
-    // in here we capture self, which I think is right.
-    dispatch_write(fd!, asyncData, queue) {
-      asyncData, error in
-      
-      if self.debugAsyncWrites {
-        println("did send[\(self.sendCount)] size \(bufsize) error \(error)")
-      }
-      
-      self.sendCount = self.sendCount - 1 // -- fails?
-      
-      if self.sendCount == 0 && self.closeRequested {
-        if self.debugAsyncWrites {
-          println("closing after async write ...")
-        }
-        self.close()
-        self.closeRequested = false
-      }
+    if queue == nil {
+      println("No queue set, using main queue")
+      queue = dispatch_get_main_queue()
     }
     
-    asyncData = nil
+    // the default destructor is supposed to copy the data. Not good, but
+    // handling ownership is going to be messy
+    let asyncData = dispatch_data_create(buffer, bufsize, queue, nil)
+    write(asyncData!)
     
     return true
   }
@@ -272,16 +301,10 @@ extension ActiveSocket : OutputStream { // writing
   }
   
   func write(string: String) {
-    string.withCString { (p: CString) -> Void in
-      if let cstr = p.persist() {
-        let len = cstr.count - 1 // remove \0 terminator
-        if len > 0 {
-          self.asyncWrite(cstr, length: len)
-        }
-      }
-      else {
-        assert(false, "Could not persist cString")
-        println("FATAL: Could not persist cString?")
+    string.withCString { (cstr: ConstUnsafePointer<Int8>) -> Void in
+      let len = Int(strlen(cstr))
+      if len > 0 {
+        self.asyncWrite(cstr, length: len)
       }
     }
   }
@@ -369,6 +392,8 @@ extension ActiveSocket { // Reading
   
 }
 
+/* no more bridging in frameworks???
+
 extension ActiveSocket { // ioctl
   
   var numberOfBytesAvailableForReading : Int? {
@@ -380,3 +405,4 @@ extension ActiveSocket { // ioctl
   }
   
 }
+*/
