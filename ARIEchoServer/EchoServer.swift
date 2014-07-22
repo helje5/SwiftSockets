@@ -126,6 +126,15 @@ class EchoServer {
     }
     
     if s.hasSuffix("\r\n") {
+      // No more substringToIndex()
+      let len = countElements(s) - 2
+      var endIdx = s.startIndex
+      for var i = 0; i < len; i++ {
+        endIdx = endIdx.successor()
+      }
+      
+      
+      s = s[s.startIndex..<endIdx]
       // doesn't work anymore:
       // s = m.substringToIndex(countElements(m) - 2)
     }
