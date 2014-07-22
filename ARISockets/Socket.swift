@@ -16,15 +16,16 @@ import Dispatch
  */
 public class Socket<T: SocketAddress> {
   
-  var fd           : Int32?             = nil
-  var boundAddress : T?                 = nil
-  var closeCB      : ((Int32) -> Void)? = nil
-  var closedFD     : Int32?             = nil // for delayed callback
-  var isValid      : Bool { return fd != nil }
-  var isBound      : Bool {
+  public var fd           : Int32?             = nil
+  public var boundAddress : T?                 = nil
+  public var isValid      : Bool { return fd != nil }
+  public var isBound      : Bool {
     // fails: return boundAddress != nil
     if let a = boundAddress { return true } else { return false }
   }
+  
+  var closeCB  : ((Int32) -> Void)? = nil
+  var closedFD : Int32?             = nil // for delayed callback
   
   
   /* initializer / deinitializer */

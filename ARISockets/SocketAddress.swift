@@ -18,11 +18,11 @@ let INADDR_ANY = in_addr(s_addr: 0)
  */
 extension in_addr {
 
-  init() {
+  public init() {
     s_addr = INADDR_ANY.s_addr
   }
   
-  init(string: String?) {
+  public init(string: String?) {
     if let s = string {
       if s.isEmpty {
         s_addr = INADDR_ANY.s_addr
@@ -39,7 +39,7 @@ extension in_addr {
     }
   }
   
-  var asString: String {
+  public var asString: String {
     if self == INADDR_ANY {
       return "*.*.*.*"
     }
@@ -291,7 +291,7 @@ extension sockaddr_un: SocketAddress {
 
 extension addrinfo {
   
-  init() {
+  public init() {
     ai_flags     = 0 // AI_CANONNAME, AI_PASSIVE, AI_NUMERICHOST
     ai_family    = AF_UNSPEC // AF_INET or AF_INET6 or AF_UNSPEC
     ai_socktype  = SOCK_STREAM
@@ -302,21 +302,21 @@ extension addrinfo {
     ai_next      = nil // UnsafePointer<addrinfo>
   }
   
-  init(flags: Int32, family: Int32) {
+  public init(flags: Int32, family: Int32) {
     self.init()
     ai_flags  = flags
     ai_family = family
   }
   
-  var hasNext : Bool {
+  public var hasNext : Bool {
     let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
     return ai_next != nullptr
   }
-  var next : addrinfo? {
+  public var next : addrinfo? {
     return hasNext ? ai_next.memory : nil
   }
   
-  var canonicalName : String? {
+  public var canonicalName : String? {
     let nullptr : UnsafePointer<CChar> = UnsafePointer.null()
     if ai_canonname != nullptr && ai_canonname[0] != 0 {
       return String.fromCString(ai_canonname)
@@ -324,22 +324,22 @@ extension addrinfo {
     return nil
   }
   
-  var hasAddress : Bool {
+  public var hasAddress : Bool {
     let nullptr : UnsafePointer<sockaddr> = UnsafePointer.null()
     return ai_addr != nullptr
   }
   
-  var isIPv4 : Bool {
+  public var isIPv4 : Bool {
     return hasAddress &&
            (ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain))
   }
   
-  var addressIPv4 : sockaddr_in?  { return address() }
+  public var addressIPv4 : sockaddr_in?  { return address() }
   /* Not working anymore in b4
-  var addressIPv6 : sockaddr_in6? { return address() }
+  public var addressIPv6 : sockaddr_in6? { return address() }
    */
   
-  func address<T: SocketAddress>() -> T? {
+  public func address<T: SocketAddress>() -> T? {
     let nullptr : UnsafePointer<sockaddr> = UnsafePointer.null()
     if ai_addr == nullptr {
       return nil
@@ -351,7 +351,7 @@ extension addrinfo {
     return aiptr.memory // copies the address to the return value
   }
   
-  var dynamicAddress : SocketAddress? {
+  public var dynamicAddress : SocketAddress? {
     if !hasAddress {
       return nil
     }
