@@ -39,11 +39,12 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   /* init */
   
-  init(fd: Int32?) { // required, otherwise the convenience one fails to compile
+  public init(fd: Int32?) {
+    // required, otherwise the convenience one fails to compile
     super.init(fd: fd)
   }
   
-  convenience init(type: Int32 = SOCK_STREAM) {
+  public convenience init(type: Int32 = SOCK_STREAM) {
     // NOTE: this is a DUPE to Socket. It fails to inherit from Socket<T>
     let lfd = socket(T.domain, type, 0)
     var fd:  Int32?
@@ -59,7 +60,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     self.init(fd: fd)
   }
   
-  convenience init(address: T) {
+  public convenience init(address: T) {
     self.init(type: SOCK_STREAM)
     
     if isValid {
