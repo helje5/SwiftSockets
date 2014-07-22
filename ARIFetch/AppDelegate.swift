@@ -11,10 +11,10 @@ import ARISockets
 
 class AppDelegate: NSObject, NSApplicationDelegate {
                             
-  @IBOutlet var window           : NSWindow
-  @IBOutlet var resultViewParent : NSScrollView
-  @IBOutlet var host             : NSTextField
-  @IBOutlet var port             : NSTextField
+  @IBOutlet var window           : NSWindow!
+  @IBOutlet var resultViewParent : NSScrollView!
+  @IBOutlet var host             : NSTextField!
+  @IBOutlet var port             : NSTextField!
 
   var resultView: NSTextView { // NSTextView doesn't work with weak?
     return resultViewParent.contentView.documentView as NSTextView
@@ -38,7 +38,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       resultView.string = "" // clear results
     }
     
-    socket = ActiveSocket()
+    socket = ActiveSocket<sockaddr_in>()
     println("Got socket: \(socket)")
     if !socket {
       return
