@@ -136,7 +136,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
       queue
     )
     
-    if listenSource {
+    if listenSource != nil {
       let lfd = fd! // please the closure and don't capture self
       
       listenSource!.onEvent { _, _ in
