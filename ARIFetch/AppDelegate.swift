@@ -40,7 +40,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     socket = ActiveSocket<sockaddr_in>()
     println("Got socket: \(socket)")
-    if !socket {
+    if socket == nil {
       return
     }
     
@@ -91,14 +91,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       }
 
       println("BLOCK: \(block)")
-      var data : String = block.withUnsafePointerToElements {
-        p in
-        // Sometimes fails in: Can't unwrap Optional.None (at bufsize==count?)
-        // FIXME: I think I know why. It may happen if the block boundary is
-        //        within a UTF-8 sequence?
-        // The end of the block is 100,-30,-128,0
-        return String.fromCString(p)! // ignore error, abort
-      }
+      // Sometimes fails in: Can't unwrap Optional.None (at bufsize==count?)
+      // FIXME: I think I know why. It may happen if the block boundary is
+      //        within a UTF-8 sequence?
+      // The end of the block is 100,-30,-128,0
+      var data = String.fromCString(block)! // ignore error, abort
       
       // log to view. Careful, must run in main thread!
       dispatch_async(dispatch_get_main_queue()) {
