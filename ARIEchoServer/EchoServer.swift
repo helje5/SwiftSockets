@@ -31,7 +31,7 @@ class EchoServer {
   
   func start() {
     listenSocket = PassiveSocketIPv4(address: sockaddr_in(port: port))
-    if !listenSocket || !listenSocket! { // neat, eh? ;-)
+    if listenSocket == nil || !listenSocket! { // neat, eh? ;-)
       log("ERROR: could not create socket ...")
       return
     }
@@ -72,21 +72,20 @@ class EchoServer {
     listenSocket = nil
   }
   
-  func sendWelcome<T: OutputStream>(var sock: T) {
+  func sendWelcome<T: OutputStreamType>(var sock: T) {
     // Hm, how to use println(), this doesn't work for me:
     //   println(s, target: sock)
     // (just writes the socket as a value, likely a tuple)
     
-    // Doing individual writes is expensive, but swiftc segfaults if I just
-    // add them up.
-    sock.write("\r\n")
-    sock.write("  /----------------------------------------------------\\\r\n")
-    sock.write("  |     Welcome to the Always Right Institute!         |\r\n")
-    sock.write("  |    I am an echo server with a zlight twist.        |\r\n")
-    sock.write("  | Just type something and I'll shout it back at you. |\r\n")
-    sock.write("  \\----------------------------------------------------/\r\n")
-    sock.write("\r\nTalk to me Dave!\r\n")
-    sock.write("> ")
+    sock.write("\r\n" +
+       "  /----------------------------------------------------\\\r\n" +
+       "  |     Welcome to the Always Right Institute!         |\r\n"  +
+       "  |    I am an echo server with a zlight twist.        |\r\n"  +
+       "  | Just type something and I'll shout it back at you. |\r\n"  +
+      "  \\----------------------------------------------------/\r\n"  +
+      "\r\nTalk to me Dave!\r\n" +
+      "> "
+    )
   }
   
   func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
@@ -120,28 +119,12 @@ class EchoServer {
   }
 
   func logReceivedBlock(block: [CChar], length: Int) {
-    var s: String = block.withUnsafePointerToElements {
-      (p : UnsafePointer<CChar>) -> String in
-      if let k = String.fromCString(p) {
-        return k
-      }
-      else {
-        return "Could not process result block \(block) length \(length)"
-      }
-    }
+    let k = String.fromCString(block)
+    var s = k ?? "Could not process result block \(block) length \(length)"
     
+    // Hu, now this is funny. In b5 \r\n is one Character (but 2 unicodeScalars)
     if s.hasSuffix("\r\n") {
-      // No more substringToIndex()
-      let len = countElements(s) - 2
-      var endIdx = s.startIndex
-      for var i = 0; i < len; i++ {
-        endIdx = endIdx.successor()
-      }
-      
-      
-      s = s[s.startIndex..<endIdx]
-      // doesn't work anymore:
-      // s = m.substringToIndex(countElements(m) - 2)
+      s = s[s.startIndex..<s.endIndex.predecessor()]
     }
     
     log("read string: \(s)")

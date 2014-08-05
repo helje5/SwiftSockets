@@ -8,13 +8,6 @@ FIXME: Collect and list all issues :-)
 
 ###Bugs
 
-- swiftc segfaults
-  - If I do Socket&lt;T: SocketAddress&gt; (etc). Need to make a branch for that
-    - demo branch: feature/generics
-  - Moving properties to a class extension (to structure the code)
-    - demo branch: feature/structure-code-with-extensions
-  - Long constant strings
-    - demo branch: feature/long-static-strings
 - No access to ioctl() (presumably due to varargs)
 - No access to fcntl() (presumably due to varargs)
 - sizeof() only works on types, not on variables/constants (No ```var buf: CInt; sizeof(buf)``` - lame! ;-)
@@ -38,7 +31,7 @@ the success case. Kinda like an Optional, with more fail values than nil.
 How should we cast between typed pointers? Eg bind() takes a &sockaddr, but the
 actual structure is variable (eg a sockaddr_in).
 
-I hacked around it like this:
+I hacked around it like this (beta3, now a bit different, but same issue):
 ```swift
 var addr = address // where address is sockaddr_in
     

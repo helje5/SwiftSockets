@@ -58,7 +58,7 @@ public class Socket<T: SocketAddress> {
   let debugClose = false
   
   public func close() {
-    if fd {
+    if fd != nil {
       closedFD = fd
       if debugClose { println("Closing socket \(closedFD) for good ...") }
       Darwin.close(fd!)
@@ -104,14 +104,14 @@ public class Socket<T: SocketAddress> {
       println("Socket is already bound!")
       return false
     }
+    let lfd = fd!
     
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
-    
-    let rc = withUnsafePointer(&addr) {
-      (ptr: UnsafePointer<T>) -> Int32 in
-      let bptr = ConstUnsafePointer<sockaddr>(ptr) // cast
-      return Darwin.bind(self.fd!, bptr, socklen_t(addr.len))
+
+    let rc = withUnsafePointer(&addr) { ptr -> Int32 in
+      let bptr = UnsafePointer<sockaddr>(ptr) // cast
+      return Darwin.bind(lfd, bptr, socklen_t(addr.len))
     }
     
     if rc == 0 {
@@ -128,6 +128,7 @@ public class Socket<T: SocketAddress> {
     if !isValid {
       return nil
     }
+    let lfd = fd!
     
     // FIXME: tried to encapsulate this in a sockaddrbuf which does all the
     //        ptr handling, but it ain't work (autoreleasepool issue?)
@@ -136,13 +137,10 @@ public class Socket<T: SocketAddress> {
     
     // Note: we are not interested in the length here, would be relevant
     //       for AF_UNIX sockets
-    let rc = withUnsafePointer(&baddr) {
-      (ptr: UnsafePointer<T>) -> Int32 in
-      let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return withUnsafePointer(&baddrlen) {
-        (buflenptr: UnsafePointer<socklen_t>) -> Int32 in
-        return Darwin.getsockname(self.fd!, bptr, buflenptr)
-      }
+    let rc = withUnsafeMutablePointer(&baddr) {
+      ptr -> Int32 in
+      let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
+      return Darwin.getsockname(lfd, bptr, &baddrlen)
     }
     
     if (rc != 0) {
@@ -160,8 +158,10 @@ public class Socket<T: SocketAddress> {
   // must live in the main-class as 'declarations in extensions cannot be
   // overridden yet'
   func descriptionAttributes() -> String {
-    var s = fd ? " fd=\(fd!)" : (closedFD ? " closed[\(closedFD)]" :" not-open")
-    if boundAddress {
+    var s = fd != nil
+      ? " fd=\(fd!)"
+      : (closedFD != nil ? " closed[\(closedFD)]" :" not-open")
+    if boundAddress != nil {
       s += " \(boundAddress!)"
     }
     return s
@@ -176,7 +176,6 @@ extension Socket { // Socket Flags
     get {
       let rc = ari_fcntlVi(fd!, F_GETFL, 0)
       return rc >= 0 ? rc : nil
-      // return nil
     }
     set {
       let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
@@ -238,22 +237,15 @@ extension Socket { // Socket Options
   }
   
   public var sendBufferSize: Int32 {
-    get {
-      let v: Int32? = getSocketOption(SO_SNDBUF)
-      if v { return v! } else { return -42 }
-    }
+    get { return getSocketOption(SO_SNDBUF) ?? -42    }
     set { setSocketOption(SO_SNDBUF, value: newValue) }
   }
   public var receiveBufferSize: Int32 {
-    get {
-      let v: Int32? = getSocketOption(SO_RCVBUF)
-      if v { return v! } else { return -42 }
-    }
+    get { return getSocketOption(SO_RCVBUF) ?? -42    }
     set { setSocketOption(SO_RCVBUF, value: newValue) }
   }
   public var socketError: Int32 {
-    let v: Int32? = getSocketOption(SO_ERROR)
-    if v { return v! } else { return -42 }
+    return getSocketOption(SO_ERROR) ?? -42
   }
   
   /* socket options (TBD: would we use subscripts for such?) */
@@ -296,7 +288,7 @@ extension Socket { // Socket Options
   }
   public func getSocketOption(option: Int32) -> Bool {
     let v: Int32? = getSocketOption(option)
-    return v ? (v! == 0 ? false : true) : false
+    return v != nil ? (v! == 0 ? false : true) : false
   }
   
 }
@@ -332,7 +324,7 @@ extension Socket { // poll()
       return nil
     }
     
-    let ctimeout = timeout ? Int32(timeout!) : -1 /* wait forever */
+    let ctimeout = timeout != nil ? Int32(timeout!) : -1 /* wait forever */
     
     var fds = pollfd(fd: fd!, events: CShort(events), revents: 0)
     let rc  = Darwin.poll(&fds, 1, ctimeout)
@@ -367,16 +359,16 @@ extension Socket { // poll()
 
 extension Socket: Printable {
   
-  public var description: String {
+  public var description : String {
     return "<Socket:" + descriptionAttributes() + ">"
   }
   
 }
 
 
-extension Socket: LogicValue {
+extension Socket: BooleanType {
   
-  public func getLogicValue() -> Bool {
+  public var boolValue : Bool {
     return isValid
   }
   

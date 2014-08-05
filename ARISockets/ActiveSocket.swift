@@ -71,7 +71,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   /* init */
   
-  public init(fd: Int32?) {
+  override public init(fd: Int32?) {
     // required, otherwise the convenience one fails to compile
     super.init(fd: fd)
   }
@@ -138,16 +138,14 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       println("Socket is already connected \(self)")
       return false
     }
+    let lfd = fd!
     
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
     
-    let rc = withUnsafePointer(&addr) {
-      (ptr: UnsafePointer<T>) -> Int32 in
-      let bptr = ConstUnsafePointer<sockaddr>(ptr) // cast
-      
-      // connect!
-      return Darwin.connect(self.fd!, bptr, socklen_t(addr.len))
+    let rc = withUnsafePointer(&addr) { ptr -> Int32 in
+      let bptr = UnsafePointer<sockaddr>(ptr) // cast
+      return Darwin.connect(lfd, bptr, socklen_t(addr.len))
     }
     
     if rc != 0 {
@@ -192,7 +190,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   override func descriptionAttributes() -> String {
     // must be in main class, override not available in extensions
     var s = super.descriptionAttributes()
-    if remoteAddress {
+    if remoteAddress != nil {
       s += " remote=\(remoteAddress)"
     }
     return s
@@ -200,7 +198,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
 }
 
 
-extension ActiveSocket : OutputStream { // writing
+extension ActiveSocket : OutputStreamType { // writing
   
   // no let in extensions: let debugAsyncWrites = false
   var debugAsyncWrites : Bool { return false }
@@ -268,7 +266,7 @@ extension ActiveSocket : OutputStream { // writing
     return true
   }
   
-  public func asyncWrite<T>(buffer: ConstUnsafePointer<T>, length:Int) -> Bool {
+  public func asyncWrite<T>(buffer: UnsafePointer<T>, length:Int) -> Bool {
     // FIXME: can we remove this dupe of the [T] version?
     if !canWrite { return false }
     
@@ -293,18 +291,15 @@ extension ActiveSocket : OutputStream { // writing
   
   public func send<T>(buffer: [T], length: Int? = nil) -> Int {
     var writeCount : Int = 0
-    let bufsize    = length ? UInt(length!) : UInt(buffer.count)
+    let bufsize    = UInt(length ?? buffer.count)
     let fd         = self.fd!
     
-    buffer.withUnsafePointerToElements {
-      p in
-      writeCount = Darwin.write(fd, p, bufsize)
-    }
+    writeCount = Darwin.write(fd, buffer, bufsize)
     return writeCount
   }
   
   public func write(string: String) {
-    string.withCString { (cstr: ConstUnsafePointer<Int8>) -> Void in
+    string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
       let len = Int(strlen(cstr))
       if len > 0 {
         self.asyncWrite(cstr, length: len)
@@ -331,10 +326,7 @@ extension ActiveSocket { // Reading
     
     // FIXME: If I just close the Terminal which hosts telnet this continues
     //        to read garbage from the server. Even with SIGPIPE off.
-    readBuffer.withUnsafePointerToElements {
-      p in readCount = Darwin.read(fd, p, bufsize)
-    }
-    
+    readCount = Darwin.read(fd, &readBuffer, bufsize)
     if readCount < 0 {
       readBuffer[0] = 0
       return ( readCount, readBuffer, errno )
@@ -348,14 +340,14 @@ extension ActiveSocket { // Reading
   /* setup read event handler */
   
   func stopEventHandler() {
-    if readSource {
+    if readSource != nil {
       dispatch_source_cancel(readSource)
       readSource = nil // abort()s if source is not resumed ...
     }
   }
   
   func startEventHandler() -> Bool {
-    if readSource {
+    if readSource != nil {
       println("Read source already setup?")
       return true // already setup
     }
@@ -375,7 +367,7 @@ extension ActiveSocket { // Reading
       0,
       queue
     )
-    if !readSource {
+    if readSource == nil {
       println("Could not create dispatch source for socket \(self)")
       return false
     }
@@ -398,7 +390,7 @@ extension ActiveSocket { // Reading
 extension ActiveSocket { // ioctl
   
   var numberOfBytesAvailableForReading : Int? {
-    // Note: this doesn't seem to work, returns 0
+    // Note: this doesn't seem to work with GCD, returns 0
     var count = Int32(0)
     let rc    = ari_ioctlVip(fd!, FIONREAD, &count);
     println("rc \(rc)")

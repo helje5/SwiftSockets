@@ -16,8 +16,8 @@ func gethoztbyname<T: SocketAddress>
   hints.ai_flags  = flags  // AI_CANONNAME, AI_NUMERICHOST, etc
   hints.ai_family = T.domain
   
-  var ptr     = UnsafePointer<addrinfo>(nil)
-  let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
+  var ptr     = UnsafeMutablePointer<addrinfo>(nil)
+  let nullptr = UnsafeMutablePointer<addrinfo>.null()
   
   /* run lookup (synchronously, can be slow!) */
   // b3: (cs : CString) doesn't pick up the right overload?
@@ -71,11 +71,11 @@ func gethostzbyname<T: SocketAddress>
   hints.ai_flags  = flags  // AI_CANONNAME, AI_NUMERICHOST, etc
   hints.ai_family = T.domain
   
-  var ptr     = UnsafePointer<addrinfo>(nil)
-  let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
+  var ptr     = UnsafeMutablePointer<addrinfo>(nil)
+  let nullptr = UnsafeMutablePointer<addrinfo>.null()
   
   /* run lookup (synchronously, can be slow!) */
-  var rc = name.withCString { (cs : ConstUnsafePointer<CChar>) -> Int32 in
+  var rc = name.withCString { (cs : UnsafePointer<CChar>) -> Int32 in
     let ncs = UnsafePointer<CChar>.null()
     return getaddrinfo(cs, ncs, &hints, &ptr)
   }
