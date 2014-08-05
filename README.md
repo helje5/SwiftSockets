@@ -117,7 +117,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] sizeof()
   - [x] Standard Protocols
     - [x] Printable
-    - [x] LogicValue
+    - [x] BooleanType (aka LogicValue)
     - [x] OutputStream
     - [x] Equatable
     - [x] Hashable
@@ -132,9 +132,11 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] Patterns
     - [x] Use wildcard pattern to ignore value
   - [x] Literal Convertibles
-  - [ ] @auto-closure
+  - [ ] @autoclosure
   - [ ] reinterpretCast()
-  - [x] @final
+  - [x] final
+  - [x] Nil coalescing operator
+  - [x] dynamic
 
 ###Why?!
 
