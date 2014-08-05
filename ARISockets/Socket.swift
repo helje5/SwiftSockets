@@ -104,14 +104,14 @@ public class Socket<T: SocketAddress> {
       println("Socket is already bound!")
       return false
     }
+    let lfd = fd!
     
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
-    
-    let rc = withUnsafePointer(&addr) {
-      (ptr: UnsafePointer<T>) -> Int32 in
+
+    let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return Darwin.bind(self.fd!, bptr, socklen_t(addr.len))
+      return Darwin.bind(lfd, bptr, socklen_t(addr.len))
     }
     
     if rc == 0 {
@@ -128,6 +128,7 @@ public class Socket<T: SocketAddress> {
     if !isValid {
       return nil
     }
+    let lfd = fd!
     
     // FIXME: tried to encapsulate this in a sockaddrbuf which does all the
     //        ptr handling, but it ain't work (autoreleasepool issue?)
@@ -139,10 +140,7 @@ public class Socket<T: SocketAddress> {
     let rc = withUnsafeMutablePointer(&baddr) {
       ptr -> Int32 in
       let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
-      return withUnsafeMutablePointer(&baddrlen) {
-        buflenptr -> Int32 in
-        return Darwin.getsockname(self.fd!, bptr, buflenptr)
-      }
+      return Darwin.getsockname(lfd, bptr, &baddrlen)
     }
     
     if (rc != 0) {

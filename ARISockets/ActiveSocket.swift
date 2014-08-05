@@ -138,16 +138,14 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       println("Socket is already connected \(self)")
       return false
     }
+    let lfd = fd!
     
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
     
-    let rc = withUnsafePointer(&addr) {
-      (ptr: UnsafePointer<T>) -> Int32 in
+    let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      
-      // connect!
-      return Darwin.connect(self.fd!, bptr, socklen_t(addr.len))
+      return Darwin.connect(lfd, bptr, socklen_t(addr.len))
     }
     
     if rc != 0 {

@@ -151,10 +151,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
           let newFD = withUnsafeMutablePointer(&baddr) {
             ptr -> Int32 in
             let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
-            return withUnsafeMutablePointer(&baddrlen) {
-              buflenptr -> Int32 in
-              return Darwin.accept(lfd, bptr, buflenptr)
-            }
+            return Darwin.accept(lfd, bptr, &baddrlen);// buflenptr)
           }
           
           if newFD != -1 {
