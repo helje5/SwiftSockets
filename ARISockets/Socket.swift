@@ -178,7 +178,6 @@ extension Socket { // Socket Flags
     get {
       let rc = ari_fcntlVi(fd!, F_GETFL, 0)
       return rc >= 0 ? rc : nil
-      // return nil
     }
     set {
       let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
