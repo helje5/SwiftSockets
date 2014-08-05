@@ -136,7 +136,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] reinterpretCast()
   - [x] final
   - [x] Nil coalescing operator
-  - [x] dynamic
+  - [ ] dynamic
 
 ###Why?!
 
