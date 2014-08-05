@@ -70,11 +70,6 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     var fd:  Int32?
     if lfd != -1 {
       fd = lfd
-      
-      reuseAddress = true
-      if !bind(address) {
-        close() // TBD: how to signal error state in Swift?
-      }
     }
     else {
       // This is lame. Would like to 'return nil' ...
@@ -83,6 +78,13 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     }
 
     self.init(fd: fd)
+    
+    if isValid {
+      reuseAddress = true
+      if !bind(address) {
+        close() // TBD: how to signal error state in Swift?
+      }
+    }
   }
   
   /* proper close */
