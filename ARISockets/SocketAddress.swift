@@ -119,12 +119,14 @@ extension sockaddr_in: SocketAddress {
   public init(address: in_addr = INADDR_ANY, port: Int?) {
     self.init()
     
-    sin_port = port ? in_port_t(htons(CUnsignedShort(port!))) : 0
+    sin_port = port != nil ? in_port_t(htons(CUnsignedShort(port!))) : 0
     sin_addr = address
   }
   
   public init(address: String?, port: Int?) {
-    let isWildcard = address ? (address! == "*" || address! == "*.*.*.*"):true;
+    let isWildcard = address != nil
+      ? (address! == "*" || address! == "*.*.*.*")
+      : true;
     let ipv4       = isWildcard ? INADDR_ANY : in_addr(string: address)
     self.init(address: ipv4, port: port)
   }
@@ -439,7 +441,7 @@ extension addrinfo : Printable {
   }
 }
 
-extension addrinfo : Sequence {
+extension addrinfo : SequenceType {
   
   public func generate() -> GeneratorOf<addrinfo> {
     var cursor : addrinfo? = self
