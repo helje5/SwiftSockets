@@ -329,9 +329,11 @@ extension ActiveSocket { // Reading
     // FIXME: If I just close the Terminal which hosts telnet this continues
     //        to read garbage from the server. Even with SIGPIPE off.
     //readCount = Darwin.read(fd, readBuffer, bufsize)
+/*
     readBuffer.withUnsafeMutableBufferPointer {
       p in readCount = Darwin.read(fd, p, bufsize)
     }
+*/
     if readCount < 0 {
       readBuffer[0] = 0
       return ( readCount, readBuffer, errno )
