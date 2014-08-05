@@ -327,7 +327,7 @@ extension Socket { // poll()
       return nil
     }
     
-    let ctimeout = Int32(timeout ?? -1 /* wait forever */)
+    let ctimeout = timeout != nil ? Int32(timeout!) : -1 /* wait forever */
     
     var fds = pollfd(fd: fd!, events: CShort(events), revents: 0)
     let rc  = Darwin.poll(&fds, 1, ctimeout)
