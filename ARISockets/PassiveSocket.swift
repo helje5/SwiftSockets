@@ -34,18 +34,20 @@ public typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
 public class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   public var backlog      : Int? = nil
-  public var isListening  : Bool { return backlog ? true : false; }
+  public var isListening  : Bool { return backlog != nil }
   public var listenSource : dispatch_source_t? = nil
   
   /* init */
-  
-  public init(fd: Int32?) {
+  // The overloading behaviour gets more weird every release?
+
+  override public init(fd: Int32?) {
     // required, otherwise the convenience one fails to compile
     super.init(fd: fd)
   }
   
   public convenience init(type: Int32 = SOCK_STREAM) {
     // NOTE: this is a DUPE to Socket. It fails to inherit from Socket<T>
+    // and for b5 another dupe below
     let lfd = socket(T.domain, type, 0)
     var fd:  Int32?
     if lfd != -1 {
@@ -61,20 +63,32 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
   }
   
   public convenience init(address: T) {
-    self.init(type: SOCK_STREAM)
-    
-    if isValid {
+    // does not work anymore in b5?: I again need to copy&paste
+    // self.init(type: SOCK_STREAM)
+    // DUPE:
+    let lfd = socket(T.domain, SOCK_STREAM, 0)
+    var fd:  Int32?
+    if lfd != -1 {
+      fd = lfd
+      
       reuseAddress = true
       if !bind(address) {
         close() // TBD: how to signal error state in Swift?
       }
     }
+    else {
+      // This is lame. Would like to 'return nil' ...
+      // TBD: How to do proper error handling in Swift?
+      println("Could not create socket.")
+    }
+
+    self.init(fd: fd)
   }
   
   /* proper close */
   
   override public func close() {
-    if listenSource {
+    if listenSource != nil {
       dispatch_source_cancel(listenSource)
       listenSource = nil
     }
