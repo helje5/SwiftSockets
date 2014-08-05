@@ -191,7 +191,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     // must be in main class, override not available in extensions
     var s = super.descriptionAttributes()
     if remoteAddress != nil {
-      s += " remote=\(remoteAddress)"
+      s += " remote=\(remoteAddress!)"
     }
     return s
   }
