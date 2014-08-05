@@ -77,16 +77,15 @@ class EchoServer {
     //   println(s, target: sock)
     // (just writes the socket as a value, likely a tuple)
     
-    // Doing individual writes is expensive, but swiftc segfaults if I just
-    // add them up.
-    sock.write("\r\n")
-    sock.write("  /----------------------------------------------------\\\r\n")
-    sock.write("  |     Welcome to the Always Right Institute!         |\r\n")
-    sock.write("  |    I am an echo server with a zlight twist.        |\r\n")
-    sock.write("  | Just type something and I'll shout it back at you. |\r\n")
-    sock.write("  \\----------------------------------------------------/\r\n")
-    sock.write("\r\nTalk to me Dave!\r\n")
-    sock.write("> ")
+    sock.write("\r\n" +
+       "  /----------------------------------------------------\\\r\n" +
+       "  |     Welcome to the Always Right Institute!         |\r\n"  +
+       "  |    I am an echo server with a zlight twist.        |\r\n"  +
+       "  | Just type something and I'll shout it back at you. |\r\n"  +
+      "  \\----------------------------------------------------/\r\n"  +
+      "\r\nTalk to me Dave!\r\n" +
+      "> "
+    )
   }
   
   func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
