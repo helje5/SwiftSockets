@@ -233,13 +233,12 @@ extension sockaddr_in: Printable {
   
 }
 
-/* Not working anymore in b4
 extension sockaddr_in6: SocketAddress {
   
-  static var domain = AF_INET6
-  static var size   = __uint8_t(sizeof(sockaddr_in6))
+  public static var domain = AF_INET6
+  public static var size   = __uint8_t(sizeof(sockaddr_in6))
   
-  init() {
+  public init() {
     sin6_len      = sockaddr_in6.size
     sin6_family   = sa_family_t(sockaddr_in.domain)
     sin6_port     = 0
@@ -248,7 +247,7 @@ extension sockaddr_in6: SocketAddress {
     sin6_scope_id = 0
   }
   
-  var port: Int {
+  public var port: Int {
     get {
       return Int(ntohs(sin6_port))
     }
@@ -257,11 +256,10 @@ extension sockaddr_in6: SocketAddress {
     }
   }
   
-  var isWildcardPort: Bool { return sin6_port == 0 }
+  public var isWildcardPort: Bool { return sin6_port == 0 }
   
-  var len: __uint8_t { return sockaddr_in6.size }
+  public var len: __uint8_t { return sockaddr_in6.size }
 }
-*/
 
 extension sockaddr_un: SocketAddress {
   // TBD: sockaddr_un would be interesting as the size of the structure is
