@@ -118,10 +118,14 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Standard Protocols
     - [x] Printable
     - [x] BooleanType (aka LogicValue)
-    - [x] OutputStream
+    - [x] OutputStreamType
     - [x] Equatable
+      - [ ] Equatable on Enums with Associated Values
     - [x] Hashable
-    - [x] Sequence (GeneratorOf<T>)
+    - [x] SequenceType (GeneratorOf<T>)
+    - [x] Literal Convertibles
+      - [x] StringLiteralConvertible
+      - [ ] IntegerLiteralConvertible
   - [x] Left shift AND right shift
   - [ ] Enums on steroids
   - [ ] Dynamic type system, reflection
@@ -133,7 +137,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [x] Use wildcard pattern to ignore value
   - [x] Literal Convertibles
   - [ ] @autoclosure
-  - [ ] reinterpretCast()
+  - [ ] unsafeBitCast (was reinterpretCast)
   - [x] final
   - [x] Nil coalescing operator
   - [ ] dynamic
