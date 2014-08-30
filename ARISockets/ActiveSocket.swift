@@ -9,7 +9,7 @@
 import Darwin
 import Dispatch
 
-public typealias ActiveSocketIPv4 = ActiveSocket<sockaddr_in>
+public typealias ActiveSocketIPv4 = ActiveSocket
 
 /**
  * Represents an active STREAM socket based on the standard Unix sockets
@@ -40,10 +40,10 @@ public typealias ActiveSocketIPv4 = ActiveSocket<sockaddr_in>
  *   socket.connect(sockaddr_in(address:"127.0.0.1", port: 80))
  *   socket.write("Ring, ring!\r\n")
  */
-public class ActiveSocket<T: SocketAddress>: Socket<T> {
+public class ActiveSocket: Socket {
   
-  public var remoteAddress  : T?                 = nil
-  public var queue          : dispatch_queue_t?  = nil
+  public var remoteAddress : sockaddr_in?       = nil
+  public var queue         : dispatch_queue_t?  = nil
   
   var readSource     : dispatch_source_t? = nil
   var sendCount      : Int                = 0
@@ -77,7 +77,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   }
   
   public convenience init
-    (fd: Int32?, remoteAddress: T?, queue: dispatch_queue_t? = nil)
+    (fd: Int32?, remoteAddress: sockaddr_in?, queue: dispatch_queue_t? = nil)
   {
     self.init(fd: fd)
     
@@ -128,7 +128,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   /* connect */
   
-  public func connect(address: T, onConnect: () -> Void) -> Bool {
+  public func connect(address: sockaddr_in, onConnect: () -> Void) -> Bool {
     // FIXME: make connect() asynchronous via GCD
     if !isValid {
       return false
@@ -191,7 +191,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     // must be in main class, override not available in extensions
     var s = super.descriptionAttributes()
     if remoteAddress != nil {
-      s += " remote=\(remoteAddress)"
+      s += " remote=\(remoteAddress!)"
     }
     return s
   }

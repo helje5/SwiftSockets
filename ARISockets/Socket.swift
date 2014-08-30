@@ -14,10 +14,10 @@ import Dispatch
  *
  * PassiveSockets are 'listening' sockets, ActiveSockets are open connections.
  */
-public class Socket<T: SocketAddress> {
+public class Socket {
   
   public var fd           : Int32?             = nil
-  public var boundAddress : T?                 = nil
+  public var boundAddress : sockaddr_in?       = nil
   public var isValid      : Bool { return fd != nil }
   public var isBound      : Bool {
     // fails: return boundAddress != nil
@@ -38,7 +38,7 @@ public class Socket<T: SocketAddress> {
   }
   
   public convenience init(type: Int32 = SOCK_STREAM) {
-    let lfd = socket(T.domain, type, 0)
+    let lfd = socket(sockaddr_in.domain, type, 0)
     var fd:  Int32?
     if lfd != -1 {
       fd = lfd
@@ -96,7 +96,7 @@ public class Socket<T: SocketAddress> {
   
   /* bind the socket. */
   
-  public func bind(address: T) -> Bool {
+  public func bind(address: sockaddr_in) -> Bool {
     if !isValid {
       return false
     }
@@ -124,7 +124,7 @@ public class Socket<T: SocketAddress> {
     return rc == 0 ? true : false
   }
   
-  public func getsockname() -> T? {
+  public func getsockname() -> sockaddr_in? {
     if !isValid {
       return nil
     }
@@ -132,7 +132,7 @@ public class Socket<T: SocketAddress> {
     
     // FIXME: tried to encapsulate this in a sockaddrbuf which does all the
     //        ptr handling, but it ain't work (autoreleasepool issue?)
-    var baddr    = T()
+    var baddr    = sockaddr_in()
     var baddrlen = socklen_t(baddr.len)
     
     // Note: we are not interested in the length here, would be relevant

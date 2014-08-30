@@ -16,7 +16,8 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
-Updated to use Swift v0.0.5.
+Updated to use Swift v0.0.6: Had to drop generics support in b6,
+makes the Swift runtime hang on startup.
 
 The project includes three targets:
 - ARISockets
@@ -33,7 +34,7 @@ library.
 
 Server Sample:
 ```swift
-let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))
+let socket = PassiveSocket(address: sockaddr_in(port: 4242))
   .listen(dispatch_get_global_queue(0, 0), backlog: 5) {
     println("Wait, someone is attempting to talk to me!")
     $0.close()
@@ -43,7 +44,7 @@ let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))
 
 Client Sample:
 ```swift
-let socket = ActiveSocket<sockaddr_in>()
+let socket = ActiveSocket()
   .onRead {
     let (count, block, errno) = $0.read()
     if count < 1 {
@@ -93,9 +94,9 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] Datagram sockets
 - [x] No NS'ism
 - [ ] Use as many language features Swift provides
-  - [x] Generics
-    - [x] Generic function
-    - [x] typealias
+  - [ ] Generics
+    - [ ] Generic function
+    - [ ] typealias
   - [x] Closures
     - [x] weak self
     - [x] trailing closures
@@ -118,10 +119,14 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Standard Protocols
     - [x] Printable
     - [x] BooleanType (aka LogicValue)
-    - [x] OutputStream
+    - [x] OutputStreamType
     - [x] Equatable
+      - [ ] Equatable on Enums with Associated Values
     - [x] Hashable
-    - [x] Sequence (GeneratorOf<T>)
+    - [x] SequenceType (GeneratorOf<T>)
+    - [x] Literal Convertibles
+      - [x] StringLiteralConvertible
+      - [ ] IntegerLiteralConvertible
   - [x] Left shift AND right shift
   - [ ] Enums on steroids
   - [ ] Dynamic type system, reflection
@@ -133,10 +138,10 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [x] Use wildcard pattern to ignore value
   - [x] Literal Convertibles
   - [ ] @autoclosure
-  - [ ] reinterpretCast()
+  - [ ] unsafeBitCast (was reinterpretCast)
   - [x] final
   - [x] Nil coalescing operator
-  - [x] dynamic
+  - [ ] dynamic
 
 ###Why?!
 
