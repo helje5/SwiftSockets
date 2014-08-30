@@ -38,7 +38,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       resultView.string = "" // clear results
     }
     
-    socket = ActiveSocket<sockaddr_in>()
+    socket = ActiveSocketIPv4()
     println("Got socket: \(socket)")
     if socket == nil {
       return
@@ -74,7 +74,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
-  func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
+  func handleIncomingData(socket: ActiveSocketIPv4, expectedCount: Int) {
     do {
       let (count, block, errno) = socket.read()
       

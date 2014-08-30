@@ -9,7 +9,7 @@
 import Darwin
 import Dispatch
 
-public typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
+public typealias PassiveSocketIPv4 = PassiveSocket
 
 /*
  * Represents a STREAM server socket based on the standard Unix sockets library.
@@ -31,7 +31,7 @@ public typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
  *     println("All good, go ahead!")
  *   }
  */
-public class PassiveSocket<T: SocketAddress>: Socket<T> {
+public class PassiveSocket: Socket {
   
   public var backlog      : Int? = nil
   public var isListening  : Bool { return backlog != nil }
@@ -48,7 +48,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
   public convenience init(type: Int32 = SOCK_STREAM) {
     // NOTE: this is a DUPE to Socket. It fails to inherit from Socket<T>
     // and for b5 another dupe below
-    let lfd = socket(T.domain, type, 0)
+    let lfd = socket(sockaddr_in.domain, type, 0)
     var fd:  Int32?
     if lfd != -1 {
       fd = lfd
@@ -62,11 +62,11 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     self.init(fd: fd)
   }
   
-  public convenience init(address: T) {
+  public convenience init(address: sockaddr_in) {
     // does not work anymore in b5?: I again need to copy&paste
     // self.init(type: SOCK_STREAM)
     // DUPE:
-    let lfd = socket(T.domain, SOCK_STREAM, 0)
+    let lfd = socket(sockaddr_in.domain, SOCK_STREAM, 0)
     var fd:  Int32?
     if lfd != -1 {
       fd = lfd
@@ -116,10 +116,10 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     return true
   }
   
-  typealias TypedActiveSocket = ActiveSocket<T>
+  typealias TypedActiveSocket = ActiveSocket
   
   public func listen(queue: dispatch_queue_t, backlog: Int = 5,
-                     accept: ( TypedActiveSocket ) -> Void)
+                     accept: ( ActiveSocket ) -> Void)
     -> Bool
   {
     if !isValid {
@@ -145,7 +145,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
         do {
           // FIXME: tried to encapsulate this in a sockaddrbuf which does all
           //        the ptr handling, but it ain't work (autoreleasepool issue?)
-          var baddr    = T()
+          var baddr    = sockaddr_in()
           var baddrlen = socklen_t(baddr.len)
           
           let newFD = withUnsafeMutablePointer(&baddr) {
