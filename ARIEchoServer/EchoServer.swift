@@ -13,7 +13,7 @@ class EchoServer {
   let port         : Int
   var listenSocket : PassiveSocketIPv4?
   let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
-  var openSockets  = [Int32:ActiveSocketIPv4](minimumCapacity: 8)
+  var openSockets  = [Int32:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
   
   init(port: Int) {
@@ -88,7 +88,7 @@ class EchoServer {
     )
   }
   
-  func handleIncomingData(socket: ActiveSocketIPv4, expectedCount: Int) {
+  func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
     // remove from openSockets if all has been read
     do {
       // FIXME: This currently continues to read garbage if I just close the
