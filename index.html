@@ -50,8 +50,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 <h3>
 <a name="targets" class="anchor" href="#targets"><span class="octicon octicon-link"></span></a>Targets</h3>
 
-<p>Updated to use Swift v0.0.6: Had to drop generics support in b6,
-makes the Swift runtime hang on startup.</p>
+<p>Updated to use Swift v0.0.7.</p>
 
 <p>The project includes three targets:</p>
 
@@ -70,7 +69,7 @@ library.</p>
 
 <p>Server Sample:</p>
 
-<div class="highlight highlight-swift"><pre><span class="k">let</span> <span class="n">socket</span> <span class="o">=</span> <span class="n">PassiveSocket</span><span class="p">(</span><span class="nl">address</span><span class="p">:</span> <span class="n">sockaddr_in</span><span class="p">(</span><span class="nl">port</span><span class="p">:</span> <span class="mi">4242</span><span class="p">))</span>
+<div class="highlight highlight-swift"><pre><span class="k">let</span> <span class="n">socket</span> <span class="o">=</span> <span class="n">PassiveSocket</span><span class="o">&lt;</span><span class="n">sockaddr_in</span><span class="o">&gt;</span><span class="p">(</span><span class="nl">address</span><span class="p">:</span> <span class="n">sockaddr_in</span><span class="p">(</span><span class="nl">port</span><span class="p">:</span> <span class="mi">4242</span><span class="p">))</span>
   <span class="p">.</span><span class="n">listen</span><span class="p">(</span><span class="n">dispatch_get_global_queue</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nl">backlog</span><span class="p">:</span> <span class="mi">5</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">println</span><span class="p">(</span><span class="s">"Wait, someone is attempting to talk to me!"</span><span class="p">)</span>
     <span class="err">$</span><span class="mf">0.</span><span class="n">close</span><span class="p">()</span>
@@ -80,7 +79,7 @@ library.</p>
 
 <p>Client Sample:</p>
 
-<div class="highlight highlight-swift"><pre><span class="k">let</span> <span class="n">socket</span> <span class="o">=</span> <span class="n">ActiveSocket</span><span class="p">()</span>
+<div class="highlight highlight-swift"><pre><span class="k">let</span> <span class="n">socket</span> <span class="o">=</span> <span class="n">ActiveSocket</span><span class="o">&lt;</span><span class="n">sockaddr_in</span><span class="o">&gt;</span><span class="p">()</span>
   <span class="p">.</span><span class="n">onRead</span> <span class="p">{</span>
     <span class="k">let</span> <span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">errno</span><span class="p">)</span> <span class="o">=</span> <span class="err">$</span><span class="mf">0.</span><span class="n">read</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="p">{</span>
@@ -151,11 +150,11 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 <li>[ ] Use as many language features Swift provides
 
 <ul>
-<li>[ ] Generics
+<li>[x] Generics
 
 <ul>
-<li>[ ] Generic function</li>
-<li>[ ] typealias</li>
+<li>[x] Generic function</li>
+<li>[x] typealias</li>
 </ul>
 </li>
 <li>[x] Closures
