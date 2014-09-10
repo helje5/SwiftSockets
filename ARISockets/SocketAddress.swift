@@ -82,6 +82,11 @@ extension in_addr: StringLiteralConvertible {
   {
     return in_addr(string: value)
   }
+  
+  public static func convertFromUnicodeScalarLiteral(value: String) -> in_addr {
+    // FIXME: doesn't work with UnicodeScalarLiteralType?
+    return in_addr(string: value)
+  }
 }
 
 extension in_addr: Printable {
@@ -222,6 +227,11 @@ extension sockaddr_in: StringLiteralConvertible {
     (value: ExtendedGraphemeClusterType) -> sockaddr_in
   {
     return sockaddr_in(string: value)
+  }
+
+  public static func convertFromUnicodeScalarLiteral(v: String) -> sockaddr_in {
+    // FIXME: doesn't work with UnicodeScalarLiteralType?
+    return sockaddr_in(string: v)
   }
 }
 
