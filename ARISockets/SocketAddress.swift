@@ -16,7 +16,7 @@ let INADDR_ANY = in_addr(s_addr: 0)
  * in_addr represents an IPv4 address in Unix. We extend that a little bit
  * to increase it's usability :-)
  */
-extension in_addr {
+public extension in_addr {
 
   public init() {
     s_addr = INADDR_ANY.s_addr
@@ -82,6 +82,11 @@ extension in_addr: StringLiteralConvertible {
   {
     return in_addr(string: value)
   }
+  
+  public static func convertFromUnicodeScalarLiteral(value: String) -> in_addr {
+    // FIXME: doesn't work with UnicodeScalarLiteralType?
+    return in_addr(string: value)
+  }
 }
 
 extension in_addr: Printable {
@@ -91,7 +96,6 @@ extension in_addr: Printable {
   }
     
 }
-
 
 public protocol SocketAddress {
   
@@ -222,6 +226,11 @@ extension sockaddr_in: StringLiteralConvertible {
     (value: ExtendedGraphemeClusterType) -> sockaddr_in
   {
     return sockaddr_in(string: value)
+  }
+
+  public static func convertFromUnicodeScalarLiteral(v: String) -> sockaddr_in {
+    // FIXME: doesn't work with UnicodeScalarLiteralType?
+    return sockaddr_in(string: v)
   }
 }
 
