@@ -16,7 +16,7 @@ let INADDR_ANY = in_addr(s_addr: 0)
  * in_addr represents an IPv4 address in Unix. We extend that a little bit
  * to increase it's usability :-)
  */
-extension in_addr {
+public extension in_addr {
 
   public init() {
     s_addr = INADDR_ANY.s_addr
@@ -96,7 +96,6 @@ extension in_addr: Printable {
   }
     
 }
-
 
 public protocol SocketAddress {
   
