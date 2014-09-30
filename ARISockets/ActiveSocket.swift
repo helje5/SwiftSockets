@@ -333,6 +333,10 @@ extension ActiveSocket { // Reading
     }
     
     readBuffer[readCount] = 0 // convenience
+    
+    // FIXME: This is a bad bug / non-sense. The whole read buffer is going
+    //        to be copied to the tuple, right? We likely want to pass back
+    //        a reference in here
     return ( readCount, readBuffer, 0 )
   }
   
