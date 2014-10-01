@@ -51,13 +51,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 extension NSTextView {
   
   func appendString(string: String) {
-    var ls = NSAttributedString(string: string)
-    textStorage.appendAttributedString(ls)
-    
-    let charCount = (self.string as NSString).length
-    let r = NSMakeRange(charCount, 0)
-    self.scrollRangeToVisible(r)
-    
+    if let ts = textStorage {
+      let ls = NSAttributedString(string: string)
+      ts.appendAttributedString(ls)
+    }
+    if let s = self.string {
+      let charCount = (s as NSString).length
+      self.scrollRangeToVisible(NSMakeRange(charCount, 0))
+    }
     needsDisplay = true
   }
   
