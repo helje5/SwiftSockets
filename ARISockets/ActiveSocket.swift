@@ -52,11 +52,13 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   var readCB         : ((ActiveSocket, Int) -> Void)? = nil
   
   // let the socket own the read buffer, what is the best buffer type?
-  var readBuffer     : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
+  //var readBuffer     : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
+  var readBufferPtr    = UnsafeMutablePointer<CChar>.alloc(4096 + 2)
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
       if readBufferSize != oldValue {
-        readBuffer = [CChar](count: readBufferSize + 2, repeatedValue: 42)
+        readBufferPtr.dealloc(oldValue + 2)
+        readBufferPtr = UnsafeMutablePointer<CChar>.alloc(readBufferSize + 2)
       }
     }
   }
@@ -87,6 +89,9 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     if let lfd = fd {
       isSigPipeDisabled = true
     }
+  }
+  deinit {
+    readBufferPtr.dealloc(readBufferSize + 2)
   }
   
   
@@ -314,10 +319,12 @@ extension ActiveSocket { // Reading
   
   // Note: Swift doesn't allow the readBuffer in here.
   
-  public func read() -> ( size: Int, block: [CChar], error: Int32) {
+  public func read() -> ( size: Int, block: UnsafePointer<CChar>, error: Int32){
+    let bptr = UnsafePointer<CChar>(readBufferPtr)
     if !isValid {
       println("Called read() on closed socket \(self)")
-      return ( -42, readBuffer, EBADF )
+      readBufferPtr[0] = 0
+      return ( -42, bptr, EBADF )
     }
     
     var readCount: Int = 0
@@ -326,14 +333,14 @@ extension ActiveSocket { // Reading
     
     // FIXME: If I just close the Terminal which hosts telnet this continues
     //        to read garbage from the server. Even with SIGPIPE off.
-    readCount = Darwin.read(fd, &readBuffer, bufsize)
+    readCount = Darwin.read(fd, readBufferPtr, bufsize)
     if readCount < 0 {
-      readBuffer[0] = 0
-      return ( readCount, readBuffer, errno )
+      readBufferPtr[0] = 0
+      return ( readCount, bptr, errno )
     }
     
-    readBuffer[readCount] = 0 // convenience
-    return ( readCount, readBuffer, 0 )
+    readBufferPtr[readCount] = 0 // convenience
+    return ( readCount, bptr, 0 )
   }
   
   

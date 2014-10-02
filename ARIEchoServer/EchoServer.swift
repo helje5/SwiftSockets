@@ -110,7 +110,15 @@ class EchoServer {
       // maps the whole block. asyncWrite does not accept slices,
       // can we add this?
       // (should adopt sth like IndexedCollection<T>?)
+      /* ptr has no map ;-) FIXME: add an extension 'mapWithCount'?
       let mblock = block.map({ $0 == 83 ? 90 : ($0 == 115 ? 122 : $0) })
+      */
+      var mblock = [CChar](count: count + 1, repeatedValue: 42)
+      for var i = 0; i < count; i++ {
+        let c = block[i]
+        mblock[i] = c == 83 ? 90 : (c == 115 ? 122 : c)
+      }
+      mblock[count] = 0
       
       socket.asyncWrite(mblock, length: count)
     } while (true)
@@ -118,7 +126,7 @@ class EchoServer {
     socket.write("> ")
   }
 
-  func logReceivedBlock(block: [CChar], length: Int) {
+  func logReceivedBlock(block: UnsafePointer<CChar>, length: Int) {
     let k = String.fromCString(block)
     var s = k ?? "Could not process result block \(block) length \(length)"
     

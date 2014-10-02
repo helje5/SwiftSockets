@@ -70,22 +70,18 @@ extension in_addr : Equatable, Hashable {
 
 extension in_addr: StringLiteralConvertible {
   // this allows you to do: let addr : in_addr = "192.168.0.1"
-  
-  public static func convertFromStringLiteral(value: StringLiteralType)
-    -> in_addr
-  {
-    return in_addr(string: value)
+
+  public init(stringLiteral value: StringLiteralType) {
+    self.init(string: value)
   }
   
-  public static func convertFromExtendedGraphemeClusterLiteral
-    (value: ExtendedGraphemeClusterType) -> in_addr
-  {
-    return in_addr(string: value)
+  public init(extendedGraphemeClusterLiteral v: ExtendedGraphemeClusterType) {
+    self.init(string: v)
   }
   
-  public static func convertFromUnicodeScalarLiteral(value: String) -> in_addr {
+  public init(unicodeScalarLiteral value: String) {
     // FIXME: doesn't work with UnicodeScalarLiteralType?
-    return in_addr(string: value)
+    self.init(string: value)
   }
 }
 
@@ -216,21 +212,17 @@ extension sockaddr_in: Equatable, Hashable {
  */
 extension sockaddr_in: StringLiteralConvertible {
   
-  public static func convertFromStringLiteral(value:StringLiteralType)
-    -> sockaddr_in
-  {
-    return sockaddr_in(string: value)
+  public init(stringLiteral value: String) {
+    self.init(string: value)
   }
   
-  public static func convertFromExtendedGraphemeClusterLiteral
-    (value: ExtendedGraphemeClusterType) -> sockaddr_in
-  {
-    return sockaddr_in(string: value)
+  public init(extendedGraphemeClusterLiteral v: ExtendedGraphemeClusterType) {
+    self.init(string: v)
   }
 
-  public static func convertFromUnicodeScalarLiteral(v: String) -> sockaddr_in {
+  public init(unicodeScalarLiteral v: String) {
     // FIXME: doesn't work with UnicodeScalarLiteralType?
-    return sockaddr_in(string: v)
+    self.init(string: v)
   }
 }
 
