@@ -227,7 +227,7 @@ extension ActiveSocket : OutputStreamType { // writing
     }
     
     // in here we capture self, which I think is right.
-    dispatch_write(fd!, data, queue) {
+    dispatch_write(fd!, data, queue!) {
       asyncData, error in
       
       if self.debugAsyncWrites {
@@ -348,7 +348,7 @@ extension ActiveSocket { // Reading
   
   func stopEventHandler() {
     if readSource != nil {
-      dispatch_source_cancel(readSource)
+      dispatch_source_cancel(readSource!)
       readSource = nil // abort()s if source is not resumed ...
     }
   }
@@ -387,7 +387,7 @@ extension ActiveSocket { // Reading
     }
     
     /* actually start listening ... */
-    dispatch_resume(readSource)
+    dispatch_resume(readSource!)
     
     return true
   }

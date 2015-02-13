@@ -95,7 +95,7 @@ extension in_addr: Printable {
 
 public protocol SocketAddress {
   
-  class var domain: Int32 { get }
+  static var domain: Int32 { get }
   
   init() // create empty address, to be filled by eg getsockname()
   
@@ -315,24 +315,21 @@ extension addrinfo {
   }
   
   public var hasNext : Bool {
-    let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
-    return ai_next != nullptr
+    return ai_next != nil
   }
   public var next : addrinfo? {
     return hasNext ? ai_next.memory : nil
   }
   
   public var canonicalName : String? {
-    let nullptr : UnsafePointer<CChar> = UnsafePointer.null()
-    if ai_canonname != nullptr && ai_canonname[0] != 0 {
+    if ai_canonname != nil && ai_canonname[0] != 0 {
       return String.fromCString(ai_canonname)
     }
     return nil
   }
   
   public var hasAddress : Bool {
-    let nullptr : UnsafePointer<sockaddr> = UnsafePointer.null()
-    return ai_addr != nullptr
+    return ai_addr != nil
   }
   
   public var isIPv4 : Bool {
@@ -346,8 +343,7 @@ extension addrinfo {
    */
   
   public func address<T: SocketAddress>() -> T? {
-    let nullptr : UnsafePointer<sockaddr> = UnsafePointer.null()
-    if ai_addr == nullptr {
+    if ai_addr == nil {
       return nil
     }
     if ai_addr.memory.sa_family != sa_family_t(T.domain) {
@@ -432,8 +428,7 @@ extension addrinfo : Printable {
       }
     }
     
-    let nullptr : UnsafePointer<addrinfo> = UnsafePointer.null()
-    s += (ai_next != nullptr ? " +" : "")
+    s += (ai_next != nil ? " +" : "")
     
     s += ">"
     return s
