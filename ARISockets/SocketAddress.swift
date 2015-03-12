@@ -138,7 +138,7 @@ extension sockaddr_in: SocketAddress {
       }
       else {
         // split string at colon
-        let comps = split(s, { $0 == ":"}, maxSplit: 1)
+        let comps = split(s, maxSplit: 1) { $0 == ":"}
         if comps.count == 2 {
           self.init(address: comps[0], port: comps[1].toInt())
         }
