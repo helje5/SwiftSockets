@@ -17,14 +17,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   @IBOutlet var port             : NSTextField!
 
   var resultView: NSTextView { // NSTextView doesn't work with weak?
-    return resultViewParent.contentView.documentView as NSTextView
+    return resultViewParent.contentView.documentView as! NSTextView
   }
 
-  func applicationDidFinishLaunching(aNotification: NSNotification?) {
+  func applicationDidFinishLaunching(aNotification: NSNotification) {
     fetch(nil)
   }
 
-  func applicationWillTerminate(aNotification: NSNotification?) {
+  func applicationWillTerminate(aNotification: NSNotification) {
     socket?.close()
   }
   

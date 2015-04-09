@@ -16,7 +16,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
-Updated to use Swift v0.0.8 (aka Xcode 6.1 beta).
+Updated to use Swift v0.2.0 (aka Xcode 6.3 beta).
 
 The project includes three targets:
 - ARISockets

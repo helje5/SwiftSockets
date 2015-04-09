@@ -16,12 +16,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   
   var logView: NSTextView {
     // NSTextView doesn't work with weak?
-    return logViewParent.contentView.documentView as NSTextView
+    return logViewParent.contentView.documentView as! NSTextView
   }
   
   var echod : EchoServer?
   
-  func applicationDidFinishLaunching(aNotification: NSNotification?) {
+  func applicationDidFinishLaunching(aNotification: NSNotification) {
     let port = 1337
     
     echod = EchoServer(port: port)
@@ -32,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       "Connect in e.g. Terminal via 'telnet 127.0.0.1 \(port)'"
   }
 
-  func applicationWillTerminate(aNotification: NSNotification?) {
+  func applicationWillTerminate(aNotification: NSNotification) {
     echod?.stop()
   }
   

@@ -91,7 +91,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   override public func close() {
     if listenSource != nil {
-      dispatch_source_cancel(listenSource)
+      dispatch_source_cancel(listenSource!)
       listenSource = nil
     }
     super.close()
@@ -173,7 +173,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
         } while (true);
       }
       
-      dispatch_resume(listenSource)
+      dispatch_resume(listenSource!)
       
       let listenOK = listen(backlog: backlog)
       
@@ -181,7 +181,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
         return true
       }
       else {
-        dispatch_source_cancel(listenSource)
+        dispatch_source_cancel(listenSource!)
         listenSource = nil
       }
     }

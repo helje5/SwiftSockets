@@ -16,14 +16,12 @@ func gethoztbyname<T: SocketAddress>
   hints.ai_flags  = flags  // AI_CANONNAME, AI_NUMERICHOST, etc
   hints.ai_family = T.domain
   
-  var ptr     = UnsafeMutablePointer<addrinfo>(nil)
-  let nullptr = UnsafeMutablePointer<addrinfo>.null()
+  var ptr = UnsafeMutablePointer<addrinfo>(nil)
   
   /* run lookup (synchronously, can be slow!) */
   // b3: (cs : CString) doesn't pick up the right overload?
   var rc = name.withCString { (cs : UnsafePointer<CChar>) -> Int32 in
-    let ncs = UnsafePointer<CChar>.null()
-    return getaddrinfo(cs, ncs, &hints, &ptr)
+    return getaddrinfo(cs, nil, &hints, &ptr)
   }
   if rc != 0 {
     cb(name, nil, nil)
@@ -33,7 +31,7 @@ func gethoztbyname<T: SocketAddress>
   /* copy results - we just take the first match */
   var cn   : String? = nil
   var addr : T?      = ptr.memory.address()
-  if rc == 0 && ptr != nullptr {
+  if rc == 0 && ptr != nil {
     cn   = ptr.memory.canonicalName
     addr = ptr.memory.address()
   }
@@ -71,13 +69,11 @@ func gethostzbyname<T: SocketAddress>
   hints.ai_flags  = flags  // AI_CANONNAME, AI_NUMERICHOST, etc
   hints.ai_family = T.domain
   
-  var ptr     = UnsafeMutablePointer<addrinfo>(nil)
-  let nullptr = UnsafeMutablePointer<addrinfo>.null()
+  var ptr = UnsafeMutablePointer<addrinfo>(nil)
   
   /* run lookup (synchronously, can be slow!) */
   var rc = name.withCString { (cs : UnsafePointer<CChar>) -> Int32 in
-    let ncs = UnsafePointer<CChar>.null()
-    return getaddrinfo(cs, ncs, &hints, &ptr)
+    return getaddrinfo(cs, nil, &hints, &ptr)
   }
   if rc != 0 {
     cb(name, nil)
@@ -88,7 +84,7 @@ func gethostzbyname<T: SocketAddress>
   typealias hapair = (cn: String?, address: T?)
   var results : Array<hapair>! = nil
   
-  if rc == 0 && ptr != nullptr {
+  if rc == 0 && ptr != nil {
     var pairs = Array<hapair>()
     for info in ptr.memory {
       let pair : hapair = ( info.canonicalName, info.address() )
