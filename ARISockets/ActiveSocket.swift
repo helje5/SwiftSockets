@@ -227,7 +227,7 @@ extension ActiveSocket : OutputStreamType { // writing
     }
     
     // in here we capture self, which I think is right.
-    dispatch_write(fd!, data, queue) {
+    dispatch_write(fd!, data, queue!) {
       asyncData, error in
       
       if self.debugAsyncWrites {
@@ -252,8 +252,8 @@ extension ActiveSocket : OutputStreamType { // writing
     // has the added benefit of being able to derive the buffer length
     if !canWrite { return false }
     
-    let writelen = UInt(buffer.count)
-    let bufsize  = writelen * UInt(sizeof(T))
+    let writelen = buffer.count
+    let bufsize  = writelen * sizeof(T)
     if bufsize < 1 { // Nothing to write ..
       return true
     }
@@ -275,8 +275,8 @@ extension ActiveSocket : OutputStreamType { // writing
     // FIXME: can we remove this dupe of the [T] version?
     if !canWrite { return false }
     
-    let writelen = UInt(length)
-    let bufsize  = writelen * UInt(sizeof(T))
+    let writelen = length
+    let bufsize  = writelen * sizeof(T)
     if bufsize < 1 { // Nothing to write ..
       return true
     }
@@ -296,7 +296,7 @@ extension ActiveSocket : OutputStreamType { // writing
   
   public func send<T>(buffer: [T], length: Int? = nil) -> Int {
     var writeCount : Int = 0
-    let bufsize    = UInt(length ?? buffer.count)
+    let bufsize    = length ?? buffer.count
     let fd         = self.fd!
     
     writeCount = Darwin.write(fd, buffer, bufsize)
@@ -328,7 +328,7 @@ extension ActiveSocket { // Reading
     }
     
     var readCount: Int = 0
-    let bufsize = UInt(readBufferSize)
+    let bufsize = readBufferSize
     let fd      = self.fd!
     
     // FIXME: If I just close the Terminal which hosts telnet this continues
@@ -348,7 +348,7 @@ extension ActiveSocket { // Reading
   
   func stopEventHandler() {
     if readSource != nil {
-      dispatch_source_cancel(readSource)
+      dispatch_source_cancel(readSource!)
       readSource = nil // abort()s if source is not resumed ...
     }
   }
@@ -387,7 +387,7 @@ extension ActiveSocket { // Reading
     }
     
     /* actually start listening ... */
-    dispatch_resume(readSource)
+    dispatch_resume(readSource!)
     
     return true
   }

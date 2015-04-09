@@ -16,8 +16,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
-Updated to use Swift v0.0.10 (aka Xcode 6.1 GM).
-Still seems to work with Swift v0.1.0/v0.1.1 (Xcode 6.1 / 6.2b).
+Updated to use Swift v0.2.0 (aka Xcode 6.3).
 
 The project includes three targets:
 - ARISockets
