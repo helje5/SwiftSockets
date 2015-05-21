@@ -37,19 +37,13 @@ public class Socket<T: SocketAddress> {
     close() // TBD: is this OK/safe?
   }
   
-  public convenience init(type: Int32 = SOCK_STREAM) {
+  public convenience init?(type: Int32 = SOCK_STREAM) {
     let lfd = socket(T.domain, type, 0)
     var fd:  Int32?
-    if lfd != -1 {
-      fd = lfd
-    }
-    else {
-      // This is lame. Would like to 'return nil' ...
-      // TBD: How to do proper error handling in Swift?
-      println("Could not create socket.")
-    }
-    
     self.init(fd: fd)
+    if lfd == -1 {
+      return nil
+    }
   }
   
   
