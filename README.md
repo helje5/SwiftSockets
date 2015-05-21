@@ -33,7 +33,7 @@ library.
 
 Server Sample:
 ```swift
-let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))
+let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))!
   .listen(dispatch_get_global_queue(0, 0), backlog: 5) {
     println("Wait, someone is attempting to talk to me!")
     $0.close()
@@ -43,7 +43,7 @@ let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))
 
 Client Sample:
 ```swift
-let socket = ActiveSocket<sockaddr_in>()
+let socket = ActiveSocket<sockaddr_in>()!
   .onRead {
     let (count, block, errno) = $0.read()
     if count < 1 {
