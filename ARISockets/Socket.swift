@@ -39,11 +39,8 @@ public class Socket<T: SocketAddress> {
   
   public convenience init?(type: Int32 = SOCK_STREAM) {
     let lfd = socket(T.domain, type, 0)
-    var fd:  Int32?
-    self.init(fd: fd)
-    if lfd == -1 {
-      return nil
-    }
+    self.init(fd: lfd)
+    if lfd == -1 { return nil }
   }
   
   
