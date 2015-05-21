@@ -45,44 +45,20 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     super.init(fd: fd)
   }
   
-  public convenience init(type: Int32 = SOCK_STREAM) {
-    // NOTE: this is a DUPE to Socket. It fails to inherit from Socket<T>
-    // and for b5 another dupe below
-    let lfd = socket(T.domain, type, 0)
-    var fd:  Int32?
-    if lfd != -1 {
-      fd = lfd
-    }
-    else {
-      // This is lame. Would like to 'return nil' ...
-      // TBD: How to do proper error handling in Swift?
-      println("Could not create socket.")
-    }
-    
-    self.init(fd: fd)
-  }
-  
-  public convenience init(address: T) {
+  public convenience init?(address: T) {
     // does not work anymore in b5?: I again need to copy&paste
     // self.init(type: SOCK_STREAM)
     // DUPE:
     let lfd = socket(T.domain, SOCK_STREAM, 0)
-    var fd:  Int32?
-    if lfd != -1 {
-      fd = lfd
-    }
-    else {
-      // This is lame. Would like to 'return nil' ...
-      // TBD: How to do proper error handling in Swift?
-      println("Could not create socket.")
-    }
 
-    self.init(fd: fd)
+    self.init(fd: lfd)
+    if lfd == -1 { return nil }
     
     if isValid {
       reuseAddress = true
       if !bind(address) {
-        close() // TBD: how to signal error state in Swift?
+        close()
+        return nil
       }
     }
   }
