@@ -110,6 +110,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Pure Swift weak delegates via @class
   - [x] Optionals
   - [x] Convenience initializers
+  - [x] Failable initializers
   - [x] Class variables on structs
   - [x] CConstPointer, CConstVoidPointer
     - [x] withCString {}
