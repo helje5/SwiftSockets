@@ -16,7 +16,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
-Updated to use Swift v0.2.0 (aka Xcode 6.3).
+Update in progress to use Swift x.y.z (aka Xcode n).
 
 The project includes three targets:
 - ARISockets
@@ -80,7 +80,8 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
 - [ ] Great error handling
   - [x] PS style great error handling
   - [x] println() error handling
-  - [ ] Real error handling
+  - [ ] Swift 2 try/throw/catch
+    - [ ] Real error handling
 - [x] Twisted (no blocking reads or writes)
   - [x] Async reads and writes
     - [x] Never block on reads
@@ -104,6 +105,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Extensions on structs
   - [x] Extensions to organize classes
   - [x] Protocols on structs
+  - [ ] Swift 2 protocol extensions
   - [x] Tuples, with labels
   - [x] Trailing closures
   - [ ] @Lazy
@@ -142,6 +144,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] final
   - [x] Nil coalescing operator
   - [ ] dynamic
+  - [ ] Swift 2 availability
 
 ###Why?!
 
