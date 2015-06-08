@@ -85,7 +85,7 @@ extension in_addr: StringLiteralConvertible {
   }
 }
 
-extension in_addr: Printable {
+extension in_addr: CustomStringConvertible {
   
   public var description: String {
     return asString
@@ -138,9 +138,9 @@ extension sockaddr_in: SocketAddress {
       }
       else {
         // split string at colon
-        let comps = split(s, maxSplit: 1) { $0 == ":"}
+        let comps = split(s.characters, maxSplit: 1) { $0 == ":"}.map { String($0) }
         if comps.count == 2 {
-          self.init(address: comps[0], port: comps[1].toInt())
+          self.init(address: comps[0], port: Int(comps[1]))
         }
         else {
           assert(comps.count == 1)
@@ -149,7 +149,7 @@ extension sockaddr_in: SocketAddress {
           if isWildcard {
             self.init(address: nil, port: nil)
           }
-          else if let port = c1.toInt() { // it's a number
+          else if let port = Int(c1) { // it's a number
             self.init(address: nil, port: port)
           }
           else { // it's a host
@@ -226,7 +226,7 @@ extension sockaddr_in: StringLiteralConvertible {
   }
 }
 
-extension sockaddr_in: Printable {
+extension sockaddr_in: CustomStringConvertible {
   
   public var description: String {
     return asString
@@ -374,7 +374,7 @@ extension addrinfo {
   }
 }
 
-extension addrinfo : Printable {
+extension addrinfo : CustomStringConvertible {
   
   public var description : String {
     var s = "<addrinfo"
@@ -397,14 +397,13 @@ extension addrinfo : Printable {
       if f != 0 {
         fs.append("flags[\(f)]")
       }
-      let fss = join(",", fs)
+      let fss = ",".join(fs)
       s += " flags=" + fss
     }
     
-    var noop = ""
     if ai_family != AF_UNSPEC { s += sa_family_t(ai_family).description }
     switch ai_socktype {
-      case 0:           noop = "" // really?
+      case 0:           break
       case SOCK_STREAM: s += " stream"
       case SOCK_DGRAM:  s += " datagram"
       default:          s += " type[\(ai_socktype)]"
@@ -437,10 +436,10 @@ extension addrinfo : Printable {
 
 extension addrinfo : SequenceType {
   
-  public func generate() -> GeneratorOf<addrinfo> {
+  public func generate() -> AnyGenerator<addrinfo> {
     var cursor : addrinfo? = self
     
-    return GeneratorOf<addrinfo> {
+    return anyGenerator {
       if let info = cursor {
         cursor = info.next
         return info
@@ -452,10 +451,10 @@ extension addrinfo : SequenceType {
   }
 }
 
-extension sa_family_t : Printable {
+extension sa_family_t { // Swift 2 : CustomStringConvertible, already imp?!
   
+  // TBD: does Swift 2 still pick this up?
   public var description : String {
-    var noop = ""
     switch Int32(self) {
       case AF_UNSPEC: return ""
       case AF_INET:   return "IPv4"

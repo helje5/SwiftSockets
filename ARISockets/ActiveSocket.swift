@@ -67,7 +67,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   public var isConnected : Bool {
     // doesn't work: return isValid ? (remoteAddress != nil) : false
     if !isValid { return false }
-    if let a = remoteAddress { return true } else { return false }
+    if let _ = remoteAddress { return true } else { return false }
   }
   
   
@@ -77,6 +77,12 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     // required, otherwise the convenience one fails to compile
     super.init(fd: fd)
   }
+
+  /* crashes Swift 2 compiler
+  public convenience init?() {
+    self.init(type: SOCK_STREAM)
+  }
+  */
   
   public convenience init
     (fd: Int32?, remoteAddress: T?, queue: dispatch_queue_t? = nil)
@@ -86,7 +92,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     self.remoteAddress  = remoteAddress
     self.queue          = queue
     
-    if let lfd = fd {
+    if let _ = fd {
       isSigPipeDisabled = true
     }
   }
@@ -98,9 +104,9 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   /* close */
   
   override public func close() {
-    if debugClose { println("closing socket \(self)") }
+    if debugClose { print("closing socket \(self)") }
     if !isValid { // already closed
-      if debugClose { println("   already closed.") }
+      if debugClose { print("   already closed.") }
       return
     }
     
@@ -108,25 +114,25 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     // TBD: not sure whether we have a locking issue here, can read&write
     //      occur on different threads in GCD?
     if !didCloseRead {
-      if debugClose { println("   stopping events ...") }
+      if debugClose { print("   stopping events ...") }
       stopEventHandler()
       // Seen this crash - if close() is called from within the readCB?
       readCB = nil // break potential cycles
-      if debugClose { println("   shutdown read channel ...") }
+      if debugClose { print("   shutdown read channel ...") }
       Darwin.shutdown(fd!, SHUT_RD);
       
       didCloseRead = true
     }
     
     if sendCount > 0 {
-      if debugClose { println("   sends pending, requesting close ...") }
+      if debugClose { print("   sends pending, requesting close ...") }
       closeRequested = true
       return
     }
     
     queue = nil // explicitly release, might be a good idea ;-)
     
-    if debugClose { println("   super close.") }
+    if debugClose { print("   super close.") }
     super.close()
   }
   
@@ -140,7 +146,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     }
     if isConnected {
       // TBD: could be tolerant if addresses match
-      println("Socket is already connected \(self)")
+      print("Socket is already connected \(self)")
       return false
     }
     let lfd = fd!
@@ -154,7 +160,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     }
     
     if rc != 0 {
-      println("Could not connect \(self) to \(addr)")
+      print("Could not connect \(self) to \(addr)")
       return false
     }
     
@@ -169,8 +175,8 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   public func onRead(cb: ((ActiveSocket, Int) -> Void)?) -> Self {
     var hadCB    = false // this doesn't work anymore: let hadCB = readCB != nil
     var hasNewCB = false // doesn't work anymore: if cb == nil
-    if let cb  = readCB { hadCB    = true }
-    if let ncb = cb     { hasNewCB = true }
+    if let _ = readCB { hadCB    = true }
+    if let _ = cb     { hasNewCB = true }
     
     if !hasNewCB && hadCB {
       stopEventHandler()
@@ -223,7 +229,7 @@ extension ActiveSocket : OutputStreamType { // writing
   public func write(data: dispatch_data_t) {
     sendCount++
     if debugAsyncWrites {
-      println("async send[\(data)]")
+      print("async send[\(data)]")
     }
     
     // in here we capture self, which I think is right.
@@ -231,14 +237,14 @@ extension ActiveSocket : OutputStreamType { // writing
       asyncData, error in
       
       if self.debugAsyncWrites {
-        println("did send[\(self.sendCount)] data \(data) error \(error)")
+        print("did send[\(self.sendCount)] data \(data) error \(error)")
       }
       
       self.sendCount = self.sendCount - 1 // -- fails?
       
       if self.sendCount == 0 && self.closeRequested {
         if self.debugAsyncWrites {
-          println("closing after async write ...")
+          print("closing after async write ...")
         }
         self.close()
         self.closeRequested = false
@@ -259,7 +265,7 @@ extension ActiveSocket : OutputStreamType { // writing
     }
     
     if queue == nil {
-      println("No queue set, using main queue")
+      print("No queue set, using main queue")
       queue = dispatch_get_main_queue()
     }
     
@@ -282,7 +288,7 @@ extension ActiveSocket : OutputStreamType { // writing
     }
     
     if queue == nil {
-      println("No queue set, using main queue")
+      print("No queue set, using main queue")
       queue = dispatch_get_main_queue()
     }
     
@@ -322,7 +328,7 @@ extension ActiveSocket { // Reading
   public func read() -> ( size: Int, block: UnsafePointer<CChar>, error: Int32){
     let bptr = UnsafePointer<CChar>(readBufferPtr)
     if !isValid {
-      println("Called read() on closed socket \(self)")
+      print("Called read() on closed socket \(self)")
       readBufferPtr[0] = 0
       return ( -42, bptr, EBADF )
     }
@@ -355,14 +361,14 @@ extension ActiveSocket { // Reading
   
   func startEventHandler() -> Bool {
     if readSource != nil {
-      println("Read source already setup?")
+      print("Read source already setup?")
       return true // already setup
     }
     
     /* do we have a queue? */
     
     if queue == nil {
-      println("No queue set, using main queue")
+      print("No queue set, using main queue")
       queue = dispatch_get_main_queue()
     }
     
@@ -375,7 +381,7 @@ extension ActiveSocket { // Reading
       queue
     )
     if readSource == nil {
-      println("Could not create dispatch source for socket \(self)")
+      print("Could not create dispatch source for socket \(self)")
       return false
     }
     
@@ -400,7 +406,7 @@ extension ActiveSocket { // ioctl
     // Note: this doesn't seem to work with GCD, returns 0
     var count = Int32(0)
     let rc    = ari_ioctlVip(fd!, FIONREAD, &count);
-    println("rc \(rc)")
+    print("rc \(rc)")
     return rc != -1 ? Int(count) : nil
   }
   

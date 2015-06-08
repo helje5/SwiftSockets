@@ -39,7 +39,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     socket = ActiveSocket<sockaddr_in>()
-    println("Got socket: \(socket)")
+    print("Got socket: \(socket)")
     if socket == nil {
       return
     }
@@ -47,16 +47,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let s = socket!
     
     s.onRead  { self.handleIncomingData($0, expectedCount: $1) }
-    s.onClose { fd in println("Closing \(fd) ..."); }
+    s.onClose { fd in print("Closing \(fd) ..."); }
     
     // connect
     
     let host = self.host.stringValue
     let port = Int(self.port.intValue)
-    println("Connect \(host):\(port) ...")
+    print("Connect \(host):\(port) ...")
     
     let ok = s.connect(sockaddr_in(address:host, port:port)) {
-      println("connected \(s)")
+      print("connected \(s)")
       s.isNonBlocking = true
       
       s.write(
@@ -68,34 +68,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       )
     }
     if !ok {
-      println("connect failed \(s)")
+      print("connect failed \(s)")
       s.close()
       socket = nil
     }
   }
 
   func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
-    do {
+    repeat {
       let (count, block, errno) = socket.read()
       
       if count < 0 && errno == EWOULDBLOCK {
         break
       }
     
-      println("got bytes: \(count)")
+      print("got bytes: \(count)")
       
       if count < 1 {
-        println("EOF \(socket)")
+        print("EOF \(socket)")
         socket.close()
         return
       }
 
-      println("BLOCK: \(block)")
+      print("BLOCK: \(block)")
       // Sometimes fails in: Can't unwrap Optional.None (at bufsize==count?)
       // FIXME: I think I know why. It may happen if the block boundary is
       //        within a UTF-8 sequence?
       // The end of the block is 100,-30,-128,0
-      var data = String.fromCString(block)! // ignore error, abort
+      let data = String.fromCString(block)! // ignore error, abort
       
       // log to view. Careful, must run in main thread!
       dispatch_async(dispatch_get_main_queue()) {

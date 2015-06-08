@@ -21,7 +21,7 @@ public class Socket<T: SocketAddress> {
   public var isValid      : Bool { return fd != nil }
   public var isBound      : Bool {
     // fails: return boundAddress != nil
-    if let a = boundAddress { return true } else { return false }
+    if let _ = boundAddress { return true } else { return false }
   }
   
   var closeCB  : ((Int32) -> Void)? = nil
@@ -51,20 +51,20 @@ public class Socket<T: SocketAddress> {
   public func close() {
     if fd != nil {
       closedFD = fd
-      if debugClose { println("Closing socket \(closedFD) for good ...") }
+      if debugClose { print("Closing socket \(closedFD) for good ...") }
       Darwin.close(fd!)
       fd       = nil
       
       if let cb = closeCB {
         // can be used to unregister socket etc when the socket is really closed
-        if debugClose { println("  let closeCB \(closedFD) know ...") }
+        if debugClose { print("  let closeCB \(closedFD) know ...") }
         cb(closedFD!)
         closeCB = nil // break potential cycles
       }
-      if debugClose { println("done closing \(closedFD)") }
+      if debugClose { print("done closing \(closedFD)") }
     }
     else if debugClose {
-      println("socket \(closedFD) already closed.")
+      print("socket \(closedFD) already closed.")
     }
     boundAddress = nil
   }
@@ -92,7 +92,7 @@ public class Socket<T: SocketAddress> {
       return false
     }
     if isBound {
-      println("Socket is already bound!")
+      print("Socket is already bound!")
       return false
     }
     let lfd = fd!
@@ -144,7 +144,7 @@ public class Socket<T: SocketAddress> {
     }
     
     if (rc != 0) {
-      println("Could not get sockname? \(rc)")
+      print("Could not get sockname? \(rc)")
       return nil
     }
     
@@ -180,7 +180,7 @@ extension Socket { // Socket Flags
     set {
       let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
       if rc == -1 {
-        println("Could not set new socket flags \(rc)")
+        print("Could not set new socket flags \(rc)")
       }
     }
   }
@@ -191,7 +191,7 @@ extension Socket { // Socket Flags
         return (f & O_NONBLOCK) != 0 ? true : false
       }
       else {
-        println("ERROR: could not get non-blocking socket property!")
+        print("ERROR: could not get non-blocking socket property!")
         return false
       }
     }
@@ -260,7 +260,7 @@ extension Socket { // Socket Options
     let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf,socklen_t(sizeof(Int32)))
     
     if rc != 0 { // ps: Great Error Handling
-      println("Could not set option \(option) on socket \(self)")
+      print("Could not set option \(option) on socket \(self)")
     }
     return rc == 0
   }
@@ -277,7 +277,7 @@ extension Socket { // Socket Options
     
     let rc = getsockopt(fd!, SOL_SOCKET, option, &buf, &buflen)
     if rc != 0 { // ps: Great Error Handling
-      println("Could not get option \(option) from socket \(self)")
+      print("Could not get option \(option) from socket \(self)")
       return nil
     }
     return buf
@@ -330,7 +330,7 @@ extension Socket { // poll()
     let rc  = Darwin.poll(&fds, 1, ctimeout)
     
     if rc < 0 {
-      println("poll() returned an error")
+      print("poll() returned an error")
       return nil
     }
     
@@ -344,7 +344,7 @@ extension Socket { // poll()
       if 0 != (mask & POLLWRNORM) { s += " WRNORM" }
       if 0 != (mask & POLLRDBAND) { s += " RDBAND" }
       if 0 != (mask & POLLWRBAND) { s += " WRBAND" }
-      println("Poll result \(rc) flags \(fds.revents)\(s)")
+      print("Poll result \(rc) flags \(fds.revents)\(s)")
     }
     
     if rc == 0 {
@@ -357,7 +357,7 @@ extension Socket { // poll()
 }
 
 
-extension Socket: Printable {
+extension Socket: CustomStringConvertible {
   
   public var description : String {
     return "<Socket:" + descriptionAttributes() + ">"

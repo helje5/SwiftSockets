@@ -118,7 +118,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
       let lfd = fd! // please the closure and don't capture self
       
       listenSource!.onEvent { _, _ in
-        do {
+        repeat {
           // FIXME: tried to encapsulate this in a sockaddrbuf which does all
           //        the ptr handling, but it ain't work (autoreleasepool issue?)
           var baddr    = T()
@@ -143,7 +143,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
             break
           }
           else { // great logging as Paul says
-            println("Failed to accept() socket: \(self) \(errno)")
+            print("Failed to accept() socket: \(self) \(errno)")
           }
           
         } while (true);
@@ -151,7 +151,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
       
       dispatch_resume(listenSource!)
       
-      let listenOK = listen(backlog: backlog)
+      let listenOK = listen(backlog)
       
       if (listenOK) {
         return true
