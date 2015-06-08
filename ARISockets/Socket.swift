@@ -116,6 +116,15 @@ public class Socket<T: SocketAddress> {
   }
   
   public func getsockname() -> T? {
+    return _getaname(Darwin.getsockname);
+  }
+  public func getpeername() -> T? {
+    return _getaname(Darwin.getpeername);
+  }
+  
+  typealias GetNameFN = ( Int32, UnsafeMutablePointer<sockaddr>,
+                          UnsafeMutablePointer<socklen_t>) -> Int32
+  func _getaname(nfn: GetNameFN) -> T? {
     if !isValid {
       return nil
     }
@@ -131,7 +140,7 @@ public class Socket<T: SocketAddress> {
     let rc = withUnsafeMutablePointer(&baddr) {
       ptr -> Int32 in
       let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
-      return Darwin.getsockname(lfd, bptr, &baddrlen)
+      return nfn(lfd, bptr, &baddrlen)
     }
     
     if (rc != 0) {
