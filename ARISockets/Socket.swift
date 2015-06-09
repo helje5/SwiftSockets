@@ -156,7 +156,7 @@ public class Socket<T: SocketAddress> {
   /* description */
   
   // must live in the main-class as 'declarations in extensions cannot be
-  // overridden yet'
+  // overridden yet' (Same in Swift 2.0)
   func descriptionAttributes() -> String {
     var s = fd != nil
       ? " fd=\(fd!)"
