@@ -149,7 +149,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [x] guard
     - [x] defer
     - [ ] C function pointers
-    - [ ] debugPrint
+    - [x] debugPrint
     - [ ] lowercaseString
 
 ###Why?!
