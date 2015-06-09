@@ -144,7 +144,11 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] final
   - [x] Nil coalescing operator
   - [ ] dynamic
-  - [ ] Swift 2 availability
+  - [ ] Swift 2
+    - [ ] availability
+    - [ ] guard
+    - [ ] defer
+    - [ ] C function pointers
 
 ###Why?!
 
