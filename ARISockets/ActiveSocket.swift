@@ -79,9 +79,19 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
 
   /* crashes Swift 2 compiler
   public convenience init?() {
-    self.init(type: SOCK_STREAM)
+    self.init(type: SOCK_STREAM) // assumption is that we inherit this
+                                 // though it should work right away?
   }
   */
+  public convenience init?(type: Int32 = SOCK_STREAM) {
+    // TODO: copy of Socket.init(type:), but required to compile. Not sure
+    // what's going on with init inheritance here. Do I *have to* read the
+    // manual???
+    let   lfd  = socket(T.domain, type, 0)
+    guard lfd != -1 else { return nil }
+    
+    self.init(fd: lfd)
+  }
   
   public convenience init
     (fd: Int32?, remoteAddress: T?, queue: dispatch_queue_t? = nil)
