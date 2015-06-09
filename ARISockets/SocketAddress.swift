@@ -322,10 +322,9 @@ extension addrinfo {
   }
   
   public var canonicalName : String? {
-    if ai_canonname != nil && ai_canonname[0] != 0 {
-      return String.fromCString(ai_canonname)
-    }
-    return nil
+    guard ai_canonname != nil && ai_canonname[0] != 0 else { return nil }
+    
+    return String.fromCString(ai_canonname)
   }
   
   public var hasAddress : Bool {
@@ -343,32 +342,25 @@ extension addrinfo {
    */
   
   public func address<T: SocketAddress>() -> T? {
-    if ai_addr == nil {
-      return nil
-    }
-    if ai_addr.memory.sa_family != sa_family_t(T.domain) {
-      return nil
-    }
+    guard ai_addr != nil else { return nil }
+    guard ai_addr.memory.sa_family == sa_family_t(T.domain) else { return nil }
+    
     let aiptr = UnsafePointer<T>(ai_addr) // cast
     return aiptr.memory // copies the address to the return value
   }
   
   public var dynamicAddress : SocketAddress? {
-    if !hasAddress {
-      return nil
-    }
+    guard hasAddress else { return nil }
     
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain) {
       let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
       return aiptr.memory // copies the address to the return value
     }
     
-    /* Not working anymore in b4
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in6.domain) {
       let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
       return aiptr.memory // copies the address to the return value
     }
-    */
     
     return nil
   }
@@ -440,13 +432,9 @@ extension addrinfo : SequenceType {
     var cursor : addrinfo? = self
     
     return anyGenerator {
-      if let info = cursor {
-        cursor = info.next
-        return info
-      }
-      else {
-        return .None
-      }
+      guard let info = cursor else { return .None }
+      cursor = info.next
+      return info
     }
   }
 }

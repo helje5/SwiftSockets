@@ -146,9 +146,11 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] dynamic
   - [ ] Swift 2
     - [ ] availability
-    - [ ] guard
-    - [ ] defer
+    - [x] guard
+    - [x] defer
     - [ ] C function pointers
+    - [ ] debugPrint
+    - [ ] lowercaseString
 
 ###Why?!
 

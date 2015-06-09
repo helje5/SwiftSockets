@@ -16,13 +16,10 @@ import Dispatch
  */
 public class Socket<T: SocketAddress> {
   
-  public var fd           : Int32?             = nil
-  public var boundAddress : T?                 = nil
-  public var isValid      : Bool { return fd != nil }
-  public var isBound      : Bool {
-    // fails: return boundAddress != nil
-    if let _ = boundAddress { return true } else { return false }
-  }
+  public var fd           : Int32?  = nil
+  public var boundAddress : T?      = nil
+  public var isValid      : Bool { return fd           != nil }
+  public var isBound      : Bool { return boundAddress != nil }
   
   var closeCB  : ((Int32) -> Void)? = nil
   var closedFD : Int32?             = nil // for delayed callback
@@ -38,9 +35,10 @@ public class Socket<T: SocketAddress> {
   }
   
   public convenience init?(type: Int32 = SOCK_STREAM) {
-    let lfd = socket(T.domain, type, 0)
+    let   lfd  = socket(T.domain, type, 0)
+    guard lfd != -1 else { return nil }
+    
     self.init(fd: lfd)
-    if lfd == -1 { return nil }
   }
   
   
@@ -66,6 +64,7 @@ public class Socket<T: SocketAddress> {
     else if debugClose {
       print("socket \(closedFD) already closed.")
     }
+    
     boundAddress = nil
   }
   
@@ -88,14 +87,12 @@ public class Socket<T: SocketAddress> {
   /* bind the socket. */
   
   public func bind(address: T) -> Bool {
-    if !isValid {
-      return false
-    }
-    if isBound {
+    guard let lfd = fd else { return false }
+    
+    guard !isBound else {
       print("Socket is already bound!")
       return false
     }
-    let lfd = fd!
     
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
@@ -125,10 +122,7 @@ public class Socket<T: SocketAddress> {
   typealias GetNameFN = ( Int32, UnsafeMutablePointer<sockaddr>,
                           UnsafeMutablePointer<socklen_t>) -> Int32
   func _getaname(nfn: GetNameFN) -> T? {
-    if !isValid {
-      return nil
-    }
-    let lfd = fd!
+    guard let lfd = fd else { return nil }
     
     // FIXME: tried to encapsulate this in a sockaddrbuf which does all the
     //        ptr handling, but it ain't work (autoreleasepool issue?)
@@ -143,7 +137,7 @@ public class Socket<T: SocketAddress> {
       return nfn(lfd, bptr, &baddrlen)
     }
     
-    if (rc != 0) {
+    guard rc == 0 else {
       print("Could not get sockname? \(rc)")
       return nil
     }
@@ -320,16 +314,14 @@ extension Socket { // poll()
   
   public func poll(events: Int32, timeout: UInt? = 0) -> Int32? {
     // This is declared as Int32 because the POLLRDNORM and such are
-    if !isValid {
-      return nil
-    }
+    guard isValid else { return nil }
     
     let ctimeout = timeout != nil ? Int32(timeout!) : -1 /* wait forever */
     
     var fds = pollfd(fd: fd!, events: CShort(events), revents: 0)
     let rc  = Darwin.poll(&fds, 1, ctimeout)
     
-    if rc < 0 {
+    guard rc >= 0 else {
       print("poll() returned an error")
       return nil
     }
@@ -347,9 +339,7 @@ extension Socket { // poll()
       print("Poll result \(rc) flags \(fds.revents)\(s)")
     }
     
-    if rc == 0 {
-      return nil
-    }
+    guard rc != 0 else { return nil }
     
     return Int32(fds.revents)
   }

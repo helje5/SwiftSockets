@@ -65,9 +65,8 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   
   public var isConnected : Bool {
-    // doesn't work: return isValid ? (remoteAddress != nil) : false
-    if !isValid { return false }
-    if let _ = remoteAddress { return true } else { return false }
+    guard isValid else { return false }
+    return remoteAddress != nil
   }
   
   
@@ -92,9 +91,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     self.remoteAddress  = remoteAddress
     self.queue          = queue
     
-    if let _ = fd {
-      isSigPipeDisabled = true
-    }
+    isSigPipeDisabled = fd != nil
   }
   deinit {
     readBufferPtr.dealloc(readBufferSize + 2)
@@ -104,9 +101,10 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   /* close */
   
   override public func close() {
-    if debugClose { print("closing socket \(self)") }
-    if !isValid { // already closed
-      if debugClose { print("   already closed.") }
+    if debugClose { debugPrint("closing socket \(self)") }
+    
+    guard isValid else { // already closed
+      if debugClose { debugPrint("   already closed.") }
       return
     }
     
@@ -114,25 +112,25 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     // TBD: not sure whether we have a locking issue here, can read&write
     //      occur on different threads in GCD?
     if !didCloseRead {
-      if debugClose { print("   stopping events ...") }
+      if debugClose { debugPrint("   stopping events ...") }
       stopEventHandler()
       // Seen this crash - if close() is called from within the readCB?
       readCB = nil // break potential cycles
-      if debugClose { print("   shutdown read channel ...") }
+      if debugClose { debugPrint("   shutdown read channel ...") }
       Darwin.shutdown(fd!, SHUT_RD);
       
       didCloseRead = true
     }
     
     if sendCount > 0 {
-      if debugClose { print("   sends pending, requesting close ...") }
+      if debugClose { debugPrint("   sends pending, requesting close ...") }
       closeRequested = true
       return
     }
     
     queue = nil // explicitly release, might be a good idea ;-)
     
-    if debugClose { print("   super close.") }
+    if debugClose { debugPrint("   super close.") }
     super.close()
   }
   
@@ -141,25 +139,23 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   public func connect(address: T, onConnect: () -> Void) -> Bool {
     // FIXME: make connect() asynchronous via GCD
-    if !isValid {
-      return false
-    }
-    if isConnected {
+    
+    guard !isConnected else {
       // TBD: could be tolerant if addresses match
       print("Socket is already connected \(self)")
       return false
     }
-    let lfd = fd!
+    guard let lfd = fd else { return false }
     
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
     
     let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return Darwin.connect(lfd, bptr, socklen_t(addr.len))
+      return Darwin.connect(lfd, bptr, socklen_t(addr.len)) //only returns block
     }
     
-    if rc != 0 {
+    guard rc == 0 else {
       print("Could not connect \(self) to \(addr)")
       return false
     }
@@ -173,10 +169,8 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   /* read */
   
   public func onRead(cb: ((ActiveSocket, Int) -> Void)?) -> Self {
-    var hadCB    = false // this doesn't work anymore: let hadCB = readCB != nil
-    var hasNewCB = false // doesn't work anymore: if cb == nil
-    if let _ = readCB { hadCB    = true }
-    if let _ = cb     { hasNewCB = true }
+    let hadCB    = readCB != nil
+    let hasNewCB = cb != nil
     
     if !hasNewCB && hadCB {
       stopEventHandler()
@@ -215,11 +209,11 @@ extension ActiveSocket : OutputStreamType { // writing
   var debugAsyncWrites : Bool { return false }
   
   public var canWrite : Bool {
-    if !isValid {
+    guard isValid else {
       assert(isValid, "Socket closed, can't do async writes anymore")
       return false
     }
-    if closeRequested {
+    guard !closeRequested else {
       assert(!closeRequested, "Socket is being shutdown already!")
       return false
     }
@@ -228,24 +222,20 @@ extension ActiveSocket : OutputStreamType { // writing
   
   public func write(data: dispatch_data_t) {
     sendCount++
-    if debugAsyncWrites {
-      print("async send[\(data)]")
-    }
+    if debugAsyncWrites { debugPrint("async send[\(data)]") }
     
     // in here we capture self, which I think is right.
     dispatch_write(fd!, data, queue!) {
       asyncData, error in
       
       if self.debugAsyncWrites {
-        print("did send[\(self.sendCount)] data \(data) error \(error)")
+        debugPrint("did send[\(self.sendCount)] data \(data) error \(error)")
       }
       
       self.sendCount = self.sendCount - 1 // -- fails?
       
       if self.sendCount == 0 && self.closeRequested {
-        if self.debugAsyncWrites {
-          print("closing after async write ...")
-        }
+        if self.debugAsyncWrites { debugPrint("closing after async write ...") }
         self.close()
         self.closeRequested = false
       }
@@ -256,47 +246,51 @@ extension ActiveSocket : OutputStreamType { // writing
   public func asyncWrite<T>(buffer: [T]) -> Bool {
     // While [T] seems to convert to ConstUnsafePointer<T>, this method
     // has the added benefit of being able to derive the buffer length
-    if !canWrite { return false }
+    guard canWrite else { return false }
     
     let writelen = buffer.count
     let bufsize  = writelen * sizeof(T)
-    if bufsize < 1 { // Nothing to write ..
+    guard bufsize > 0 else { // Nothing to write ..
       return true
     }
     
     if queue == nil {
-      print("No queue set, using main queue")
+      debugPrint("No queue set, using main queue")
       queue = dispatch_get_main_queue()
     }
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-    let asyncData = dispatch_data_create(buffer, bufsize, queue, nil)
-    write(asyncData!)
+    guard let asyncData = dispatch_data_create(buffer,bufsize, queue,nil) else {
+      return false
+    }
     
+    write(asyncData)
     return true
   }
   
   public func asyncWrite<T>(buffer: UnsafePointer<T>, length:Int) -> Bool {
     // FIXME: can we remove this dupe of the [T] version?
-    if !canWrite { return false }
+    guard canWrite else { return false }
     
     let writelen = length
     let bufsize  = writelen * sizeof(T)
-    if bufsize < 1 { // Nothing to write ..
+    guard bufsize > 0 else { // Nothing to write ..
       return true
     }
     
     if queue == nil {
-      print("No queue set, using main queue")
+      debugPrint("No queue set, using main queue")
       queue = dispatch_get_main_queue()
     }
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-    let asyncData = dispatch_data_create(buffer, bufsize, queue, nil)
-    write(asyncData!)
+    guard let asyncData = dispatch_data_create(buffer,bufsize, queue,nil) else {
+      return false
+    }
     
+    write(asyncData)
     return true
   }
   
@@ -327,7 +321,8 @@ extension ActiveSocket { // Reading
   
   public func read() -> ( size: Int, block: UnsafePointer<CChar>, error: Int32){
     let bptr = UnsafePointer<CChar>(readBufferPtr)
-    if !isValid {
+    
+    guard let fd = self.fd else {
       print("Called read() on closed socket \(self)")
       readBufferPtr[0] = 0
       return ( -42, bptr, EBADF )
@@ -335,12 +330,11 @@ extension ActiveSocket { // Reading
     
     var readCount: Int = 0
     let bufsize = readBufferSize
-    let fd      = self.fd!
     
     // FIXME: If I just close the Terminal which hosts telnet this continues
     //        to read garbage from the server. Even with SIGPIPE off.
     readCount = Darwin.read(fd, readBufferPtr, bufsize)
-    if readCount < 0 {
+    guard readCount >= 0 else {
       readBufferPtr[0] = 0
       return ( readCount, bptr, errno )
     }
@@ -360,7 +354,7 @@ extension ActiveSocket { // Reading
   }
   
   func startEventHandler() -> Bool {
-    if readSource != nil {
+    guard readSource == nil else {
       print("Read source already setup?")
       return true // already setup
     }
@@ -368,24 +362,23 @@ extension ActiveSocket { // Reading
     /* do we have a queue? */
     
     if queue == nil {
-      print("No queue set, using main queue")
+      debugPrint("No queue set, using main queue")
       queue = dispatch_get_main_queue()
     }
     
     /* setup GCD dispatch source */
     
-    readSource = dispatch_source_create(
+    guard let readSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
       UInt(fd!), // is this going to bite us?
       0,
       queue
-    )
-    if readSource == nil {
+    ) else {
       print("Could not create dispatch source for socket \(self)")
       return false
     }
     
-    readSource!.onEvent {
+    readSource.onEvent {
       [unowned self] _, readCount in
       if let cb = self.readCB {
         cb(self, Int(readCount))
@@ -393,7 +386,7 @@ extension ActiveSocket { // Reading
     }
     
     /* actually start listening ... */
-    dispatch_resume(readSource!)
+    dispatch_resume(readSource)
     
     return true
   }
