@@ -25,7 +25,7 @@ class EchoServer {
       lcb(s)
     }
     else {
-      println(s)
+      print(s)
     }
   }
   
@@ -90,7 +90,7 @@ class EchoServer {
   
   func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
     // remove from openSockets if all has been read
-    do {
+    repeat {
       // FIXME: This currently continues to read garbage if I just close the
       //        Terminal which hosts telnet. Even with sigpipe off.
       let (count, block, errno) = socket.read()

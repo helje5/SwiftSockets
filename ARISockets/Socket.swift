@@ -16,13 +16,10 @@ import Dispatch
  */
 public class Socket<T: SocketAddress> {
   
-  public var fd           : Int32?             = nil
-  public var boundAddress : T?                 = nil
-  public var isValid      : Bool { return fd != nil }
-  public var isBound      : Bool {
-    // fails: return boundAddress != nil
-    if let a = boundAddress { return true } else { return false }
-  }
+  public var fd           : Int32?  = nil
+  public var boundAddress : T?      = nil
+  public var isValid      : Bool { return fd           != nil }
+  public var isBound      : Bool { return boundAddress != nil }
   
   var closeCB  : ((Int32) -> Void)? = nil
   var closedFD : Int32?             = nil // for delayed callback
@@ -38,9 +35,10 @@ public class Socket<T: SocketAddress> {
   }
   
   public convenience init?(type: Int32 = SOCK_STREAM) {
-    let lfd = socket(T.domain, type, 0)
+    let   lfd  = socket(T.domain, type, 0)
+    guard lfd != -1 else { return nil }
+    
     self.init(fd: lfd)
-    if lfd == -1 { return nil }
   }
   
   
@@ -51,21 +49,22 @@ public class Socket<T: SocketAddress> {
   public func close() {
     if fd != nil {
       closedFD = fd
-      if debugClose { println("Closing socket \(closedFD) for good ...") }
+      if debugClose { print("Closing socket \(closedFD) for good ...") }
       Darwin.close(fd!)
       fd       = nil
       
       if let cb = closeCB {
         // can be used to unregister socket etc when the socket is really closed
-        if debugClose { println("  let closeCB \(closedFD) know ...") }
+        if debugClose { print("  let closeCB \(closedFD) know ...") }
         cb(closedFD!)
         closeCB = nil // break potential cycles
       }
-      if debugClose { println("done closing \(closedFD)") }
+      if debugClose { print("done closing \(closedFD)") }
     }
     else if debugClose {
-      println("socket \(closedFD) already closed.")
+      print("socket \(closedFD) already closed.")
     }
+    
     boundAddress = nil
   }
   
@@ -88,14 +87,12 @@ public class Socket<T: SocketAddress> {
   /* bind the socket. */
   
   public func bind(address: T) -> Bool {
-    if !isValid {
+    guard let lfd = fd else { return false }
+    
+    guard !isBound else {
+      print("Socket is already bound!")
       return false
     }
-    if isBound {
-      println("Socket is already bound!")
-      return false
-    }
-    let lfd = fd!
     
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
@@ -125,10 +122,7 @@ public class Socket<T: SocketAddress> {
   typealias GetNameFN = ( Int32, UnsafeMutablePointer<sockaddr>,
                           UnsafeMutablePointer<socklen_t>) -> Int32
   func _getaname(nfn: GetNameFN) -> T? {
-    if !isValid {
-      return nil
-    }
-    let lfd = fd!
+    guard let lfd = fd else { return nil }
     
     // FIXME: tried to encapsulate this in a sockaddrbuf which does all the
     //        ptr handling, but it ain't work (autoreleasepool issue?)
@@ -143,8 +137,8 @@ public class Socket<T: SocketAddress> {
       return nfn(lfd, bptr, &baddrlen)
     }
     
-    if (rc != 0) {
-      println("Could not get sockname? \(rc)")
+    guard rc == 0 else {
+      print("Could not get sockname? \(rc)")
       return nil
     }
     
@@ -156,7 +150,7 @@ public class Socket<T: SocketAddress> {
   /* description */
   
   // must live in the main-class as 'declarations in extensions cannot be
-  // overridden yet'
+  // overridden yet' (Same in Swift 2.0)
   func descriptionAttributes() -> String {
     var s = fd != nil
       ? " fd=\(fd!)"
@@ -180,7 +174,7 @@ extension Socket { // Socket Flags
     set {
       let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
       if rc == -1 {
-        println("Could not set new socket flags \(rc)")
+        print("Could not set new socket flags \(rc)")
       }
     }
   }
@@ -191,7 +185,7 @@ extension Socket { // Socket Flags
         return (f & O_NONBLOCK) != 0 ? true : false
       }
       else {
-        println("ERROR: could not get non-blocking socket property!")
+        print("ERROR: could not get non-blocking socket property!")
         return false
       }
     }
@@ -260,7 +254,7 @@ extension Socket { // Socket Options
     let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf,socklen_t(sizeof(Int32)))
     
     if rc != 0 { // ps: Great Error Handling
-      println("Could not set option \(option) on socket \(self)")
+      print("Could not set option \(option) on socket \(self)")
     }
     return rc == 0
   }
@@ -277,7 +271,7 @@ extension Socket { // Socket Options
     
     let rc = getsockopt(fd!, SOL_SOCKET, option, &buf, &buflen)
     if rc != 0 { // ps: Great Error Handling
-      println("Could not get option \(option) from socket \(self)")
+      print("Could not get option \(option) from socket \(self)")
       return nil
     }
     return buf
@@ -320,17 +314,15 @@ extension Socket { // poll()
   
   public func poll(events: Int32, timeout: UInt? = 0) -> Int32? {
     // This is declared as Int32 because the POLLRDNORM and such are
-    if !isValid {
-      return nil
-    }
+    guard isValid else { return nil }
     
     let ctimeout = timeout != nil ? Int32(timeout!) : -1 /* wait forever */
     
     var fds = pollfd(fd: fd!, events: CShort(events), revents: 0)
     let rc  = Darwin.poll(&fds, 1, ctimeout)
     
-    if rc < 0 {
-      println("poll() returned an error")
+    guard rc >= 0 else {
+      print("poll() returned an error")
       return nil
     }
     
@@ -344,12 +336,10 @@ extension Socket { // poll()
       if 0 != (mask & POLLWRNORM) { s += " WRNORM" }
       if 0 != (mask & POLLRDBAND) { s += " RDBAND" }
       if 0 != (mask & POLLWRBAND) { s += " WRBAND" }
-      println("Poll result \(rc) flags \(fds.revents)\(s)")
+      print("Poll result \(rc) flags \(fds.revents)\(s)")
     }
     
-    if rc == 0 {
-      return nil
-    }
+    guard rc != 0 else { return nil }
     
     return Int32(fds.revents)
   }
@@ -357,7 +347,7 @@ extension Socket { // poll()
 }
 
 
-extension Socket: Printable {
+extension Socket: CustomStringConvertible {
   
   public var description : String {
     return "<Socket:" + descriptionAttributes() + ">"
