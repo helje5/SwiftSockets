@@ -16,7 +16,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
-Update in progress to use Swift x.y.z (aka Xcode n).
+Update in progress to use Swift 2.x (aka Xcode 7bY).
 
 The project includes three targets:
 - ARISockets
@@ -35,9 +35,9 @@ Server Sample:
 ```swift
 let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))!
   .listen(dispatch_get_global_queue(0, 0), backlog: 5) {
-    println("Wait, someone is attempting to talk to me!")
+    print("Wait, someone is attempting to talk to me!")
     $0.close()
-    println("All good, go ahead!")
+    print("All good, go ahead!")
   }
 ```
 
@@ -46,8 +46,8 @@ Client Sample:
 let socket = ActiveSocket<sockaddr_in>()!
   .onRead {
     let (count, block, errno) = $0.read()
-    if count < 1 {
-      println("EOF, or great error handling \(errno).")
+    guard count > 0 else {
+      print("EOF, or great error handling \(errno).")
       return
     }
     println("Answer to ring,ring is: \(count) bytes: \(block)")
