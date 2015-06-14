@@ -26,9 +26,9 @@ public typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
  *   let socket = PassiveSocket(address: sockaddr_in(port: 4242))
  *
  *   socket.listen(dispatch_get_global_queue(0, 0), backlog: 5) {
- *     println("Wait, someone is attempting to talk to me!")
+ *     print("Wait, someone is attempting to talk to me!")
  *     $0.close()
- *     println("All good, go ahead!")
+ *     print("All good, go ahead!")
  *   }
  */
 public class PassiveSocket<T: SocketAddress>: Socket<T> {

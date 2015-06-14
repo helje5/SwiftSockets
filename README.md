@@ -50,7 +50,7 @@ let socket = ActiveSocket<sockaddr_in>()!
       print("EOF, or great error handling \(errno).")
       return
     }
-    println("Answer to ring,ring is: \(count) bytes: \(block)")
+    print("Answer to ring,ring is: \(count) bytes: \(block)")
   }
   .connect("127.0.0.1:80") {
     socket.write("Ring, ring!\r\n")
@@ -79,7 +79,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
 - [x] Max line length: 80 characters
 - [ ] Great error handling
   - [x] PS style great error handling
-  - [x] println() error handling
+  - [x] print() error handling
   - [ ] Swift 2 try/throw/catch
     - [ ] Real error handling
 - [x] Twisted (no blocking reads or writes)

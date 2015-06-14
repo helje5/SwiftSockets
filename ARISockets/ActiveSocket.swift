@@ -32,10 +32,10 @@ public typealias ActiveSocketIPv4 = ActiveSocket<sockaddr_in>
  *     .onRead {
  *       let (count, block) = $0.read()
  *       if count < 1 {
- *         println("EOF, or great error handling.")
+ *         print("EOF, or great error handling.")
  *         return
  *       }
- *       println("Answer to ring,ring is: \(count) bytes: \(block)")
+ *       print("Answer to ring,ring is: \(count) bytes: \(block)")
  *     }
  *   socket.connect(sockaddr_in(address:"127.0.0.1", port: 80))
  *   socket.write("Ring, ring!\r\n")

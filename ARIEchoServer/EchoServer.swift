@@ -73,8 +73,8 @@ class EchoServer {
   }
   
   func sendWelcome<T: OutputStreamType>(var sock: T) {
-    // Hm, how to use println(), this doesn't work for me:
-    //   println(s, target: sock)
+    // Hm, how to use print(), this doesn't work for me:
+    //   print(s, target: sock)
     // (just writes the socket as a value, likely a tuple)
     
     sock.write("\r\n" +

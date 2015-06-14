@@ -51,7 +51,7 @@ func gethoztbyname<T: SocketAddress>
  *   gethostzbyname(hhost, flags: Int32(AI_CANONNAME)) {
  *     ( cn: String, infos: [ ( cn: String?, address: sockaddr_in? )]? ) -> Void
  *     in
- *     println("result \(cn): \(infos)")
+ *     print("result \(cn): \(infos)")
  *   }
  *
  * TBD: The 'flags' has to be provided, otherwise the trailing closure is not
