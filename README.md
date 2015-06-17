@@ -105,7 +105,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Extensions on structs
   - [x] Extensions to organize classes
   - [x] Protocols on structs
-  - [ ] Swift 2 protocol extensions
+  - [ ] Swift 2 protocol extensions (crashes swiftc2)
   - [x] Tuples, with labels
   - [x] Trailing closures
   - [ ] @Lazy
