@@ -53,7 +53,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   // let the socket own the read buffer, what is the best buffer type?
   //var readBuffer     : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
-  var readBufferPtr    = UnsafeMutablePointer<CChar>.alloc(4096 + 2)
+  var readBufferPtr  = UnsafeMutablePointer<CChar>.alloc(4096 + 2)
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
       if readBufferSize != oldValue {
