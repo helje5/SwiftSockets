@@ -77,7 +77,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     super.init(fd: fd)
   }
 
-  /* crashes Swift 2 compiler
+  /* Still crashes Swift 2b3 compiler (when the method below is removed)
   public convenience init?() {
     self.init(type: SOCK_STREAM) // assumption is that we inherit this
                                  // though it should work right away?
