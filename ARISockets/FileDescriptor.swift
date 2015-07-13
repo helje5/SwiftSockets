@@ -61,13 +61,15 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     return ( nil, buf )
   }
   
-  public func write(buffer: [ UInt8 ], var count: Int = -1)
+  public func write<T>(buffer: [ T ], var count: Int = -1)
                 -> ( ErrorType?, Int )
   {
     guard buffer.count > 0 else { return ( nil, 0 ) }
     
     if count < 0 { count = buffer.count }
     
+    // TODO: This is funny. It accepts an array of any type?!
+    //       Is it actually what we want?
     let writeCount = Darwin.write(fd, buffer, count)
     
     guard writeCount >= 0 else {
@@ -80,7 +82,7 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   
   // MARK: - File Descriptor
   
-  public var isValid : Bool { return fd >= 0 }
+  public var isValid   : Bool { return fd >= 0 }
   
   
   // MARK: - Description
@@ -189,6 +191,13 @@ public extension FileDescriptor {
     return Int32(fds.revents)
   }
 
+  var numberOfBytesAvailableForReading : Int? {
+    // Note: this doesn't seem to work with GCD, returns 0
+    var count = Int32(0)
+    let rc    = ari_ioctlVip(fd, FIONREAD, &count);
+    print("rc \(rc)")
+    return rc != -1 ? Int(count) : nil
+  }
 }
 
 private func pollMaskToString(mask16: Int16) -> String {
@@ -205,6 +214,19 @@ private func pollMaskToString(mask16: Int16) -> String {
 }
 
 
+// MARK: - Equatable, Hashable
+
+extension FileDescriptor: Equatable, Hashable {
+
+  public var hashValue: Int { return fd.hashValue }
+  
+}
+
+public func ==(lhs: FileDescriptor, rhs: FileDescriptor) -> Bool {
+  return lhs.fd == rhs.fd
+}
+
+
 // MARK: - Description
 
 extension FileDescriptor: CustomStringConvertible {
@@ -218,7 +240,7 @@ extension FileDescriptor: CustomStringConvertible {
 
 // MARK: - Boolean
 
-extension FileDescriptor: BooleanType {
+extension FileDescriptor: BooleanType { // TBD: Swift doesn't want us to do this
   
   public var boolValue : Bool {
     return isValid
