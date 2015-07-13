@@ -72,7 +72,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   /* init */
   
-  override public init(fd: Int32?) {
+  override public init(fd: FileDescriptor) {
     // required, otherwise the convenience one fails to compile
     super.init(fd: fd)
   }
@@ -90,18 +90,18 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     let   lfd  = socket(T.domain, type, 0)
     guard lfd != -1 else { return nil }
     
-    self.init(fd: lfd)
+    self.init(fd: FileDescriptor(lfd))
   }
   
   public convenience init
-    (fd: Int32?, remoteAddress: T?, queue: dispatch_queue_t? = nil)
+    (fd: FileDescriptor, remoteAddress: T?, queue: dispatch_queue_t? = nil)
   {
     self.init(fd: fd)
     
     self.remoteAddress  = remoteAddress
     self.queue          = queue
     
-    isSigPipeDisabled = fd != nil
+    isSigPipeDisabled = fd.isValid // hm, hm?
   }
   deinit {
     readBufferPtr.dealloc(readBufferSize + 2)
@@ -127,7 +127,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       // Seen this crash - if close() is called from within the readCB?
       readCB = nil // break potential cycles
       if debugClose { debugPrint("   shutdown read channel ...") }
-      Darwin.shutdown(fd!, SHUT_RD);
+      Darwin.shutdown(fd.fd, SHUT_RD);
       
       didCloseRead = true
     }
@@ -155,11 +155,12 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       print("Socket is already connected \(self)")
       return false
     }
-    guard let lfd = fd else { return false }
+    guard fd.isValid else { return false }
     
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
     
+    let lfd = fd.fd
     let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
       return Darwin.connect(lfd, bptr, socklen_t(addr.len)) //only returns block
@@ -235,7 +236,7 @@ extension ActiveSocket : OutputStreamType { // writing
     if debugAsyncWrites { debugPrint("async send[\(data)]") }
     
     // in here we capture self, which I think is right.
-    dispatch_write(fd!, data, queue!) {
+    dispatch_write(fd.fd, data, queue!) {
       asyncData, error in
       
       if self.debugAsyncWrites {
@@ -305,11 +306,12 @@ extension ActiveSocket : OutputStreamType { // writing
   }
   
   public func send<T>(buffer: [T], length: Int? = nil) -> Int {
-    var writeCount : Int = 0
+    // var writeCount : Int = 0
     let bufsize    = length ?? buffer.count
-    let fd         = self.fd!
     
-    writeCount = Darwin.write(fd, buffer, bufsize)
+    // this is funky
+    let ( _, writeCount ) = fd.write(buffer, count: bufsize)
+
     return writeCount
   }
   
@@ -332,7 +334,7 @@ extension ActiveSocket { // Reading
   public func read() -> ( size: Int, block: UnsafePointer<CChar>, error: Int32){
     let bptr = UnsafePointer<CChar>(readBufferPtr)
     
-    guard let fd = self.fd else {
+    guard fd.isValid else {
       print("Called read() on closed socket \(self)")
       readBufferPtr[0] = 0
       return ( -42, bptr, EBADF )
@@ -343,7 +345,7 @@ extension ActiveSocket { // Reading
     
     // FIXME: If I just close the Terminal which hosts telnet this continues
     //        to read garbage from the server. Even with SIGPIPE off.
-    readCount = Darwin.read(fd, readBufferPtr, bufsize)
+    readCount = Darwin.read(fd.fd, readBufferPtr, bufsize)
     guard readCount >= 0 else {
       readBufferPtr[0] = 0
       return ( readCount, bptr, errno )
@@ -380,7 +382,7 @@ extension ActiveSocket { // Reading
     
     guard let readSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
-      UInt(fd!), // is this going to bite us?
+      UInt(fd.fd), // is this going to bite us?
       0,
       queue
     ) else {
@@ -406,11 +408,7 @@ extension ActiveSocket { // Reading
 extension ActiveSocket { // ioctl
   
   var numberOfBytesAvailableForReading : Int? {
-    // Note: this doesn't seem to work with GCD, returns 0
-    var count = Int32(0)
-    let rc    = ari_ioctlVip(fd!, FIONREAD, &count);
-    print("rc \(rc)")
-    return rc != -1 ? Int(count) : nil
+    return fd.numberOfBytesAvailableForReading
   }
   
 }

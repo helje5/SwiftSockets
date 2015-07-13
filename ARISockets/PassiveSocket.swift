@@ -40,7 +40,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
   /* init */
   // The overloading behaviour gets more weird every release?
 
-  override public init(fd: Int32?) {
+  override public init(fd: FileDescriptor) {
     // required, otherwise the convenience one fails to compile
     super.init(fd: fd)
   }
@@ -52,7 +52,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     let lfd = socket(T.domain, SOCK_STREAM, 0)
     guard lfd != -1 else { return nil }
 
-    self.init(fd: lfd)
+    self.init(fd: FileDescriptor(lfd))
     
     if isValid {
       reuseAddress = true
@@ -79,7 +79,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     guard isValid      else { return false }
     guard !isListening else { return true }
     
-    let rc = Darwin.listen(fd!, Int32(backlog))
+    let rc = Darwin.listen(fd.fd, Int32(backlog))
     guard rc == 0 else { return false }
     
     self.backlog       = backlog
@@ -93,20 +93,22 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
                      accept: ( TypedActiveSocket ) -> Void)
     -> Bool
   {
-    guard let lfd = fd else { return false }
+    guard fd.isValid   else { return false }
     guard !isListening else { return false }
     
     /* setup GCD dispatch source */
     
     guard let listenSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
-      UInt(fd!), // is this going to bite us?
+      UInt(fd.fd), // is this going to bite us?
       0,
       queue
     )
     else {
       return false
     }
+    
+    let lfd = fd.fd
     
     listenSource.onEvent { _, _ in
       repeat {
@@ -125,7 +127,8 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
           // we pass over the queue, seems convenient. Not sure what kind of
           // queue setup a typical server would want to have
           let newSocket =
-            TypedActiveSocket(fd: newFD, remoteAddress: baddr, queue: queue)
+            TypedActiveSocket(fd: FileDescriptor(newFD),
+                              remoteAddress: baddr, queue: queue)
           newSocket.isSigPipeDisabled = true
           
           accept(newSocket)

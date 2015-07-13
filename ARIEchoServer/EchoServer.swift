@@ -13,7 +13,7 @@ class EchoServer {
   let port         : Int
   var listenSocket : PassiveSocketIPv4?
   let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
-  var openSockets  = [Int32:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
+  var openSockets  = [FileDescriptor:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
   
   init(port: Int) {
@@ -48,13 +48,13 @@ class EchoServer {
       
       dispatch_async(self.lockQueue) {
         // Note: we need to keep the socket around!!
-        self.openSockets[newSock.fd!] = newSock
+        self.openSockets[newSock.fd] = newSock
       }
       
       self.sendWelcome(newSock)
       
       newSock.onRead  { self.handleIncomingData($0, expectedCount: $1) }
-             .onClose { ( fd: Int32 ) -> Void in
+             .onClose { ( fd: FileDescriptor ) -> Void in
         // we need to consume the return value to give peace to the closure
         dispatch_async(self.lockQueue) { [unowned self] in
           _ = self.openSockets.removeValueForKey(fd)
