@@ -1,6 +1,6 @@
 //
 //  ActiveSocket.swift
-//  TestSwiftyCocoa
+//  ARISockets
 //
 //  Created by Helge Hess on 6/11/14.
 //  Copyright (c) 2014 Always Right Institute. All rights reserved.

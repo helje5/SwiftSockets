@@ -1,6 +1,6 @@
 //
 //  ARISocket.swift
-//  TestSwiftyCocoa
+//  ARISockets
 //
 //  Created by Helge Heß on 6/9/14.
 //  Copyright (c) 2014 Always Right Institute. All rights reserved.
