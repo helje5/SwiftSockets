@@ -87,10 +87,8 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     return true
   }
   
-  typealias TypedActiveSocket = ActiveSocket<T>
-  
   public func listen(queue: dispatch_queue_t, backlog: Int = 5,
-                     accept: ( TypedActiveSocket ) -> Void)
+                     accept: ( ActiveSocket<T> ) -> Void)
     -> Bool
   {
     guard fd.isValid   else { return false }
@@ -126,9 +124,8 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
         if newFD != -1 {
           // we pass over the queue, seems convenient. Not sure what kind of
           // queue setup a typical server would want to have
-          let newSocket =
-            TypedActiveSocket(fd: FileDescriptor(newFD),
-                              remoteAddress: baddr, queue: queue)
+          let newSocket = ActiveSocket<T>(fd: FileDescriptor(newFD),
+                                          remoteAddress: baddr, queue: queue)
           newSocket.isSigPipeDisabled = true
           
           accept(newSocket)
