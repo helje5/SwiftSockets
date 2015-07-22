@@ -380,25 +380,27 @@ extension ActiveSocket { // Reading
     
     /* setup GCD dispatch source */
     
-    guard let readSource = dispatch_source_create(
+    readSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
       0,
       queue
-    ) else {
+    )
+    guard readSource != nil else {
       print("Could not create dispatch source for socket \(self)")
       return false
     }
     
-    readSource.onEvent {
-      [unowned self] _, readCount in
+    // TBD: do we create a retain cycle here (self vs self.readSource)
+    readSource!.onEvent { [unowned self]
+      _, readCount in
       if let cb = self.readCB {
         cb(self, Int(readCount))
       }
     }
     
     /* actually start listening ... */
-    dispatch_resume(readSource)
+    dispatch_resume(readSource!)
     
     return true
   }
