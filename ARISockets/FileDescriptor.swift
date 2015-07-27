@@ -11,6 +11,10 @@ import Darwin
 /// This essentially wraps the Integer representing a file descriptor in a
 /// struct for the whole reason to attach methods to it.
 public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
+
+  public static let stdin  = FileDescriptor(STDIN_FILENO)
+  public static let stdout = FileDescriptor(STDOUT_FILENO)
+  public static let stderr = FileDescriptor(STDERR_FILENO)
   
   public let fd : Int32
   
