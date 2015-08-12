@@ -138,13 +138,13 @@ extension sockaddr_in: SocketAddress {
       }
       else {
         // split string at colon
-        let comps = split(s.characters, maxSplit: 1) { $0 == ":"}.map { String($0) }
-        if comps.count == 2 {
-          self.init(address: comps[0], port: Int(comps[1]))
+        let components = s.characters.split(":", maxSplit: 1).map { String($0) }
+        if components.count == 2 {
+          self.init(address: components[0], port: Int(components[1]))
         }
         else {
-          assert(comps.count == 1)
-          let c1 = comps[0]
+          assert(components.count == 1)
+          let c1         = components[0]
           let isWildcard = (c1 == "*" || c1 == "*.*.*.*")
           if isWildcard {
             self.init(address: nil, port: nil)

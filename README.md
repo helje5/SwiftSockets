@@ -16,7 +16,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
-Update in progress to use Swift 2.x (aka Xcode 7bY).
+Updated for Swift 0.2 beta 5 (aka Xcode 7b5).
 
 The project includes three targets:
 - ARISockets
