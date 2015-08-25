@@ -389,7 +389,7 @@ extension addrinfo : CustomStringConvertible {
       if f != 0 {
         fs.append("flags[\(f)]")
       }
-      let fss = ",".join(fs)
+      let fss = fs.joinWithSeparator(",")
       s += " flags=" + fss
     }
     
