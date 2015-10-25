@@ -147,7 +147,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   /* connect */
   
-  public func connect(address: T, onConnect: () -> Void) -> Bool {
+  public func connect(address: T, onConnect: ( ActiveSocket<T> ) -> Void) -> Bool {
     // FIXME: make connect() asynchronous via GCD
     
     guard !isConnected else {
@@ -172,7 +172,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     }
     
     remoteAddress = addr
-    onConnect()
+    onConnect(self)
     
     return true
   }

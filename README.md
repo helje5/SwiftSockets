@@ -44,15 +44,15 @@ let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))!
 Client Sample:
 ```swift
 let socket = ActiveSocket<sockaddr_in>()!
-  .onRead {
-    let (count, block, errno) = $0.read()
+  .onRead { sock, _ in
+    let (count, block, errno) = sock.read() // $0 for sock doesn't work anymore?
     guard count > 0 else {
       print("EOF, or great error handling \(errno).")
       return
     }
     print("Answer to ring,ring is: \(count) bytes: \(block)")
   }
-  .connect("127.0.0.1:80") {
+  .connect("127.0.0.1:80") { socket in
     socket.write("Ring, ring!\r\n")
   }
 ```
