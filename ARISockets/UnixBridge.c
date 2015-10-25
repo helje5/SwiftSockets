@@ -4,7 +4,6 @@
 //
 //  Created by Helge Heß on 6/26/14.
 //
-//
 
 #include <fcntl.h>
 #include <sys/ioctl.h>

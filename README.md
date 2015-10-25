@@ -16,7 +16,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
-Updated to use Swift v0.2.0 (aka Xcode 6.3).
+Updated for Swift 0.2 (aka Xcode 7.0).
 
 The project includes three targets:
 - ARISockets
@@ -35,24 +35,24 @@ Server Sample:
 ```swift
 let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))!
   .listen(dispatch_get_global_queue(0, 0), backlog: 5) {
-    println("Wait, someone is attempting to talk to me!")
+    print("Wait, someone is attempting to talk to me!")
     $0.close()
-    println("All good, go ahead!")
+    print("All good, go ahead!")
   }
 ```
 
 Client Sample:
 ```swift
 let socket = ActiveSocket<sockaddr_in>()!
-  .onRead {
-    let (count, block, errno) = $0.read()
-    if count < 1 {
-      println("EOF, or great error handling \(errno).")
+  .onRead { sock, _ in
+    let (count, block, errno) = sock.read() // $0 for sock doesn't work anymore?
+    guard count > 0 else {
+      print("EOF, or great error handling \(errno).")
       return
     }
-    println("Answer to ring,ring is: \(count) bytes: \(block)")
+    print("Answer to ring,ring is: \(count) bytes: \(block)")
   }
-  .connect("127.0.0.1:80") {
+  .connect("127.0.0.1:80") { socket in
     socket.write("Ring, ring!\r\n")
   }
 ```
@@ -79,8 +79,9 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
 - [x] Max line length: 80 characters
 - [ ] Great error handling
   - [x] PS style great error handling
-  - [x] println() error handling
-  - [ ] Real error handling
+  - [x] print() error handling
+  - [ ] Swift 2 try/throw/catch
+    - [ ] Real error handling
 - [x] Twisted (no blocking reads or writes)
   - [x] Async reads and writes
     - [x] Never block on reads
@@ -104,6 +105,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] Extensions on structs
   - [x] Extensions to organize classes
   - [x] Protocols on structs
+  - [ ] Swift 2 protocol extensions
   - [x] Tuples, with labels
   - [x] Trailing closures
   - [ ] @Lazy
@@ -142,6 +144,13 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] final
   - [x] Nil coalescing operator
   - [ ] dynamic
+  - [ ] Swift 2
+    - [ ] availability
+    - [x] guard
+    - [x] defer
+    - [ ] C function pointers
+    - [x] debugPrint
+    - [ ] lowercaseString
 
 ###Why?!
 

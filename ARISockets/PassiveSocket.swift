@@ -1,6 +1,6 @@
 //
 //  PassiveSocket.swift
-//  TestSwiftyCocoa
+//  ARISockets
 //
 //  Created by Helge Hess on 6/11/14.
 //  Copyright (c) 2014 Always Right Institute. All rights reserved.
@@ -26,9 +26,9 @@ public typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
  *   let socket = PassiveSocket(address: sockaddr_in(port: 4242))
  *
  *   socket.listen(dispatch_get_global_queue(0, 0), backlog: 5) {
- *     println("Wait, someone is attempting to talk to me!")
+ *     print("Wait, someone is attempting to talk to me!")
  *     $0.close()
- *     println("All good, go ahead!")
+ *     print("All good, go ahead!")
  *   }
  */
 public class PassiveSocket<T: SocketAddress>: Socket<T> {
@@ -40,7 +40,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
   /* init */
   // The overloading behaviour gets more weird every release?
 
-  override public init(fd: Int32?) {
+  override public init(fd: FileDescriptor) {
     // required, otherwise the convenience one fails to compile
     super.init(fd: fd)
   }
@@ -50,9 +50,9 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     // self.init(type: SOCK_STREAM)
     // DUPE:
     let lfd = socket(T.domain, SOCK_STREAM, 0)
+    guard lfd != -1 else { return nil }
 
-    self.init(fd: lfd)
-    if lfd == -1 { return nil }
+    self.init(fd: FileDescriptor(lfd))
     
     if isValid {
       reuseAddress = true
@@ -76,93 +76,78 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
   /* start listening */
   
   public func listen(backlog: Int = 5) -> Bool {
-    if !isValid {
-      return false
-    }
-    if isListening {
-      return true
-    }
+    guard isValid      else { return false }
+    guard !isListening else { return true }
     
-    let rc = Darwin.listen(fd!, Int32(backlog))
-    if (rc != 0) {
-      return false
-    }
+    let rc = Darwin.listen(fd.fd, Int32(backlog))
+    guard rc == 0 else { return false }
+    
     self.backlog       = backlog
     self.isNonBlocking = true
     return true
   }
   
-  typealias TypedActiveSocket = ActiveSocket<T>
-  
   public func listen(queue: dispatch_queue_t, backlog: Int = 5,
-                     accept: ( TypedActiveSocket ) -> Void)
+                     accept: ( ActiveSocket<T> ) -> Void)
     -> Bool
   {
-    if !isValid {
-      return false
-    }
-    if isListening {
-      return false
-    }
+    guard fd.isValid   else { return false }
+    guard !isListening else { return false }
     
     /* setup GCD dispatch source */
     
-    listenSource = dispatch_source_create(
+    guard let listenSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
-      UInt(fd!), // is this going to bite us?
+      UInt(fd.fd), // is this going to bite us?
       0,
       queue
     )
-    
-    if listenSource != nil {
-      let lfd = fd! // please the closure and don't capture self
-      
-      listenSource!.onEvent { _, _ in
-        do {
-          // FIXME: tried to encapsulate this in a sockaddrbuf which does all
-          //        the ptr handling, but it ain't work (autoreleasepool issue?)
-          var baddr    = T()
-          var baddrlen = socklen_t(baddr.len)
-          
-          let newFD = withUnsafeMutablePointer(&baddr) {
-            ptr -> Int32 in
-            let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
-            return Darwin.accept(lfd, bptr, &baddrlen);// buflenptr)
-          }
-          
-          if newFD != -1 {
-            // we pass over the queue, seems convenient. Not sure what kind of
-            // queue setup a typical server would want to have
-            let newSocket =
-              TypedActiveSocket(fd: newFD, remoteAddress: baddr, queue: queue)
-            newSocket.isSigPipeDisabled = true
-            
-            accept(newSocket)
-          }
-          else if errno == EWOULDBLOCK {
-            break
-          }
-          else { // great logging as Paul says
-            println("Failed to accept() socket: \(self) \(errno)")
-          }
-          
-        } while (true);
-      }
-      
-      dispatch_resume(listenSource!)
-      
-      let listenOK = listen(backlog: backlog)
-      
-      if (listenOK) {
-        return true
-      }
-      else {
-        dispatch_source_cancel(listenSource!)
-        listenSource = nil
-      }
+    else {
+      return false
     }
     
-    return false
+    let lfd = fd.fd
+    
+    listenSource.onEvent { _, _ in
+      repeat {
+        // FIXME: tried to encapsulate this in a sockaddrbuf which does all
+        //        the ptr handling, but it ain't work (autoreleasepool issue?)
+        var baddr    = T()
+        var baddrlen = socklen_t(baddr.len)
+        
+        let newFD = withUnsafeMutablePointer(&baddr) {
+          ptr -> Int32 in
+          let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
+          return Darwin.accept(lfd, bptr, &baddrlen);// buflenptr)
+        }
+        
+        if newFD != -1 {
+          // we pass over the queue, seems convenient. Not sure what kind of
+          // queue setup a typical server would want to have
+          let newSocket = ActiveSocket<T>(fd: FileDescriptor(newFD),
+                                          remoteAddress: baddr, queue: queue)
+          newSocket.isSigPipeDisabled = true
+          
+          accept(newSocket)
+        }
+        else if errno == EWOULDBLOCK {
+          break
+        }
+        else { // great logging as Paul says
+          print("Failed to accept() socket: \(self) \(errno)")
+        }
+        
+      } while (true);
+    }
+    
+    dispatch_resume(listenSource)
+    
+    guard listen(backlog) else {
+      dispatch_source_cancel(listenSource)
+      return false
+    }
+    
+    return true
   }
   
   

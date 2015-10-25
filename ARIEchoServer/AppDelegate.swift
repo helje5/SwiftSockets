@@ -39,7 +39,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   
   func log(string: String) {
     // log to shell
-    println(string)
+    print(string)
     
     // log to view. Careful, must run in main thread!
     dispatch_async(dispatch_get_main_queue()) {

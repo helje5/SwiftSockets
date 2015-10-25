@@ -13,7 +13,7 @@ class EchoServer {
   let port         : Int
   var listenSocket : PassiveSocketIPv4?
   let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
-  var openSockets  = [Int32:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
+  var openSockets  = [FileDescriptor:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
   
   init(port: Int) {
@@ -25,7 +25,7 @@ class EchoServer {
       lcb(s)
     }
     else {
-      println(s)
+      print(s)
     }
   }
   
@@ -48,13 +48,13 @@ class EchoServer {
       
       dispatch_async(self.lockQueue) {
         // Note: we need to keep the socket around!!
-        self.openSockets[newSock.fd!] = newSock
+        self.openSockets[newSock.fd] = newSock
       }
       
       self.sendWelcome(newSock)
       
       newSock.onRead  { self.handleIncomingData($0, expectedCount: $1) }
-             .onClose { ( fd: Int32 ) -> Void in
+             .onClose { ( fd: FileDescriptor ) -> Void in
         // we need to consume the return value to give peace to the closure
         dispatch_async(self.lockQueue) { [unowned self] in
           _ = self.openSockets.removeValueForKey(fd)
@@ -73,8 +73,8 @@ class EchoServer {
   }
   
   func sendWelcome<T: OutputStreamType>(var sock: T) {
-    // Hm, how to use println(), this doesn't work for me:
-    //   println(s, target: sock)
+    // Hm, how to use print(), this doesn't work for me:
+    //   print(s, target: sock)
     // (just writes the socket as a value, likely a tuple)
     
     sock.write("\r\n" +
@@ -90,7 +90,7 @@ class EchoServer {
   
   func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
     // remove from openSockets if all has been read
-    do {
+    repeat {
       // FIXME: This currently continues to read garbage if I just close the
       //        Terminal which hosts telnet. Even with sigpipe off.
       let (count, block, errno) = socket.read()

@@ -1,6 +1,6 @@
 //
 //  ARISocket.swift
-//  TestSwiftyCocoa
+//  ARISockets
 //
 //  Created by Helge Heß on 6/9/14.
 //  Copyright (c) 2014 Always Right Institute. All rights reserved.
@@ -16,21 +16,18 @@ import Dispatch
  */
 public class Socket<T: SocketAddress> {
   
-  public var fd           : Int32?             = nil
-  public var boundAddress : T?                 = nil
-  public var isValid      : Bool { return fd != nil }
-  public var isBound      : Bool {
-    // fails: return boundAddress != nil
-    if let a = boundAddress { return true } else { return false }
-  }
+  public var fd           : FileDescriptor = nil
+  public var boundAddress : T?      = nil
+  public var isValid      : Bool { return fd.isValid }
+  public var isBound      : Bool { return boundAddress != nil }
   
-  var closeCB  : ((Int32) -> Void)? = nil
-  var closedFD : Int32?             = nil // for delayed callback
+  var closeCB  : ((FileDescriptor) -> Void)? = nil
+  var closedFD : FileDescriptor? = nil // for delayed callback
   
   
   /* initializer / deinitializer */
   
-  public init(fd: Int32?) {
+  public init(fd: FileDescriptor) {
     self.fd = fd
   }
   deinit {
@@ -38,9 +35,10 @@ public class Socket<T: SocketAddress> {
   }
   
   public convenience init?(type: Int32 = SOCK_STREAM) {
-    let lfd = socket(T.domain, type, 0)
-    self.init(fd: lfd)
-    if lfd == -1 { return nil }
+    let   lfd  = socket(T.domain, type, 0)
+    guard lfd != -1 else { return nil }
+    
+    self.init(fd: FileDescriptor(lfd))
   }
   
   
@@ -49,27 +47,28 @@ public class Socket<T: SocketAddress> {
   let debugClose = false
   
   public func close() {
-    if fd != nil {
+    if fd.isValid {
       closedFD = fd
-      if debugClose { println("Closing socket \(closedFD) for good ...") }
-      Darwin.close(fd!)
+      if debugClose { print("Closing socket \(closedFD) for good ...") }
+      fd.close()
       fd       = nil
       
       if let cb = closeCB {
         // can be used to unregister socket etc when the socket is really closed
-        if debugClose { println("  let closeCB \(closedFD) know ...") }
+        if debugClose { print("  let closeCB \(closedFD) know ...") }
         cb(closedFD!)
         closeCB = nil // break potential cycles
       }
-      if debugClose { println("done closing \(closedFD)") }
+      if debugClose { print("done closing \(closedFD)") }
     }
     else if debugClose {
-      println("socket \(closedFD) already closed.")
+      print("socket \(closedFD) already closed.")
     }
+    
     boundAddress = nil
   }
   
-  public func onClose(cb: ((Int32) -> Void)?) -> Self {
+  public func onClose(cb: ((FileDescriptor) -> Void)?) -> Self {
     if let fd = closedFD { // socket got closed before event-handler attached
       if let lcb = cb {
         lcb(fd)
@@ -88,21 +87,19 @@ public class Socket<T: SocketAddress> {
   /* bind the socket. */
   
   public func bind(address: T) -> Bool {
-    if !isValid {
+    guard fd.isValid else { return false }
+    
+    guard !isBound else {
+      print("Socket is already bound!")
       return false
     }
-    if isBound {
-      println("Socket is already bound!")
-      return false
-    }
-    let lfd = fd!
     
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
 
     let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return Darwin.bind(lfd, bptr, socklen_t(addr.len))
+      return Darwin.bind(fd.fd, bptr, socklen_t(addr.len))
     }
     
     if rc == 0 {
@@ -116,10 +113,16 @@ public class Socket<T: SocketAddress> {
   }
   
   public func getsockname() -> T? {
-    if !isValid {
-      return nil
-    }
-    let lfd = fd!
+    return _getaname(Darwin.getsockname);
+  }
+  public func getpeername() -> T? {
+    return _getaname(Darwin.getpeername);
+  }
+  
+  typealias GetNameFN = ( Int32, UnsafeMutablePointer<sockaddr>,
+                          UnsafeMutablePointer<socklen_t>) -> Int32
+  func _getaname(nfn: GetNameFN) -> T? {
+    guard fd.isValid else { return nil }
     
     // FIXME: tried to encapsulate this in a sockaddrbuf which does all the
     //        ptr handling, but it ain't work (autoreleasepool issue?)
@@ -131,15 +134,15 @@ public class Socket<T: SocketAddress> {
     let rc = withUnsafeMutablePointer(&baddr) {
       ptr -> Int32 in
       let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
-      return Darwin.getsockname(lfd, bptr, &baddrlen)
+      return nfn(fd.fd, bptr, &baddrlen)
     }
     
-    if (rc != 0) {
-      println("Could not get sockname? \(rc)")
+    guard rc == 0 else {
+      print("Could not get sockname? \(rc)")
       return nil
     }
     
-    // println("PORT: \(baddr.sin_port)")
+    // print("PORT: \(baddr.sin_port)")
     return baddr
   }
   
@@ -147,10 +150,10 @@ public class Socket<T: SocketAddress> {
   /* description */
   
   // must live in the main-class as 'declarations in extensions cannot be
-  // overridden yet'
+  // overridden yet' (Same in Swift 2.0)
   func descriptionAttributes() -> String {
-    var s = fd != nil
-      ? " fd=\(fd!)"
+    var s = fd.isValid
+      ? " fd=\(fd.fd)"
       : (closedFD != nil ? " closed[\(closedFD)]" :" not-open")
     if boundAddress != nil {
       s += " \(boundAddress!)"
@@ -164,45 +167,16 @@ public class Socket<T: SocketAddress> {
 extension Socket { // Socket Flags
   
   public var flags : Int32? {
-    get {
-      let rc = ari_fcntlVi(fd!, F_GETFL, 0)
-      return rc >= 0 ? rc : nil
-    }
-    set {
-      let rc = ari_fcntlVi(fd!, F_SETFL, Int32(newValue!))
-      if rc == -1 {
-        println("Could not set new socket flags \(rc)")
-      }
-    }
+    get { return fd.flags      }
+    set { fd.flags = newValue! }
   }
   
   public var isNonBlocking : Bool {
-    get {
-      if let f = flags {
-        return (f & O_NONBLOCK) != 0 ? true : false
-      }
-      else {
-        println("ERROR: could not get non-blocking socket property!")
-        return false
-      }
-    }
-    set {
-      if newValue {
-        if let f = flags {
-          flags = f | O_NONBLOCK
-        }
-        else {
-          flags = O_NONBLOCK
-        }
-      }
-      else {
-        flags = flags! & ~O_NONBLOCK
-      }
-    }
+    get { return fd.isNonBlocking }
+    set { fd.isNonBlocking = newValue }
   }
   
 }
-
 
 extension Socket { // Socket Options
 
@@ -248,10 +222,11 @@ extension Socket { // Socket Options
     }
     
     var buf = value
-    let rc  = setsockopt(fd!, SOL_SOCKET, option, &buf,socklen_t(sizeof(Int32)))
+    let rc  = setsockopt(fd.fd, SOL_SOCKET, option,
+                         &buf, socklen_t(sizeof(Int32)))
     
     if rc != 0 { // ps: Great Error Handling
-      println("Could not set option \(option) on socket \(self)")
+      print("Could not set option \(option) on socket \(self)")
     }
     return rc == 0
   }
@@ -266,9 +241,9 @@ extension Socket { // Socket Options
     var buf    = Int32(0)
     var buflen = socklen_t(sizeof(Int32))
     
-    let rc = getsockopt(fd!, SOL_SOCKET, option, &buf, &buflen)
+    let rc = getsockopt(fd.fd, SOL_SOCKET, option, &buf, &buflen)
     if rc != 0 { // ps: Great Error Handling
-      println("Could not get option \(option) from socket \(self)")
+      print("Could not get option \(option) from socket \(self)")
       return nil
     }
     return buf
@@ -287,68 +262,18 @@ extension Socket { // Socket Options
 
 extension Socket { // poll()
   
-  public var isDataAvailable: Bool { return pollFlag(POLLRDNORM) }
+  public var isDataAvailable: Bool { return fd.isDataAvailable }
   
-  public func pollFlag(flag: Int32) -> Bool {
-    let rc: Int32? = poll(flag, timeout: 0)
-    if let flags = rc {
-      if (flags & flag) != 0 {
-        return true
-      }
-    }
-    return false
-  }
-  
-  // Swift doesn't allow let's in here?!
-  var pollEverythingMask : Int32 { return (
-      POLLIN | POLLPRI | POLLOUT
-    | POLLRDNORM | POLLWRNORM
-    | POLLRDBAND | POLLWRBAND)
-  }
-  
-  // Swift doesn't allow let's in here?!
-  var debugPoll : Bool { return false }
+  public func pollFlag(flag: Int32) -> Bool { return fd.pollFlag(flag) }
   
   public func poll(events: Int32, timeout: UInt? = 0) -> Int32? {
-    // This is declared as Int32 because the POLLRDNORM and such are
-    if !isValid {
-      return nil
-    }
-    
-    let ctimeout = timeout != nil ? Int32(timeout!) : -1 /* wait forever */
-    
-    var fds = pollfd(fd: fd!, events: CShort(events), revents: 0)
-    let rc  = Darwin.poll(&fds, 1, ctimeout)
-    
-    if rc < 0 {
-      println("poll() returned an error")
-      return nil
-    }
-    
-    if debugPoll {
-      var s = ""
-      let mask = Int32(fds.revents)
-      if 0 != (mask & POLLIN)     { s += " IN"  }
-      if 0 != (mask & POLLPRI)    { s += " PRI" }
-      if 0 != (mask & POLLOUT)    { s += " OUT" }
-      if 0 != (mask & POLLRDNORM) { s += " RDNORM" }
-      if 0 != (mask & POLLWRNORM) { s += " WRNORM" }
-      if 0 != (mask & POLLRDBAND) { s += " RDBAND" }
-      if 0 != (mask & POLLWRBAND) { s += " WRBAND" }
-      println("Poll result \(rc) flags \(fds.revents)\(s)")
-    }
-    
-    if rc == 0 {
-      return nil
-    }
-    
-    return Int32(fds.revents)
+    return fd.poll(events, timeout: timeout)
   }
   
 }
 
 
-extension Socket: Printable {
+extension Socket: CustomStringConvertible {
   
   public var description : String {
     return "<Socket:" + descriptionAttributes() + ">"
@@ -357,7 +282,7 @@ extension Socket: Printable {
 }
 
 
-extension Socket: BooleanType {
+extension Socket: BooleanType { // TBD: Swift doesn't want us to do this
   
   public var boolValue : Bool {
     return isValid

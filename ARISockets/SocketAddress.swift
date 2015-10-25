@@ -1,6 +1,6 @@
 //
 //  SocketAddress.swift
-//  TestSwiftyCocoa
+//  ARISockets
 //
 //  Created by Helge Heß on 6/12/14.
 //  Copyright (c) 2014 Always Right Institute. All rights reserved.
@@ -85,7 +85,7 @@ extension in_addr: StringLiteralConvertible {
   }
 }
 
-extension in_addr: Printable {
+extension in_addr: CustomStringConvertible {
   
   public var description: String {
     return asString
@@ -138,18 +138,18 @@ extension sockaddr_in: SocketAddress {
       }
       else {
         // split string at colon
-        let comps = split(s, maxSplit: 1) { $0 == ":"}
-        if comps.count == 2 {
-          self.init(address: comps[0], port: comps[1].toInt())
+        let components = s.characters.split(":", maxSplit: 1).map { String($0) }
+        if components.count == 2 {
+          self.init(address: components[0], port: Int(components[1]))
         }
         else {
-          assert(comps.count == 1)
-          let c1 = comps[0]
+          assert(components.count == 1)
+          let c1         = components[0]
           let isWildcard = (c1 == "*" || c1 == "*.*.*.*")
           if isWildcard {
             self.init(address: nil, port: nil)
           }
-          else if let port = c1.toInt() { // it's a number
+          else if let port = Int(c1) { // it's a number
             self.init(address: nil, port: port)
           }
           else { // it's a host
@@ -226,7 +226,7 @@ extension sockaddr_in: StringLiteralConvertible {
   }
 }
 
-extension sockaddr_in: Printable {
+extension sockaddr_in: CustomStringConvertible {
   
   public var description: String {
     return asString
@@ -295,7 +295,7 @@ extension sockaddr_un: SocketAddress {
 
 /* DNS */
 
-extension addrinfo {
+public extension addrinfo {
   
   public init() {
     ai_flags     = 0 // AI_CANONNAME, AI_PASSIVE, AI_NUMERICHOST
@@ -322,10 +322,9 @@ extension addrinfo {
   }
   
   public var canonicalName : String? {
-    if ai_canonname != nil && ai_canonname[0] != 0 {
-      return String.fromCString(ai_canonname)
-    }
-    return nil
+    guard ai_canonname != nil && ai_canonname[0] != 0 else { return nil }
+    
+    return String.fromCString(ai_canonname)
   }
   
   public var hasAddress : Bool {
@@ -343,38 +342,31 @@ extension addrinfo {
    */
   
   public func address<T: SocketAddress>() -> T? {
-    if ai_addr == nil {
-      return nil
-    }
-    if ai_addr.memory.sa_family != sa_family_t(T.domain) {
-      return nil
-    }
+    guard ai_addr != nil else { return nil }
+    guard ai_addr.memory.sa_family == sa_family_t(T.domain) else { return nil }
+    
     let aiptr = UnsafePointer<T>(ai_addr) // cast
     return aiptr.memory // copies the address to the return value
   }
   
   public var dynamicAddress : SocketAddress? {
-    if !hasAddress {
-      return nil
-    }
+    guard hasAddress else { return nil }
     
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain) {
       let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
       return aiptr.memory // copies the address to the return value
     }
     
-    /* Not working anymore in b4
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in6.domain) {
       let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
       return aiptr.memory // copies the address to the return value
     }
-    */
     
     return nil
   }
 }
 
-extension addrinfo : Printable {
+extension addrinfo : CustomStringConvertible {
   
   public var description : String {
     var s = "<addrinfo"
@@ -397,14 +389,13 @@ extension addrinfo : Printable {
       if f != 0 {
         fs.append("flags[\(f)]")
       }
-      let fss = join(",", fs)
+      let fss = fs.joinWithSeparator(",")
       s += " flags=" + fss
     }
     
-    var noop = ""
     if ai_family != AF_UNSPEC { s += sa_family_t(ai_family).description }
     switch ai_socktype {
-      case 0:           noop = "" // really?
+      case 0:           break
       case SOCK_STREAM: s += " stream"
       case SOCK_DGRAM:  s += " datagram"
       default:          s += " type[\(ai_socktype)]"
@@ -437,25 +428,21 @@ extension addrinfo : Printable {
 
 extension addrinfo : SequenceType {
   
-  public func generate() -> GeneratorOf<addrinfo> {
+  public func generate() -> AnyGenerator<addrinfo> {
     var cursor : addrinfo? = self
     
-    return GeneratorOf<addrinfo> {
-      if let info = cursor {
-        cursor = info.next
-        return info
-      }
-      else {
-        return .None
-      }
+    return anyGenerator {
+      guard let info = cursor else { return .None }
+      cursor = info.next
+      return info
     }
   }
 }
 
-extension sa_family_t : Printable {
+public extension sa_family_t { // Swift 2 : CustomStringConvertible, already imp?!
   
+  // TBD: does Swift 2 still pick this up?
   public var description : String {
-    var noop = ""
     switch Int32(self) {
       case AF_UNSPEC: return ""
       case AF_INET:   return "IPv4"
