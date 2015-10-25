@@ -9,7 +9,7 @@ DESC
 
   s.license          = 'MIT'
   s.author           = { "Helge Heß" => "helge@alwaysrightinstitute.com" }
-  s.source           = { :git => "https://github.com/AlwaysRightInstitute/SwiftSockets.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/AlwaysRightInstitute/SwiftSockets.git", :tag => "v" + s.version.to_s }
   s.social_media_url      = 'https://twitter.com/helje5'
 
   s.ios.deployment_target = '8.0'
