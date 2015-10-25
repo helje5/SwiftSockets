@@ -13,7 +13,7 @@ DESC
   s.social_media_url = 'http://twitter.com/'
 
   s.platform     = :osx, '10.10'
-
+  s.platfrom     = :ios, '9.0'
   s.requires_arc = true
 
   s.source_files = 'ARISockets/*.{h,c,swift}'
