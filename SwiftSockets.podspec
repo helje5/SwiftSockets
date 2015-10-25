@@ -12,8 +12,8 @@ DESC
   s.source           = { :git => "https://github.com/AlwaysRightInstitute/SwiftSockets.git", :tag => s.version.to_s }
   s.social_media_url = 'http://twitter.com/'
 
-  s.platform     = :osx, '10.10'
-  s.platform     = :ios, '9.0'
+  s.platform = :ios, '8.0'
+  s.platform = :osx, '10.10'
   s.requires_arc = true
 
   s.source_files = 'ARISockets/*.{h,c,swift}'
