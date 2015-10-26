@@ -19,7 +19,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 Updated for Swift 0.2 (aka Xcode 7.0).
 
 The project includes three targets:
-- ARISockets
+- SwiftSockets
 - ARIEchoServer
 - ARIFetch
 

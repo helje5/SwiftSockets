@@ -35,14 +35,14 @@
 			containerPortal = E88984A9194A74C400A831A3 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E88984B3194A751E00A831A3;
-			remoteInfo = ARISockets;
+			remoteInfo = SwiftSockets;
 		};
 		E864F2E0194B925A0070CA3A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E88984A9194A74C400A831A3 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E88984B3194A751E00A831A3;
-			remoteInfo = ARISockets;
+			remoteInfo = SwiftSockets;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -157,7 +157,7 @@
 				E88984B7194A751E00A831A3 /* Supporting Files */,
 			);
 			name = SwiftSockets;
-			path = ARISockets;
+			path = SwiftSockets;
 			sourceTree = "<group>";
 		};
 		E88984B7194A751E00A831A3 /* Supporting Files */ = {
@@ -235,7 +235,7 @@
 			dependencies = (
 			);
 			name = SwiftSockets;
-			productName = ARISockets;
+			productName = SwiftSockets;
 			productReference = E88984B4194A751E00A831A3 /* SwiftSockets.framework */;
 			productType = "com.apple.product-type.framework";
 		};
@@ -540,7 +540,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = ARISockets/Info.plist;
+				INFOPLIST_FILE = SwiftSockets/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
@@ -591,7 +591,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = ARISockets/Info.plist;
+				INFOPLIST_FILE = SwiftSockets/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
