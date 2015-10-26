@@ -156,7 +156,6 @@
 				E83305A4195B92D100CCBDF5 /* UnixBridge.c */,
 				E88984B7194A751E00A831A3 /* Supporting Files */,
 			);
-			name = SwiftSockets;
 			path = SwiftSockets;
 			sourceTree = "<group>";
 		};
