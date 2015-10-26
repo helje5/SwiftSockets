@@ -1,37 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta charset="UTF-8">
     <title>SwiftSockets by AlwaysRightInstitute</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
-
   <body>
-    <div id="container">
-      <div class="inner">
+    <section class="page-header">
+      <h1 class="project-name">SwiftSockets</h1>
+      <h2 class="project-tagline">A simple GCD based socket wrapper for Swift.</h2>
+      <a href="https://github.com/AlwaysRightInstitute/SwiftSockets" class="btn">View on GitHub</a>
+      <a href="https://github.com/AlwaysRightInstitute/SwiftSockets/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-        <header>
-          <h1>SwiftSockets</h1>
-          <h2>A simple GCD based socket wrapper for Swift.</h2>
-        </header>
-
-        <section id="downloads" class="clearfix">
-          <a href="https://github.com/AlwaysRightInstitute/SwiftSockets/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-          <a href="https://github.com/AlwaysRightInstitute/SwiftSockets" id="view-on-github" class="button"><span>View on GitHub</span></a>
-        </section>
-
-        <hr>
-
-        <section id="main_content">
-          <h1>
+    <section class="main-content">
+      <h1>
 <a id="swiftsockets" class="anchor" href="#swiftsockets" aria-hidden="true"><span class="octicon octicon-link"></span></a>SwiftSockets</h1>
 
 <p>A simple GCD based socket library for Swift.</p>
@@ -50,7 +38,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 <h3>
 <a id="targets" class="anchor" href="#targets" aria-hidden="true"><span class="octicon octicon-link"></span></a>Targets</h3>
 
-<p>Updated to use Swift v0.2.0 (aka Xcode 6.3).</p>
+<p>Updated for Swift 0.2 (aka Xcode 7.0).</p>
 
 <p>The project includes three targets:</p>
 
@@ -71,25 +59,25 @@ library.</p>
 
 <p>Server Sample:</p>
 
-<div class="highlight highlight-swift"><pre><span class="pl-k">let</span> socket <span class="pl-k">=</span> PassiveSocket<span class="pl-k">&lt;</span>sockaddr_in<span class="pl-k">&gt;</span>(address: sockaddr_in(port: <span class="pl-c1">4242</span>))
+<div class="highlight highlight-source-swift"><pre><span class="pl-k">let</span> socket <span class="pl-k">=</span> PassiveSocket<span class="pl-k">&lt;</span>sockaddr_in<span class="pl-k">&gt;</span>(address: sockaddr_in(port: <span class="pl-c1">4242</span>))<span class="pl-k">!</span>
   <span class="pl-k">.</span>listen(dispatch_get_global_queue(<span class="pl-c1">0</span>, <span class="pl-c1">0</span>), backlog: <span class="pl-c1">5</span>) {
-    println(<span class="pl-s"><span class="pl-pds">"</span>Wait, someone is attempting to talk to me!<span class="pl-pds">"</span></span>)
+    <span class="pl-c1">print</span>(<span class="pl-s"><span class="pl-pds">"</span>Wait, someone is attempting to talk to me!<span class="pl-pds">"</span></span>)
     $<span class="pl-c1">0</span><span class="pl-k">.</span>close()
-    println(<span class="pl-s"><span class="pl-pds">"</span>All good, go ahead!<span class="pl-pds">"</span></span>)
+    <span class="pl-c1">print</span>(<span class="pl-s"><span class="pl-pds">"</span>All good, go ahead!<span class="pl-pds">"</span></span>)
   }</pre></div>
 
 <p>Client Sample:</p>
 
-<div class="highlight highlight-swift"><pre><span class="pl-k">let</span> socket <span class="pl-k">=</span> ActiveSocket<span class="pl-k">&lt;</span>sockaddr_in<span class="pl-k">&gt;</span>()
-  <span class="pl-k">.</span>onRead {
-    <span class="pl-k">let</span> (count, block, errno) <span class="pl-k">=</span> $<span class="pl-c1">0</span><span class="pl-k">.</span>read()
-    <span class="pl-k">if</span> count <span class="pl-k">&lt;</span> <span class="pl-c1">1</span> {
-      println(<span class="pl-s"><span class="pl-pds">"</span>EOF, or great error handling <span class="pl-pse">\(</span><span class="pl-s1">errno</span><span class="pl-pse">)</span>.<span class="pl-pds">"</span></span>)
+<div class="highlight highlight-source-swift"><pre><span class="pl-k">let</span> socket <span class="pl-k">=</span> ActiveSocket<span class="pl-k">&lt;</span>sockaddr_in<span class="pl-k">&gt;</span>()<span class="pl-k">!</span>
+  <span class="pl-k">.</span>onRead { sock, _ <span class="pl-k">in</span>
+    <span class="pl-k">let</span> (count, block, errno) <span class="pl-k">=</span> sock<span class="pl-k">.</span>read() <span class="pl-c">// $0 for sock doesn't work anymore?</span>
+    <span class="pl-k">guard</span> count <span class="pl-k">&gt;</span> <span class="pl-c1">0</span> <span class="pl-k">else</span> {
+      <span class="pl-c1">print</span>(<span class="pl-s"><span class="pl-pds">"</span>EOF, or great error handling <span class="pl-pse">\(</span><span class="pl-s1">errno</span><span class="pl-pse">)</span>.<span class="pl-pds">"</span></span>)
       <span class="pl-k">return</span>
     }
-    println(<span class="pl-s"><span class="pl-pds">"</span>Answer to ring,ring is: <span class="pl-pse">\(</span><span class="pl-s1">count</span><span class="pl-pse">)</span> bytes: <span class="pl-pse">\(</span><span class="pl-s1">block</span><span class="pl-pse">)</span><span class="pl-pds">"</span></span>)
+    <span class="pl-c1">print</span>(<span class="pl-s"><span class="pl-pds">"</span>Answer to ring,ring is: <span class="pl-pse">\(</span><span class="pl-s1">count</span><span class="pl-pse">)</span> bytes: <span class="pl-pse">\(</span><span class="pl-s1">block</span><span class="pl-pse">)</span><span class="pl-pds">"</span></span>)
   }
-  <span class="pl-k">.</span>connect(<span class="pl-s"><span class="pl-pds">"</span>127.0.0.1:80<span class="pl-pds">"</span></span>) {
+  <span class="pl-k">.</span>connect(<span class="pl-s"><span class="pl-pds">"</span>127.0.0.1:80<span class="pl-pds">"</span></span>) { socket <span class="pl-k">in</span>
     socket<span class="pl-k">.</span>write(<span class="pl-s"><span class="pl-pds">"</span>Ring, ring!<span class="pl-cce">\r\n</span><span class="pl-pds">"</span></span>)
   }</pre></div>
 
@@ -120,8 +108,13 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 
 <ul>
 <li>[x] PS style great error handling</li>
-<li>[x] println() error handling</li>
+<li>[x] print() error handling</li>
+<li>[ ] Swift 2 try/throw/catch
+
+<ul>
 <li>[ ] Real error handling</li>
+</ul>
+</li>
 </ul>
 </li>
 <li>[x] Twisted (no blocking reads or writes)
@@ -169,6 +162,7 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 <li>[x] Extensions on structs</li>
 <li>[x] Extensions to organize classes</li>
 <li>[x] Protocols on structs</li>
+<li>[ ] Swift 2 protocol extensions</li>
 <li>[x] Tuples, with labels</li>
 <li>[x] Trailing closures</li>
 <li>[ ] <a href="https://github.com/Lazy" class="user-mention">@Lazy</a>
@@ -177,6 +171,7 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 </li>
 <li>[x] Optionals</li>
 <li>[x] Convenience initializers</li>
+<li>[x] Failable initializers</li>
 <li>[x] Class variables on structs</li>
 <li>[x] CConstPointer, CConstVoidPointer
 
@@ -230,6 +225,17 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 <li>[x] final</li>
 <li>[x] Nil coalescing operator</li>
 <li>[ ] dynamic</li>
+<li>[ ] Swift 2
+
+<ul>
+<li>[ ] availability</li>
+<li>[x] guard</li>
+<li>[x] defer</li>
+<li>[ ] C function pointers</li>
+<li>[x] debugPrint</li>
+<li>[ ] lowercaseString</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -249,15 +255,15 @@ wrapped Objective-C? :-)</p>
 <p><a href="http://twitter.com/helje5">@helje5</a> | <a href="mailto:helge@alwaysrightinstitute.com">helge@alwaysrightinstitute.com</a></p>
 
 <p><img src="http://www.alwaysrightinstitute.com/ARI.png" alt=""></p>
-        </section>
 
-        <footer>
-          SwiftSockets is maintained by <a href="https://github.com/AlwaysRightInstitute">AlwaysRightInstitute</a><br>
-          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
-        </footer>
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/AlwaysRightInstitute/SwiftSockets">SwiftSockets</a> is maintained by <a href="https://github.com/AlwaysRightInstitute">AlwaysRightInstitute</a>.</span>
 
-        
-      </div>
-    </div>
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
   </body>
 </html>
