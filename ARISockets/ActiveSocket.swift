@@ -283,7 +283,7 @@ public extension ActiveSocket { // writing
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-    guard let asyncData = dispatch_data_create(buffer,bufsize, queue,nil) else {
+    guard let asyncData = dispatch_data_create(buffer,bufsize, queue,{}) else {
       return false
     }
     
@@ -308,7 +308,7 @@ public extension ActiveSocket { // writing
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-    guard let asyncData = dispatch_data_create(buffer,bufsize, queue,nil) else {
+    guard let asyncData = dispatch_data_create(buffer,bufsize, queue,{}) else {
       return false
     }
     
