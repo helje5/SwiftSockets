@@ -61,6 +61,7 @@
 		E85D5FEA194B917900ECC32A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E85D5FEC194B917900ECC32A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		E85D5FEF194B917900ECC32A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		E862B87B1BDFB70B002A4EA5 /* SwiftSockets.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SwiftSockets.podspec; sourceTree = "<group>"; };
 		E86B8F63194B83FC000B0368 /* EchoServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EchoServer.swift; sourceTree = "<group>"; };
 		E88984B4194A751E00A831A3 /* SwiftSockets.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftSockets.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E88984B8194A751E00A831A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -125,6 +126,7 @@
 			isa = PBXGroup;
 			children = (
 				E83FFF33197DF00E00A51E6F /* README.md */,
+				E862B87B1BDFB70B002A4EA5 /* SwiftSockets.podspec */,
 				E88984B6194A751E00A831A3 /* SwiftSockets */,
 				E88984E9194A760300A831A3 /* ARIEchoServer */,
 				E85D5FE5194B917900ECC32A /* ARIFetch */,
