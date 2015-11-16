@@ -34,6 +34,8 @@
 		E88984EF194A760300A831A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88984EE194A760300A831A3 /* AppDelegate.swift */; };
 		E88984F1194A760300A831A3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E88984F0194A760300A831A3 /* Images.xcassets */; };
 		E88984F4194A760300A831A3 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E88984F2194A760300A831A3 /* MainMenu.xib */; };
+		E8961A6F1BFA24F400B3707D /* SwiftSockets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3710E9F11BF548480002A4DB /* SwiftSockets.framework */; };
+		E8961A701BFA24FC00B3707D /* SwiftSockets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3710E9F11BF548480002A4DB /* SwiftSockets.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -85,6 +87,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8961A701BFA24FC00B3707D /* SwiftSockets.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +95,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8961A6F1BFA24F400B3707D /* SwiftSockets.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -849,6 +853,7 @@
 				3710E9F81BF548480002A4DB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		3710EA0C1BF548C80002A4DB /* Build configuration list for PBXNativeTarget "SwiftSockets-iOS" */ = {
 			isa = XCConfigurationList;
@@ -857,6 +862,7 @@
 				3710EA0E1BF548C80002A4DB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E85D5FFD194B917900ECC32A /* Build configuration list for PBXNativeTarget "ARIFetch" */ = {
 			isa = XCConfigurationList;
