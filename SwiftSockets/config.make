@@ -1,5 +1,15 @@
 # GNUmakefile
 
-SWIFT_TOOLCHAIN=~/swift-not-so-much/swift-2.2-SNAPSHOT-2015-12-01-b-ubuntu15.10/usr/bin
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Darwin)
+  SWIFT_SNAPSHOT=swift-2.2-SNAPSHOT-2015-12-01-a
+  SWIFT_TOOLCHAIN_BASEDIR=/Library/Developer/Toolchains
+  SWIFT_TOOLCHAIN=$(SWIFT_TOOLCHAIN_BASEDIR)/$(SWIFT_SNAPSHOT).xctoolchain/usr/bin
+else
+  SWIFT_SNAPSHOT=swift-2.2-SNAPSHOT-2015-12-01-b-ubuntu15.10
+  SWIFT_TOOLCHAIN=$(SWIFT_TOOLCHAIN_BASEDIR)/$(SWIFT_SNAPSHOT)/usr/bin
+endif
+
 SWIFT_BUILD_TOOL=$(SWIFT_TOOLCHAIN)/swift build
 SWIFT_BUILD_DIR=$(PACKAGE_DIR)/.build/debug
