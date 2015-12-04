@@ -6,7 +6,11 @@
 //  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
 //
 
+#if os(Linux)
+import Glibc
+#else
 import Darwin
+#endif
 import Dispatch
 
 /**
