@@ -13,7 +13,8 @@ class EchoServer {
   let port         : Int
   var listenSocket : PassiveSocketIPv4?
   let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
-  var openSockets  = [FileDescriptor:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
+  var openSockets  =
+        [FileDescriptor:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
   
   init(port: Int) {
