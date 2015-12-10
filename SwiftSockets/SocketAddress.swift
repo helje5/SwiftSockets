@@ -431,7 +431,7 @@ extension addrinfo : SequenceType {
   public func generate() -> AnyGenerator<addrinfo> {
     var cursor : addrinfo? = self
     
-    return anyGenerator {
+    return AnyGenerator {
       guard let info = cursor else { return .None }
       cursor = info.next
       return info

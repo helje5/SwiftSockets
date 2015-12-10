@@ -12,6 +12,9 @@ import Glibc
 import Darwin
 #endif
 
+// fails on Swift 2.1, required for Swift 2.2
+extension POSIXError : ErrorType {}
+
 /// This essentially wraps the Integer representing a file descriptor in a
 /// struct for the whole reason to attach methods to it.
 public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
@@ -69,16 +72,16 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     return ( nil, buf )
   }
   
-  public func write<T>(buffer: [ T ], var count: Int = -1)
+  public func write<T>(buffer: [ T ], count: Int = -1)
                 -> ( ErrorType?, Int )
   {
     guard buffer.count > 0 else { return ( nil, 0 ) }
     
-    if count < 0 { count = buffer.count }
+    let lCount = count < 0 ? buffer.count : count
     
     // TODO: This is funny. It accepts an array of any type?!
     //       Is it actually what we want?
-    let writeCount = Darwin.write(fd, buffer, count)
+    let writeCount = Darwin.write(fd, buffer, lCount)
     
     guard writeCount >= 0 else {
       return ( POSIXError(rawValue: Darwin.errno)!, 0 )
