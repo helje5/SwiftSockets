@@ -19,7 +19,3 @@ FOUNDATION_EXPORT const unsigned char SwiftSocketsVersionString[];
 
 // Frameworks have no bridging headers anymore. The only way to expose functions
 // is to put them in the public header.
-
-// I think the originals are not mapped because they are using varargs
-FOUNDATION_EXPORT int ari_fcntlVi (int fildes, int cmd, int val);
-FOUNDATION_EXPORT int ari_ioctlVip(int fildes, unsigned long request, int *val);
