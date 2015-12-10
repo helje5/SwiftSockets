@@ -14,7 +14,6 @@
 		3710E9FD1BF5486B0002A4DB /* FileDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFF6A61B53DDE9001A3B6E /* FileDescriptor.swift */; };
 		3710E9FE1BF5486B0002A4DB /* UnixUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D74194B06E20073740A /* UnixUtils.swift */; };
 		3710E9FF1BF5486B0002A4DB /* DNS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81DC1F71965A42600BD826B /* DNS.swift */; };
-		3710EA001BF5486B0002A4DB /* UnixBridge.c in Sources */ = {isa = PBXBuildFile; fileRef = E83305A4195B92D100CCBDF5 /* UnixBridge.c */; };
 		3710EA011BF548700002A4DB /* SwiftSockets.h in Headers */ = {isa = PBXBuildFile; fileRef = E88984B9194A751E00A831A3 /* SwiftSockets.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3710EA0F1BF54A3B0002A4DB /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D72194B06E20073740A /* Socket.swift */; };
 		3710EA101BF54A3B0002A4DB /* SocketAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D73194B06E20073740A /* SocketAddress.swift */; };
@@ -23,7 +22,6 @@
 		3710EA131BF54A3B0002A4DB /* FileDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFF6A61B53DDE9001A3B6E /* FileDescriptor.swift */; };
 		3710EA141BF54A3B0002A4DB /* UnixUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D74194B06E20073740A /* UnixUtils.swift */; };
 		3710EA151BF54A3B0002A4DB /* DNS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81DC1F71965A42600BD826B /* DNS.swift */; };
-		3710EA161BF54A3B0002A4DB /* UnixBridge.c in Sources */ = {isa = PBXBuildFile; fileRef = E83305A4195B92D100CCBDF5 /* UnixBridge.c */; };
 		3710EA171BF54A3E0002A4DB /* SwiftSockets.h in Headers */ = {isa = PBXBuildFile; fileRef = E88984B9194A751E00A831A3 /* SwiftSockets.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E85D5FE9194B917900ECC32A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85D5FE8194B917900ECC32A /* main.swift */; };
 		E85D5FEB194B917900ECC32A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85D5FEA194B917900ECC32A /* AppDelegate.swift */; };
@@ -47,7 +45,6 @@
 		E8305D72194B06E20073740A /* Socket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Socket.swift; sourceTree = "<group>"; };
 		E8305D73194B06E20073740A /* SocketAddress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketAddress.swift; sourceTree = "<group>"; };
 		E8305D74194B06E20073740A /* UnixUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnixUtils.swift; sourceTree = "<group>"; };
-		E83305A4195B92D100CCBDF5 /* UnixBridge.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UnixBridge.c; sourceTree = "<group>"; };
 		E83FFF33197DF00E00A51E6F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E85D5FE4194B917900ECC32A /* ARIFetch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIFetch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E85D5FE7194B917900ECC32A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -156,7 +153,6 @@
 				E8CFF6A61B53DDE9001A3B6E /* FileDescriptor.swift */,
 				E8305D74194B06E20073740A /* UnixUtils.swift */,
 				E81DC1F71965A42600BD826B /* DNS.swift */,
-				E83305A4195B92D100CCBDF5 /* UnixBridge.c */,
 				E88984B7194A751E00A831A3 /* Supporting Files */,
 			);
 			path = SwiftSockets;
@@ -373,7 +369,6 @@
 				3710E9FC1BF5486B0002A4DB /* ActiveSocket.swift in Sources */,
 				3710E9FE1BF5486B0002A4DB /* UnixUtils.swift in Sources */,
 				3710E9FA1BF5486B0002A4DB /* SocketAddress.swift in Sources */,
-				3710EA001BF5486B0002A4DB /* UnixBridge.c in Sources */,
 				3710E9FD1BF5486B0002A4DB /* FileDescriptor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -388,7 +383,6 @@
 				3710EA121BF54A3B0002A4DB /* ActiveSocket.swift in Sources */,
 				3710EA141BF54A3B0002A4DB /* UnixUtils.swift in Sources */,
 				3710EA101BF54A3B0002A4DB /* SocketAddress.swift in Sources */,
-				3710EA161BF54A3B0002A4DB /* UnixBridge.c in Sources */,
 				3710EA131BF54A3B0002A4DB /* FileDescriptor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
