@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3710EA061BF548C80002A4DB"
-               BuildableName = "SwiftSockets-iOS.framework"
+               BuildableName = "SwiftSockets.framework"
                BlueprintName = "SwiftSockets-iOS"
                ReferencedContainer = "container:SwiftSockets.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3710EA061BF548C80002A4DB"
-            BuildableName = "SwiftSockets-iOS.framework"
+            BuildableName = "SwiftSockets.framework"
             BlueprintName = "SwiftSockets-iOS"
             ReferencedContainer = "container:SwiftSockets.xcodeproj">
          </BuildableReference>
@@ -64,7 +64,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3710EA061BF548C80002A4DB"
-            BuildableName = "SwiftSockets-iOS.framework"
+            BuildableName = "SwiftSockets.framework"
             BlueprintName = "SwiftSockets-iOS"
             ReferencedContainer = "container:SwiftSockets.xcodeproj">
          </BuildableReference>
