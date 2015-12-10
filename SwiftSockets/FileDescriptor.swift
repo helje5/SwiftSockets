@@ -114,33 +114,6 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
 }
 
 
-// MARK: - Replicate C shims - BAD HACK
-
-private let hLibC   = Darwin.dlopen(nil, RTLD_NOW)
-private let fnFcntl = Darwin.dlsym(hLibC, "fcntl")
-private let fnIoctl = Darwin.dlsym(hLibC, "ioctl")
-
-typealias fcntlViType  =
-  @convention(c) (Int32, Int32, Int32) -> Int32
-typealias ioctlVipType =
-  @convention(c) (Int32, CUnsignedLong, UnsafeMutablePointer<Int32>) -> Int32
-
-func ari_fcntlVi(fildes: Int32, _ cmd: Int32, _ val: Int32) -> Int32 {
-  // this works on Linux x64 and OSX 10.11/Intel, but obviously this depends on
-  // the ABI and is pure luck aka Wrong
-  let fp = UnsafeMutablePointer<fcntlViType>(fnFcntl)
-  return fp.memory(fildes, cmd, val)
-}
-func ari_ioctlVip(fildes: Int32, _ cmd: CUnsignedLong,
-                  _ val: UnsafeMutablePointer<Int32>) -> Int32
-{
-  // this works on Linux x64 and OSX 10.11/Intel, but obviously this depends on
-  // the ABI and is pure luck aka Wrong
-  let fp = UnsafeMutablePointer<ioctlVipType>(fnIoctl)
-  return fp.memory(fildes, cmd, val)
-}
-
-
 // MARK: - File Descriptor Flags
 
 extension FileDescriptor { // Socket Flags
