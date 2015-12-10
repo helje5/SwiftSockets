@@ -151,6 +151,8 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [ ] C function pointers
     - [x] debugPrint
     - [ ] lowercaseString
+- [ ] Swift Package Manager
+- [ ] Linux support
 
 ###Why?!
 
