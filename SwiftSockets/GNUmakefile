@@ -2,6 +2,7 @@
 
 PACKAGE_DIR=.
 PACKAGE=SwiftSockets
+debug=on
 
 include config.make
 
