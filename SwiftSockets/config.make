@@ -3,11 +3,13 @@
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
-  SWIFT_SNAPSHOT=swift-2.2-SNAPSHOT-2015-12-01-a
+  SWIFT_SNAPSHOT=swift-2.2-SNAPSHOT-2015-12-10-a
   SWIFT_TOOLCHAIN_BASEDIR=/Library/Developer/Toolchains
   SWIFT_TOOLCHAIN=$(SWIFT_TOOLCHAIN_BASEDIR)/$(SWIFT_SNAPSHOT).xctoolchain/usr/bin
 else
-  SWIFT_SNAPSHOT=swift-2.2-SNAPSHOT-2015-12-01-b-ubuntu15.10
+  OS=$(shell lsb_release -si | tr A-Z a-z)
+  VER=$(shell lsb_release -sr)
+  SWIFT_SNAPSHOT=swift-2.2-SNAPSHOT-2015-12-10-a-$(OS)$(VER)
   SWIFT_TOOLCHAIN_BASEDIR=$(HOME)/swift-not-so-much
   SWIFT_TOOLCHAIN=$(SWIFT_TOOLCHAIN_BASEDIR)/$(SWIFT_SNAPSHOT)/usr/bin
 endif
