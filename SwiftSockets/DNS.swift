@@ -5,7 +5,11 @@
 //  Created by Helge Hess on 7/3/14.
 //  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
 //
-import Darwin
+#if os(Linux)
+    import Glibc
+#else	
+    import Darwin
+#endif
 
 func gethoztbyname<T: SocketAddress>
   (name : String, flags : Int32 = AI_CANONNAME,

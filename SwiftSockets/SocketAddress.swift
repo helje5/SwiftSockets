@@ -6,8 +6,16 @@
 //  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
 //
 
-import Darwin
-// import Darwin.POSIX.netinet.`in` - this doesn't seem to work
+#if os(Linux)
+    import Glibc
+#else	
+    import Darwin
+#endif
+// #if os(Linux)
+    import Glibc
+#else	
+    import Darwin
+#endif.POSIX.netinet.`in` - this doesn't seem to work
 // import struct Darwin.POSIX.netinet.`in`.sockaddr_in - neither
 
 let INADDR_ANY = in_addr(s_addr: 0)
