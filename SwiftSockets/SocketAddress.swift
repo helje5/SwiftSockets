@@ -7,14 +7,9 @@
 //
 
 #if os(Linux)
-    import Glibc
+  import Glibc
 #else	
-    import Darwin
-#endif
-// #if os(Linux)
-    import Glibc
-#else	
-    import Darwin
+  import Darwin
 #endif.POSIX.netinet.`in` - this doesn't seem to work
 // import struct Darwin.POSIX.netinet.`in`.sockaddr_in - neither
 
