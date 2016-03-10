@@ -3,22 +3,24 @@
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
-  SWIFT_SNAPSHOT=swift-2.2-SNAPSHOT-2016-01-11-a
+  SWIFT_SNAPSHOT=swift-DEVELOPMENT-SNAPSHOT-2016-03-01-a
   SWIFT_TOOLCHAIN_BASEDIR=/Library/Developer/Toolchains
   SWIFT_TOOLCHAIN=$(SWIFT_TOOLCHAIN_BASEDIR)/$(SWIFT_SNAPSHOT).xctoolchain/usr/bin
 else
   OS=$(shell lsb_release -si | tr A-Z a-z)
   VER=$(shell lsb_release -sr)
-  SWIFT_SNAPSHOT=swift-2.2-SNAPSHOT-2016-01-11-a-$(OS)$(VER)
+  SWIFT_SNAPSHOT=swift-DEVELOPMENT-SNAPSHOT-2016-03-01-a-$(OS)$(VER)
   SWIFT_TOOLCHAIN_BASEDIR=$(HOME)/swift-not-so-much
   SWIFT_TOOLCHAIN=$(SWIFT_TOOLCHAIN_BASEDIR)/$(SWIFT_SNAPSHOT)/usr/bin
 endif
 
 ifeq ($(debug),on)
-SWIFT_INTERNAL_BUILD_FLAGS = -c debug
+SWIFT_INTERNAL_BUILD_FLAGS += -c debug
 else
-SWIFT_INTERNAL_BUILD_FLAGS = -c release
+SWIFT_INTERNAL_BUILD_FLAGS += -c release
 endif
+
+SWIFT_INTERNAL_BUILD_FLAGS += -Xcc -fblocks -Xlinker -ldispatch
 
 SWIFT_BUILD_TOOL=$(SWIFT_TOOLCHAIN)/swift build $(SWIFT_INTERNAL_BUILD_FLAGS)
 SWIFT_CLEAN_TOOL=$(SWIFT_TOOLCHAIN)/swift build --clean
