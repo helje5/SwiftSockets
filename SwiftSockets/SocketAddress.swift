@@ -114,7 +114,10 @@ extension sockaddr_in: SocketAddress {
     // how to refer to self?
   
   public init() {
+#if os(Linux) // no sin_len on Linux
+#else
     sin_len    = sockaddr_in.size
+#endif
     sin_family = sa_family_t(sockaddr_in.domain)
     sin_port   = 0
     sin_addr   = INADDR_ANY
@@ -245,7 +248,10 @@ extension sockaddr_in6: SocketAddress {
   public static var size   = __uint8_t(sizeof(sockaddr_in6))
   
   public init() {
+#if os(Linux) // no sin_len on Linux
+#else
     sin6_len      = sockaddr_in6.size
+#endif
     sin6_family   = sa_family_t(sockaddr_in.domain)
     sin6_port     = 0
     sin6_flowinfo = 0
@@ -275,11 +281,25 @@ extension sockaddr_un: SocketAddress {
   public static var size   = __uint8_t(sizeof(sockaddr_un)) // CAREFUL
   
   public init() {
+#if os(Linux) // no sin_len on Linux
+#else // os(Darwin)
     sun_len    = sockaddr_un.size // CAREFUL - kinda wrong
+#endif // os(Darwin)
     sun_family = sa_family_t(sockaddr_un.domain)
     
     // Autsch!
-    sun_path   = (
+#if os(Linux)
+    sun_path   = ( // 16 per block, 108 total
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    );
+#else // os(Darwin)
+    sun_path   = ( // 16 per block, 104 total
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -288,6 +308,7 @@ extension sockaddr_un: SocketAddress {
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0
     );
+#endif
   }
   
   public var len: __uint8_t {
@@ -305,7 +326,7 @@ public extension addrinfo {
   public init() {
     ai_flags     = 0 // AI_CANONNAME, AI_PASSIVE, AI_NUMERICHOST
     ai_family    = AF_UNSPEC // AF_INET or AF_INET6 or AF_UNSPEC
-    ai_socktype  = SOCK_STREAM
+    ai_socktype  = sys_SOCK_STREAM
     ai_protocol  = 0   // or IPPROTO_xxx for IPv4
     ai_addrlen   = 0   // length of ai_addr below
     ai_canonname = nil // UnsafePointer<Int8>
@@ -401,9 +422,9 @@ extension addrinfo : CustomStringConvertible {
     if ai_family != AF_UNSPEC { s += sa_family_t(ai_family).description }
     switch ai_socktype {
       case 0:           break
-      case SOCK_STREAM: s += " stream"
-      case SOCK_DGRAM:  s += " datagram"
-      default:          s += " type[\(ai_socktype)]"
+      case sys_SOCK_STREAM: s += " stream"
+      case sys_SOCK_DGRAM:  s += " datagram"
+      default:              s += " type[\(ai_socktype)]"
     }
     
     if let cn = canonicalName {
