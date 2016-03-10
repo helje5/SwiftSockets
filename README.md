@@ -16,7 +16,12 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
-Updated for Swift 0.2 (aka Xcode 7.0).
+**NOTE**: Updated for Swift swift-DEVELOPMENT-SNAPSHOT-2016-03-01-a-ubuntu15.10.
+This is the feature branch for the Linux port of SwiftSockets. Make sure you
+have GCD installed.
+
+**NOTE**: This is still incomplete. You can go into the SwiftSockets subdir
+and call `make`. It should build successfully.
 
 The project includes three targets:
 - SwiftSockets
