@@ -87,7 +87,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
                                  // though it should work right away?
   }
   */
-  public convenience init?(type: Int32 = SOCK_STREAM) {
+  public convenience init?(type: Int32 = sys_SOCK_STREAM) {
     // TODO: copy of Socket.init(type:), but required to compile. Not sure
     // what's going on with init inheritance here. Do I *have to* read the
     // manual???
@@ -131,7 +131,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       // Seen this crash - if close() is called from within the readCB?
       readCB = nil // break potential cycles
       if debugClose { debugPrint("   shutdown read channel ...") }
-      Darwin.shutdown(fd.fd, SHUT_RD);
+      sysShutdown(fd.fd, sys_SHUT_RD);
       
       didCloseRead = true
     }
@@ -167,7 +167,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     let lfd = fd.fd
     let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return Darwin.connect(lfd, bptr, socklen_t(addr.len)) //only returns block
+      return sysConnect(lfd, bptr, socklen_t(addr.len)) //only returns block
     }
     
     guard rc == 0 else {
@@ -247,7 +247,7 @@ public extension ActiveSocket { // writing
   }
   
   public func write(data: dispatch_data_t) {
-    sendCount++
+    sendCount += 1
     if debugAsyncWrites { debugPrint("async send[\(data)]") }
     
     // in here we capture self, which I think is right.
@@ -287,9 +287,13 @@ public extension ActiveSocket { // writing
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-    guard let asyncData = dispatch_data_create(buffer,bufsize, queue,nil) else {
+#if os(Linux)
+    let asyncData = dispatch_data_create(buffer, bufsize, queue!, nil)
+#else /* os(Darwin) */ // TBD
+    guard let asyncData = dispatch_data_create(buffer, bufsize, queue!, nil) else {
       return false
     }
+#endif /* os(Darwin) */
     
     write(asyncData)
     return true
@@ -312,10 +316,15 @@ public extension ActiveSocket { // writing
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-    guard let asyncData = dispatch_data_create(buffer,bufsize, queue,nil) else {
+#if os(Linux)
+    let asyncData = dispatch_data_create(buffer, bufsize, queue!, nil);
+#else /* os(Darwin) */
+    guard let asyncData = dispatch_data_create(buffer, bufsize,
+                            queue!, nil) else {
       return false
     }
-    
+#endif /* os(Darwin) */
+
     write(asyncData)
     return true
   }
@@ -351,7 +360,7 @@ public extension ActiveSocket { // Reading
     
     // FIXME: If I just close the Terminal which hosts telnet this continues
     //        to read garbage from the server. Even with SIGPIPE off.
-    readCount = Darwin.read(fd.fd, readBufferPtr, bufsize)
+    readCount = sysRead(fd.fd, readBufferPtr, bufsize)
     guard readCount >= 0 else {
       readBufferPtr[0] = 0
       return ( readCount, bptr, errno )
@@ -390,7 +399,7 @@ public extension ActiveSocket { // Reading
       DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
       0,
-      queue
+      queue!
     )
     guard readSource != nil else {
       print("Could not create dispatch source for socket \(self)")
@@ -406,7 +415,12 @@ public extension ActiveSocket { // Reading
     }
     
     /* actually start listening ... */
+#if os(Linux)
+    // TBD: what is the better way?
+    dispatch_resume(unsafeBitCast(readSource!, dispatch_object_t.self))
+#else /* os(Darwin) */
     dispatch_resume(readSource!)
+#endif /* os(Darwin) */
     
     return true
   }
