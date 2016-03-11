@@ -72,7 +72,8 @@ let socket = ActiveSocket<sockaddr_in>()!
 
 ####SwiftyEchoDaemon
 
-The **bezt** Echo daemon ever written in Swift - SPM version.
+[The **bezt** Echo daemon ever written in Swift]((http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/))
+- SPM version.
 
 This is a demo on how to use the
 [SwiftSockets Swift Package Manager version](https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux)
