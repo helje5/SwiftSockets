@@ -7,7 +7,7 @@ SwiftSockets is kind of a demo on how to integrate Swift with raw C APIs. More
 for stealing Swift coding ideas than for actually using the code in a real
 world project. In most real world Swift apps you have access to Cocoa, use it.
 
-###Importing SwiftSockets
+####Importing SwiftSockets
 
 **NOTE**: Updated for Swift swift-DEVELOPMENT-SNAPSHOT-2016-03-01-a-ubuntu15.10.
 This is the feature branch for the Linux port of SwiftSockets. Make sure you
@@ -21,6 +21,22 @@ and  ARIFetch are  still  in the  directory,  they don't  build  via SPM  (yet).
 However,    there     is    a     great    new    standalone     Echo    server:
 [SwiftyEchoDaemon](http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/)  which
 you can grab as an example on how to use SwiftSockets in SPM.
+
+To use SwiftSockets in your SPM tool, just add it as a dependency in your
+`Package.swift` file, like so:
+
+    import PackageDescription
+    
+    let package = Package(
+      name:         "SwiftyEcho",
+      targets:      [],
+      dependencies: [
+        .Package(url: "https://github.com/AlwaysRightInstitute/SwiftSockets.git",
+                 majorVersion: 0, minor: 1
+        )
+      ]
+    )
+
 
 ####SwiftSockets
 
