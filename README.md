@@ -7,14 +7,7 @@ SwiftSockets is kind of a demo on how to integrate Swift with raw C APIs. More
 for stealing Swift coding ideas than for actually using the code in a real
 world project. In most real world Swift apps you have access to Cocoa, use it.
 
-It also comes with a great Echo daemon as a demo, it's always there if you need
-a chat.
-
-**Note**: This is my first [Swift](https://developer.apple.com/swift/) project.
-Any suggestions on how to improve the code are welcome. I expect lots and lots
-:-)
-
-###Targets
+###Importing SwiftSockets
 
 **NOTE**: Updated for Swift swift-DEVELOPMENT-SNAPSHOT-2016-03-01-a-ubuntu15.10.
 This is the feature branch for the Linux port of SwiftSockets. Make sure you
@@ -23,12 +16,11 @@ have GCD installed.
 **NOTE**: This is still incomplete. You can go into the SwiftSockets subdir
 and call `make`. It should build successfully.
 
-The project includes three targets:
-- SwiftSockets
-- ARIEchoServer
-- ARIFetch
-
-I suggest you start out looking at the ARIEchoServer.
+The SPM  version of this project  just carries the library.  While ARIEchoServer
+and  ARIFetch are  still  in the  directory,  they don't  build  via SPM  (yet).
+However,    there     is    a     great    new    standalone     Echo    server:
+[SwiftyEchoDaemon](http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/)  which
+you can grab as an example on how to use SwiftSockets in SPM.
 
 ####SwiftSockets
 
@@ -61,23 +53,6 @@ let socket = ActiveSocket<sockaddr_in>()!
     socket.write("Ring, ring!\r\n")
   }
 ```
-
-####ARIEchoServer
-
-Great echo server. This is actually a Cocoa app. Compile it, run it, then
-connect to it in the Terminal.app via ```telnet 1337```.
-
-![](http://i.imgur.com/874ovtE.png)
-
-####ARIFetch
-
-Connects a socket to some end point, sends an HTTP/1.0 GET request with some
-awesome headers, then shows the results the server sends. Cocoa app.
-
-Why HTTP/1.0? Avoids redirects on www.apple.com :-)
-
-![](http://i.imgur.com/nRhADxg.png)
-
 
 ###Goals
 
