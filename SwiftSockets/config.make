@@ -3,10 +3,13 @@
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
-  SWIFT_SNAPSHOT=swift-DEVELOPMENT-SNAPSHOT-2016-03-01-a
+  #SWIFT_SNAPSHOT=swift-DEVELOPMENT-SNAPSHOT-2016-03-01-a
   ifneq ($(SWIFT_SNAPSHOT),)
     SWIFT_TOOLCHAIN_BASEDIR=/Library/Developer/Toolchains
     SWIFT_TOOLCHAIN=$(SWIFT_TOOLCHAIN_BASEDIR)/$(SWIFT_SNAPSHOT).xctoolchain/usr/bin
+  else
+    SWIFT_TOOLCHAIN_BASEDIR=/Library/Developer/Toolchains
+    SWIFT_TOOLCHAIN=$(SWIFT_TOOLCHAIN_BASEDIR)/swift-latest.xctoolchain/usr/bin
   endif
 else
   OS=$(shell lsb_release -si | tr A-Z a-z)
