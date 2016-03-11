@@ -72,7 +72,7 @@ let socket = ActiveSocket<sockaddr_in>()!
 
 ####SwiftyEchoDaemon
 
-[The **bezt** Echo daemon ever written in Swift]((http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/))
+[The **bezt** Echo daemon ever written in Swift](http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/)
 - SPM version.
 
 This is a demo on how to use the
