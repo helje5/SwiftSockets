@@ -20,6 +20,7 @@ else
     SWIFT_TOOLCHAIN_BASEDIR=$(HOME)/swift-not-so-much
     SWIFT_TOOLCHAIN=$(SWIFT_TOOLCHAIN_BASEDIR)/$(SWIFT_SNAPSHOT)/usr/bin
   endif
+  SWIFT_INTERNAL_BUILD_FLAGS += -Xcc -fblocks -Xlinker -ldispatch
 endif
 
 
@@ -35,8 +36,6 @@ SWIFT_INTERNAL_BUILD_FLAGS += -c debug
 else
 SWIFT_INTERNAL_BUILD_FLAGS += -c release
 endif
-
-SWIFT_INTERNAL_BUILD_FLAGS += -Xcc -fblocks -Xlinker -ldispatch
 
 
 SWIFT_BUILD_TOOL=$(SWIFT_TOOLCHAIN_PREFIX)swift build $(SWIFT_INTERNAL_BUILD_FLAGS)
