@@ -18,6 +18,10 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 Updated for Swift 0.2 (aka Xcode 7.0).
 
+*Note*: Linux/SPM users - there is a 
+[Linux branch](https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux)
+of SwiftSockets. master/develop are setup for the current Xcode release.
+
 The project includes three targets:
 - SwiftSockets
 - ARIEchoServer
