@@ -85,6 +85,8 @@ func ari_ioctlVip(fildes: Int32, _ cmd: CUnsignedLong,
 
 // MARK: - Wrap system naming differences
 
+typealias sysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
+
 #if os(Linux)
 import Glibc
 
@@ -92,7 +94,6 @@ public enum POSIXError : CInt {
   case EPERM
 }
 
-typealias sysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
 let sysOpen        : sysOpenType = Glibc.open
 let sysClose       = Glibc.close
 let sysRead        = Glibc.read
@@ -118,7 +119,7 @@ let sys_SHUT_RD     : Int32 = Int32(SHUT_RD)
 
 import Darwin
 
-let sysOpen        = Darwin.open
+let sysOpen        : sysOpenType = Darwin.open
 let sysClose       = Darwin.close
 let sysRead        = Darwin.read
 let sysWrite       = Darwin.write
