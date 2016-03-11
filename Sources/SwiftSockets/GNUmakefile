@@ -1,6 +1,6 @@
 # GNUmakefile
 
-PACKAGE_DIR=.
+PACKAGE_DIR=../..
 PACKAGE=SwiftSockets
 debug=on
 
