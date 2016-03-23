@@ -20,24 +20,48 @@ else
     SWIFT_TOOLCHAIN_BASEDIR=$(HOME)/swift-not-so-much
     SWIFT_TOOLCHAIN=$(SWIFT_TOOLCHAIN_BASEDIR)/$(SWIFT_SNAPSHOT)/usr/bin
   endif
-  SWIFT_INTERNAL_BUILD_FLAGS += -Xcc -fblocks -Xlinker -ldispatch
+  SWIFT_INTERNAL_BUILD_FLAGS  += -Xcc -fblocks -Xlinker -ldispatch
 endif
 
 
 ifneq ($(SWIFT_TOOLCHAIN),)
-SWIFT_TOOLCHAIN_PREFIX=$(SWIFT_TOOLCHAIN)/
+  SWIFT_TOOLCHAIN_PREFIX=$(SWIFT_TOOLCHAIN)/
+  SWIFT_BIN=$(SWIFT_TOOLCHAIN_PREFIX)swift
+  SWIFT_BUILD_TOOL_BIN=$(SWIFT_BIN)-build
+  ifeq ("$(wildcard $(SWIFT_BUILD_TOOL_BIN))", "")
+    HAVE_SPM=no
+  else
+    HAVE_SPM=yes
+  endif
 else
-SWIFT_TOOLCHAIN_PREFIX=
+  SWIFT_TOOLCHAIN_PREFIX=
+  SWIFT_BIN=swift
+  SWIFT_BUILD_TOOL_BIN=$(SWIFT_BIN)-build
+  WHICH_SWIFT_BUILD_TOOL_BIN=$(shell which $(SWIFT_BUILD_TOOL_BIN))
+  ifeq ("$(wildcard $(WHICH_SWIFT_BUILD_TOOL_BIN))", "")
+    HAVE_SPM=no
+  else
+    HAVE_SPM=yes
+  endif
 endif
+
+SWIFTC=$(SWIFT_BIN)c
 
 
 ifeq ($(debug),on)
-SWIFT_INTERNAL_BUILD_FLAGS += -c debug
+  ifeq ($(HAVE_SPM),yes)
+    SWIFT_INTERNAL_BUILD_FLAGS += -c debug
+  else
+    SWIFT_INTERNAL_BUILD_FLAGS += -g
+  endif
+  SWIFT_BUILD_DIR=$(PACKAGE_DIR)/.build/debug
 else
-SWIFT_INTERNAL_BUILD_FLAGS += -c release
+  ifeq ($(HAVE_SPM),yes)
+    SWIFT_INTERNAL_BUILD_FLAGS += -c release
+  endif
+  SWIFT_BUILD_DIR=$(PACKAGE_DIR)/.build/release
 endif
 
-
-SWIFT_BUILD_TOOL=$(SWIFT_TOOLCHAIN_PREFIX)swift build $(SWIFT_INTERNAL_BUILD_FLAGS)
-SWIFT_CLEAN_TOOL=$(SWIFT_TOOLCHAIN_PREFIX)swift build --clean
-SWIFT_BUILD_DIR=$(PACKAGE_DIR)/.build/debug
+# Note: the invocations must not use swift-build, but 'swift build'
+SWIFT_BUILD_TOOL=$(SWIFT_BIN) build $(SWIFT_INTERNAL_BUILD_FLAGS)
+SWIFT_CLEAN_TOOL=$(SWIFT_BIN) build --clean
