@@ -28,8 +28,8 @@ This compiles with the 2016-03-01-a snapshot via Swift Package Manager
 as well as with the Swift 2.2 release using the embedded makefiles.
 Make sure you 
 [install Grand Central Dispatch](http://www.alwaysrightinstitute.com/swift-on-linux-in-vbox-on-osx/)
-into your Swift installtion.
-In Linux the included ARIEchoServer/ARIFetch apps do not build, but this one
+into your Swift installation.
+On Linux the included ARIEchoServer/ARIFetch apps do not build, but this one
 does:
 [SwiftyEchoDaemon](http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/).
 
@@ -67,7 +67,7 @@ let socket = ActiveSocket<sockaddr_in>()!
 
 ####Using SwiftSockets with Swift Package Manager
 
-To use SwiftSockets in your SPM tool, just add it as a dependency in your
+To use SwiftSockets in your SPM project, just add it as a dependency in your
 `Package.swift` file, like so:
 
     import PackageDescription
@@ -93,10 +93,11 @@ connect to it in the Terminal.app via ```telnet 1337```.
 #### SwiftyEchoDaemon
 
 [The **bezt** Echo daemon ever written in Swift](http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/) - SPM version.
-
 This is a demo on how to use the
 [SwiftSockets Swift Package Manager version](https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux)
 on Linux or OSX.
+It also works w/o SPM if SwiftSockets has been built
+via makefiles.
 
 Great echo server. Compile it via `make`, run it via `make run`, then
 connect to it in the Terminal.app via ```telnet 1337```.
