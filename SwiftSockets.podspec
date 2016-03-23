@@ -16,6 +16,6 @@ DESC
   s.osx.deployment_target = '10.10'
   s.requires_arc          = true
 
-  s.source_files = 'SwiftSockets/*.{h,c,swift}'
+  s.source_files = 'Sources/SwiftSockets/*.{h,c,swift}'
 
 end
