@@ -16,18 +16,22 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
-Updated for Swift 0.2.2 (aka Xcode 7.3).
-
-*Note*: Linux/SPM users - there is a 
-[Linux branch](https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux)
-of SwiftSockets. master/develop are setup for the current Xcode release.
-
 The project includes three targets:
 - SwiftSockets
 - ARIEchoServer
 - ARIFetch
 
-I suggest you start out looking at the ARIEchoServer.
+Updated for Swift 0.2.2 (aka Xcode 7.3).
+
+*Note for Linux users*:
+This compiles with the 2016-03-01-a snapshot via Swift Package Manager
+as well as with the Swift 2.2 release using the embedded makefiles.
+Make sure you 
+[install Grand Central Dispatch](http://www.alwaysrightinstitute.com/swift-on-linux-in-vbox-on-osx/)
+into your Swift installation.
+On Linux the included ARIEchoServer/ARIFetch apps do not build, but this one
+does:
+[SwiftyEchoDaemon](http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/).
 
 ####SwiftSockets
 
@@ -61,12 +65,44 @@ let socket = ActiveSocket<sockaddr_in>()!
   }
 ```
 
-####ARIEchoServer
+####Using SwiftSockets with Swift Package Manager
+
+To use SwiftSockets in your SPM project, just add it as a dependency in your
+`Package.swift` file, like so:
+
+    import PackageDescription
+    
+    let package = Package(
+      name:         "SwiftyEcho",
+      targets:      [],
+      dependencies: [
+        .Package(url: "https://github.com/AlwaysRightInstitute/SwiftSockets.git",
+                 majorVersion: 0, minor: 1
+        )
+      ]
+    )
+
+
+####ARIEchoServer 
 
 Great echo server. This is actually a Cocoa app. Compile it, run it, then
 connect to it in the Terminal.app via ```telnet 1337```.
 
 ![](http://i.imgur.com/874ovtE.png)
+
+#### SwiftyEchoDaemon
+
+[The **bezt** Echo daemon ever written in Swift](http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/) - SPM version.
+This is a demo on how to use the
+[SwiftSockets Swift Package Manager version](https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux)
+on Linux or OSX.
+It also works w/o SPM if SwiftSockets has been built
+via makefiles.
+
+Great echo server. Compile it via `make`, run it via `make run`, then
+connect to it in the Terminal.app via ```telnet 1337```.
+
+![](http://i.imgur.com/mzXANTC.png)
 
 ####ARIFetch
 
@@ -155,6 +191,11 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [ ] C function pointers
     - [x] debugPrint
     - [ ] lowercaseString
+  - [x] #if os(Linux)
+  - [ ] #if swift(>=2.2)
+- [x] Swift Package Manager
+  - [x] GNUmakefile support
+- [x] Linux support
 
 ###Why?!
 

@@ -6,7 +6,16 @@
 //  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
 //
 
+#if os(Linux)
+import Glibc
+#else
 import Darwin
+#endif
+
+
+#if os(Linux) // OSX has this
+extension POSIXError : ErrorType {}
+#endif
 
 /// This essentially wraps the Integer representing a file descriptor in a
 /// struct for the whole reason to attach methods to it.
@@ -35,16 +44,16 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   public static func open(path: String, flags: CInt)
                      -> ( ErrorType?, FileDescriptor? )
   {
-    let fd = Darwin.open(path, flags)
+    let fd = sysOpen(path, flags)
     guard fd >= 0 else {
-      return ( POSIXError(rawValue: Darwin.errno)!, nil )
+      return ( POSIXError(rawValue: sysErrno)!, nil )
     }
     
     return ( nil, FileDescriptor(fd) )
   }
   
   public func close() {
-    Darwin.close(fd)
+    sysClose(fd)
   }
   
   public func read(count: Int) -> ( ErrorType?, [ UInt8 ]? ) {
@@ -53,9 +62,9 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     
     // synchronous
     
-    let readCount = Darwin.read(fd, &buf, count)
+    let readCount = sysRead(fd, &buf, count)
     guard readCount >= 0 else {
-      return ( POSIXError(rawValue: Darwin.errno)!, nil )
+      return ( POSIXError(rawValue: sysErrno)!, nil )
     }
     
     if readCount == 0 { return ( nil, [] ) } // EOF
@@ -65,19 +74,19 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     return ( nil, buf )
   }
   
-  public func write<T>(buffer: [ T ], var count: Int = -1)
+  public func write<T>(buffer: [ T ], count: Int = -1)
                 -> ( ErrorType?, Int )
   {
     guard buffer.count > 0 else { return ( nil, 0 ) }
     
-    if count < 0 { count = buffer.count }
+    let lCount = count < 0 ? buffer.count : count
     
     // TODO: This is funny. It accepts an array of any type?!
     //       Is it actually what we want?
-    let writeCount = Darwin.write(fd, buffer, count)
+    let writeCount = sysWrite(fd, buffer, lCount)
     
     guard writeCount >= 0 else {
-      return ( POSIXError(rawValue: Darwin.errno)!, 0 )
+      return ( POSIXError(rawValue: sysErrno)!, 0 )
     }
     
     return ( nil, writeCount )
@@ -185,7 +194,7 @@ public extension FileDescriptor {
     let ctimeout = timeout != nil ? Int32(timeout!) : -1 /* wait forever */
     
     var fds = pollfd(fd: self.fd, events: CShort(events), revents: 0)
-    let rc  = Darwin.poll(&fds, 1, ctimeout)
+    let rc  = sysPoll(&fds, 1, ctimeout)
     
     guard rc >= 0 else {
       print("poll() returned an error")
@@ -205,7 +214,7 @@ public extension FileDescriptor {
   var numberOfBytesAvailableForReading : Int? {
     // Note: this doesn't seem to work with GCD, returns 0
     var count = Int32(0)
-    let rc    = ari_ioctlVip(fd, FIONREAD, &count);
+    let rc    = ari_ioctlVip(fd, sysFIONREAD, &count);
     print("rc \(rc)")
     return rc != -1 ? Int(count) : nil
   }

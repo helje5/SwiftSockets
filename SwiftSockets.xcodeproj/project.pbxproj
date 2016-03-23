@@ -14,7 +14,6 @@
 		3710E9FD1BF5486B0002A4DB /* FileDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFF6A61B53DDE9001A3B6E /* FileDescriptor.swift */; };
 		3710E9FE1BF5486B0002A4DB /* UnixUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D74194B06E20073740A /* UnixUtils.swift */; };
 		3710E9FF1BF5486B0002A4DB /* DNS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81DC1F71965A42600BD826B /* DNS.swift */; };
-		3710EA001BF5486B0002A4DB /* UnixBridge.c in Sources */ = {isa = PBXBuildFile; fileRef = E83305A4195B92D100CCBDF5 /* UnixBridge.c */; };
 		3710EA011BF548700002A4DB /* SwiftSockets.h in Headers */ = {isa = PBXBuildFile; fileRef = E88984B9194A751E00A831A3 /* SwiftSockets.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3710EA0F1BF54A3B0002A4DB /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D72194B06E20073740A /* Socket.swift */; };
 		3710EA101BF54A3B0002A4DB /* SocketAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D73194B06E20073740A /* SocketAddress.swift */; };
@@ -23,7 +22,6 @@
 		3710EA131BF54A3B0002A4DB /* FileDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFF6A61B53DDE9001A3B6E /* FileDescriptor.swift */; };
 		3710EA141BF54A3B0002A4DB /* UnixUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8305D74194B06E20073740A /* UnixUtils.swift */; };
 		3710EA151BF54A3B0002A4DB /* DNS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81DC1F71965A42600BD826B /* DNS.swift */; };
-		3710EA161BF54A3B0002A4DB /* UnixBridge.c in Sources */ = {isa = PBXBuildFile; fileRef = E83305A4195B92D100CCBDF5 /* UnixBridge.c */; };
 		3710EA171BF54A3E0002A4DB /* SwiftSockets.h in Headers */ = {isa = PBXBuildFile; fileRef = E88984B9194A751E00A831A3 /* SwiftSockets.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E85D5FE9194B917900ECC32A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85D5FE8194B917900ECC32A /* main.swift */; };
 		E85D5FEB194B917900ECC32A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85D5FEA194B917900ECC32A /* AppDelegate.swift */; };
@@ -41,13 +39,12 @@
 /* Begin PBXFileReference section */
 		3710E9F11BF548480002A4DB /* SwiftSockets.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftSockets.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3710EA071BF548C80002A4DB /* SwiftSockets.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftSockets.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E81DC1F71965A42600BD826B /* DNS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DNS.swift; sourceTree = "<group>"; };
-		E8305D70194B06E20073740A /* ActiveSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActiveSocket.swift; sourceTree = "<group>"; };
-		E8305D71194B06E20073740A /* PassiveSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PassiveSocket.swift; sourceTree = "<group>"; };
-		E8305D72194B06E20073740A /* Socket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Socket.swift; sourceTree = "<group>"; };
-		E8305D73194B06E20073740A /* SocketAddress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketAddress.swift; sourceTree = "<group>"; };
-		E8305D74194B06E20073740A /* UnixUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnixUtils.swift; sourceTree = "<group>"; };
-		E83305A4195B92D100CCBDF5 /* UnixBridge.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UnixBridge.c; sourceTree = "<group>"; };
+		E81DC1F71965A42600BD826B /* DNS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DNS.swift; path = Sources/SwiftSockets/DNS.swift; sourceTree = SOURCE_ROOT; };
+		E8305D70194B06E20073740A /* ActiveSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ActiveSocket.swift; path = Sources/SwiftSockets/ActiveSocket.swift; sourceTree = SOURCE_ROOT; };
+		E8305D71194B06E20073740A /* PassiveSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PassiveSocket.swift; path = Sources/SwiftSockets/PassiveSocket.swift; sourceTree = SOURCE_ROOT; };
+		E8305D72194B06E20073740A /* Socket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Socket.swift; path = Sources/SwiftSockets/Socket.swift; sourceTree = SOURCE_ROOT; };
+		E8305D73194B06E20073740A /* SocketAddress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketAddress.swift; path = Sources/SwiftSockets/SocketAddress.swift; sourceTree = SOURCE_ROOT; };
+		E8305D74194B06E20073740A /* UnixUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UnixUtils.swift; path = Sources/SwiftSockets/UnixUtils.swift; sourceTree = SOURCE_ROOT; };
 		E83FFF33197DF00E00A51E6F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E85D5FE4194B917900ECC32A /* ARIFetch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIFetch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E85D5FE7194B917900ECC32A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -58,14 +55,14 @@
 		E862B87B1BDFB70B002A4EA5 /* SwiftSockets.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SwiftSockets.podspec; sourceTree = "<group>"; };
 		E86B8F63194B83FC000B0368 /* EchoServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EchoServer.swift; sourceTree = "<group>"; };
 		E88984B8194A751E00A831A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E88984B9194A751E00A831A3 /* SwiftSockets.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftSockets.h; sourceTree = "<group>"; };
+		E88984B9194A751E00A831A3 /* SwiftSockets.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SwiftSockets.h; path = Sources/SwiftSockets/SwiftSockets.h; sourceTree = SOURCE_ROOT; };
 		E88984E8194A760300A831A3 /* ARIEchoServer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIEchoServer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E88984EB194A760300A831A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E88984EC194A760300A831A3 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		E88984EE194A760300A831A3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E88984F0194A760300A831A3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		E88984F3194A760300A831A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		E8CFF6A61B53DDE9001A3B6E /* FileDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileDescriptor.swift; sourceTree = "<group>"; };
+		E8CFF6A61B53DDE9001A3B6E /* FileDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FileDescriptor.swift; path = Sources/SwiftSockets/FileDescriptor.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,7 +153,6 @@
 				E8CFF6A61B53DDE9001A3B6E /* FileDescriptor.swift */,
 				E8305D74194B06E20073740A /* UnixUtils.swift */,
 				E81DC1F71965A42600BD826B /* DNS.swift */,
-				E83305A4195B92D100CCBDF5 /* UnixBridge.c */,
 				E88984B7194A751E00A831A3 /* Supporting Files */,
 			);
 			path = SwiftSockets;
@@ -373,7 +369,6 @@
 				3710E9FC1BF5486B0002A4DB /* ActiveSocket.swift in Sources */,
 				3710E9FE1BF5486B0002A4DB /* UnixUtils.swift in Sources */,
 				3710E9FA1BF5486B0002A4DB /* SocketAddress.swift in Sources */,
-				3710EA001BF5486B0002A4DB /* UnixBridge.c in Sources */,
 				3710E9FD1BF5486B0002A4DB /* FileDescriptor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -388,7 +383,6 @@
 				3710EA121BF54A3B0002A4DB /* ActiveSocket.swift in Sources */,
 				3710EA141BF54A3B0002A4DB /* UnixUtils.swift in Sources */,
 				3710EA101BF54A3B0002A4DB /* SocketAddress.swift in Sources */,
-				3710EA161BF54A3B0002A4DB /* UnixBridge.c in Sources */,
 				3710EA131BF54A3B0002A4DB /* FileDescriptor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -476,7 +470,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/SwiftSockets/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/SwiftSockets/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
@@ -528,7 +522,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/SwiftSockets/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/SwiftSockets/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
@@ -582,7 +576,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/SwiftSockets/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/SwiftSockets/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -633,7 +627,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/SwiftSockets/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/SwiftSockets/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
