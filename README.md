@@ -20,7 +20,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 [Linux branch](https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux)
 of SwiftSockets. master/develop are setup for the current Xcode release.
 
-Updated for Swift 0.2 (aka Xcode 7.0).
+Updated for Swift 0.2.2 (aka Xcode 7.3).
 
 The project includes three targets:
 - SwiftSockets
