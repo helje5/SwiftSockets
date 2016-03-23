@@ -13,8 +13,9 @@ import Darwin
 #endif
 
 
-// fails on Swift 2.1, required for Swift 2.2
+#if os(Linux) // OSX has this
 extension POSIXError : ErrorType {}
+#endif
 
 /// This essentially wraps the Integer representing a file descriptor in a
 /// struct for the whole reason to attach methods to it.
