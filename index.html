@@ -1,26 +1,35 @@
-<!DOCTYPE html>
-<html lang="en-us">
+<!doctype html>
+<html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>SwiftSockets by AlwaysRightInstitute</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
   <body>
-    <section class="page-header">
-      <h1 class="project-name">SwiftSockets</h1>
-      <h2 class="project-tagline">A simple GCD based socket wrapper for Swift.</h2>
-      <a href="https://github.com/AlwaysRightInstitute/SwiftSockets" class="btn">View on GitHub</a>
-      <a href="https://github.com/AlwaysRightInstitute/SwiftSockets/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tarball/master" class="btn">Download .tar.gz</a>
-    </section>
+    <div class="wrapper">
+      <header>
+        <h1>SwiftSockets</h1>
+        <p>A simple GCD based socket wrapper for Swift.</p>
 
-    <section class="main-content">
-      <h1>
-<a id="swiftsockets" class="anchor" href="#swiftsockets" aria-hidden="true"><span class="octicon octicon-link"></span></a>SwiftSockets</h1>
+        <p class="view"><a href="https://github.com/AlwaysRightInstitute/SwiftSockets">View the Project on GitHub <small>AlwaysRightInstitute/SwiftSockets</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/AlwaysRightInstitute/SwiftSockets/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/AlwaysRightInstitute/SwiftSockets">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="swiftsockets" class="anchor" href="#swiftsockets" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SwiftSockets</h1>
 
 <p>A simple GCD based socket library for Swift.</p>
 
@@ -36,9 +45,13 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 :-)</p>
 
 <h3>
-<a id="targets" class="anchor" href="#targets" aria-hidden="true"><span class="octicon octicon-link"></span></a>Targets</h3>
+<a id="targets" class="anchor" href="#targets" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Targets</h3>
 
-<p>Updated for Swift 0.2 (aka Xcode 7.0).</p>
+<p>Updated for Swift 0.2.2 (aka Xcode 7.3).</p>
+
+<p><em>Note</em>: Linux/SPM users - there is a 
+<a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux">Linux branch</a>
+of SwiftSockets. master/develop are setup for the current Xcode release.</p>
 
 <p>The project includes three targets:</p>
 
@@ -51,7 +64,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 <p>I suggest you start out looking at the ARIEchoServer.</p>
 
 <h4>
-<a id="swiftsockets-1" class="anchor" href="#swiftsockets-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>SwiftSockets</h4>
+<a id="swiftsockets-1" class="anchor" href="#swiftsockets-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SwiftSockets</h4>
 
 <p>A framework containing the socket classes and relevant extensions. It takes a
 bit of inspiration from the <a href="http://sope.opengroupware.org">SOPE</a> NGStreams
@@ -82,7 +95,7 @@ library.</p>
   }</pre></div>
 
 <h4>
-<a id="ariechoserver" class="anchor" href="#ariechoserver" aria-hidden="true"><span class="octicon octicon-link"></span></a>ARIEchoServer</h4>
+<a id="ariechoserver" class="anchor" href="#ariechoserver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ARIEchoServer</h4>
 
 <p>Great echo server. This is actually a Cocoa app. Compile it, run it, then
 connect to it in the Terminal.app via <code>telnet 1337</code>.</p>
@@ -90,7 +103,7 @@ connect to it in the Terminal.app via <code>telnet 1337</code>.</p>
 <p><img src="http://i.imgur.com/874ovtE.png" alt=""></p>
 
 <h4>
-<a id="arifetch" class="anchor" href="#arifetch" aria-hidden="true"><span class="octicon octicon-link"></span></a>ARIFetch</h4>
+<a id="arifetch" class="anchor" href="#arifetch" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ARIFetch</h4>
 
 <p>Connects a socket to some end point, sends an HTTP/1.0 GET request with some
 awesome headers, then shows the results the server sends. Cocoa app.</p>
@@ -100,7 +113,7 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 <p><img src="http://i.imgur.com/nRhADxg.png" alt=""></p>
 
 <h3>
-<a id="goals" class="anchor" href="#goals" aria-hidden="true"><span class="octicon octicon-link"></span></a>Goals</h3>
+<a id="goals" class="anchor" href="#goals" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Goals</h3>
 
 <ul>
 <li>[x] Max line length: 80 characters</li>
@@ -241,7 +254,7 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 </ul>
 
 <h3>
-<a id="why" class="anchor" href="#why" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why?!</h3>
+<a id="why" class="anchor" href="#why" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why?!</h3>
 
 <p>This is an experiment to get acquainted with Swift. To check whether something
 real can be implemented in 'pure' Swift. Meaning, without using any Objective-C
@@ -250,20 +263,18 @@ Or in other words: Can you use Swift without writing all the 'real' code in
 wrapped Objective-C? :-)</p>
 
 <h3>
-<a id="contact" class="anchor" href="#contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contact</h3>
+<a id="contact" class="anchor" href="#contact" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contact</h3>
 
 <p><a href="http://twitter.com/helje5">@helje5</a> | <a href="mailto:helge@alwaysrightinstitute.com">helge@alwaysrightinstitute.com</a></p>
 
 <p><img src="http://www.alwaysrightinstitute.com/images/ARI-symbol-logo.png" alt=""></p>
-
-      <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/AlwaysRightInstitute/SwiftSockets">SwiftSockets</a> is maintained by <a href="https://github.com/AlwaysRightInstitute">AlwaysRightInstitute</a>.</span>
-
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/AlwaysRightInstitute">AlwaysRightInstitute</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
-
-    </section>
-
-  
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
   </body>
 </html>
