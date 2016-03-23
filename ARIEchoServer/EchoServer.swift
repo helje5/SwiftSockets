@@ -73,12 +73,13 @@ class EchoServer {
     listenSocket = nil
   }
   
-  func sendWelcome<T: OutputStreamType>(var sock: T) {
+  func sendWelcome<T: OutputStreamType>(sock: T) {
     // Hm, how to use print(), this doesn't work for me:
     //   print(s, target: sock)
     // (just writes the socket as a value, likely a tuple)
     
-    sock.write("\r\n" +
+    var s = sock
+    s.write("\r\n" +
        "  /----------------------------------------------------\\\r\n" +
        "  |     Welcome to the Always Right Institute!         |\r\n"  +
        "  |    I am an echo server with a zlight twist.        |\r\n"  +
@@ -115,7 +116,7 @@ class EchoServer {
       let mblock = block.map({ $0 == 83 ? 90 : ($0 == 115 ? 122 : $0) })
       */
       var mblock = [CChar](count: count + 1, repeatedValue: 42)
-      for var i = 0; i < count; i++ {
+      for i in 0 ..< count {
         let c = block[i]
         mblock[i] = c == 83 ? 90 : (c == 115 ? 122 : c)
       }
