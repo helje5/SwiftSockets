@@ -47,12 +47,6 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 <h3>
 <a id="targets" class="anchor" href="#targets" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Targets</h3>
 
-<p>Updated for Swift 0.2.2 (aka Xcode 7.3).</p>
-
-<p><em>Note</em>: Linux/SPM users - there is a 
-<a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux">Linux branch</a>
-of SwiftSockets. master/develop are setup for the current Xcode release.</p>
-
 <p>The project includes three targets:</p>
 
 <ul>
@@ -61,7 +55,17 @@ of SwiftSockets. master/develop are setup for the current Xcode release.</p>
 <li>ARIFetch</li>
 </ul>
 
-<p>I suggest you start out looking at the ARIEchoServer.</p>
+<p>Updated for Swift 0.2.2 (aka Xcode 7.3).</p>
+
+<p><em>Note for Linux users</em>:
+This compiles with the 2016-03-01-a snapshot via Swift Package Manager
+as well as with the Swift 2.2 release using the embedded makefiles.
+Make sure you 
+<a href="http://www.alwaysrightinstitute.com/swift-on-linux-in-vbox-on-osx/">install Grand Central Dispatch</a>
+into your Swift installation.
+On Linux the included ARIEchoServer/ARIFetch apps do not build, but this one
+does:
+<a href="http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/">SwiftyEchoDaemon</a>.</p>
 
 <h4>
 <a id="swiftsockets-1" class="anchor" href="#swiftsockets-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SwiftSockets</h4>
@@ -95,12 +99,46 @@ library.</p>
   }</pre></div>
 
 <h4>
+<a id="using-swiftsockets-with-swift-package-manager" class="anchor" href="#using-swiftsockets-with-swift-package-manager" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using SwiftSockets with Swift Package Manager</h4>
+
+<p>To use SwiftSockets in your SPM project, just add it as a dependency in your
+<code>Package.swift</code> file, like so:</p>
+
+<pre><code>import PackageDescription
+
+let package = Package(
+  name:         "SwiftyEcho",
+  targets:      [],
+  dependencies: [
+    .Package(url: "https://github.com/AlwaysRightInstitute/SwiftSockets.git",
+             majorVersion: 0, minor: 1
+    )
+  ]
+)
+</code></pre>
+
+<h4>
 <a id="ariechoserver" class="anchor" href="#ariechoserver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ARIEchoServer</h4>
 
 <p>Great echo server. This is actually a Cocoa app. Compile it, run it, then
 connect to it in the Terminal.app via <code>telnet 1337</code>.</p>
 
 <p><img src="http://i.imgur.com/874ovtE.png" alt=""></p>
+
+<h4>
+<a id="swiftyechodaemon" class="anchor" href="#swiftyechodaemon" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SwiftyEchoDaemon</h4>
+
+<p><a href="http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/">The <strong>bezt</strong> Echo daemon ever written in Swift</a> - SPM version.
+This is a demo on how to use the
+<a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux">SwiftSockets Swift Package Manager version</a>
+on Linux or OSX.
+It also works w/o SPM if SwiftSockets has been built
+via makefiles.</p>
+
+<p>Great echo server. Compile it via <code>make</code>, run it via <code>make run</code>, then
+connect to it in the Terminal.app via <code>telnet 1337</code>.</p>
+
+<p><img src="http://i.imgur.com/mzXANTC.png" alt=""></p>
 
 <h4>
 <a id="arifetch" class="anchor" href="#arifetch" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ARIFetch</h4>
@@ -249,8 +287,17 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 <li>[ ] lowercaseString</li>
 </ul>
 </li>
+<li>[x] #if os(Linux)</li>
+<li>[ ] #if swift(&gt;=2.2)</li>
 </ul>
 </li>
+<li>[x] Swift Package Manager
+
+<ul>
+<li>[x] GNUmakefile support</li>
+</ul>
+</li>
+<li>[x] Linux support</li>
 </ul>
 
 <h3>
