@@ -6,7 +6,11 @@
 //  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
 //
 
+#if os(Linux)
+import Glibc
+#else
 import Darwin
+#endif
 import Dispatch
 
 public typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
@@ -49,7 +53,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     // does not work anymore in b5?: I again need to copy&paste
     // self.init(type: SOCK_STREAM)
     // DUPE:
-    let lfd = socket(T.domain, SOCK_STREAM, 0)
+    let lfd = socket(T.domain, sys_SOCK_STREAM, 0)
     guard lfd != -1 else { return nil }
 
     self.init(fd: FileDescriptor(lfd))
@@ -79,7 +83,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     guard isValid      else { return false }
     guard !isListening else { return true }
     
-    let rc = Darwin.listen(fd.fd, Int32(backlog))
+    let rc = sysListen(fd.fd, Int32(backlog))
     guard rc == 0 else { return false }
     
     self.backlog       = backlog
@@ -95,7 +99,15 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     guard !isListening else { return false }
     
     /* setup GCD dispatch source */
-    
+
+#if os(Linux) // is this GCD Linux vs GCD OSX or Swift 2.1 vs 2.2?
+    let listenSource = dispatch_source_create(
+      DISPATCH_SOURCE_TYPE_READ,
+      UInt(fd.fd), // is this going to bite us?
+      0,
+      queue
+    )
+#else // os(Darwin)
     guard let listenSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
@@ -105,6 +117,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     else {
       return false
     }
+#endif // os(Darwin)
     
     let lfd = fd.fd
     
@@ -118,7 +131,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
         let newFD = withUnsafeMutablePointer(&baddr) {
           ptr -> Int32 in
           let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
-          return Darwin.accept(lfd, bptr, &baddrlen);// buflenptr)
+          return sysAccept(lfd, bptr, &baddrlen);// buflenptr)
         }
         
         if newFD != -1 {
@@ -126,7 +139,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
           // queue setup a typical server would want to have
           let newSocket = ActiveSocket<T>(fd: FileDescriptor(newFD),
                                           remoteAddress: baddr, queue: queue)
-          newSocket.isSigPipeDisabled = true
+          newSocket.isSigPipeDisabled = true // Note: not on Linux!
           
           accept(newSocket)
         }
@@ -139,8 +152,15 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
         
       } while (true);
     }
-    
+
+    // cannot convert value of type 'dispatch_source_t' (aka 'COpaquePointer')
+    // to expected argument type 'dispatch_object_t'
+#if os(Linux)
+    // TBD: what is the better way?
+    dispatch_resume(unsafeBitCast(listenSource, dispatch_object_t.self))
+#else /* os(Darwin) */
     dispatch_resume(listenSource)
+#endif /* os(Darwin) */
     
     guard listen(backlog) else {
       dispatch_source_cancel(listenSource)

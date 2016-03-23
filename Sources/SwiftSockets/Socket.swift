@@ -6,7 +6,11 @@
 //  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
 //
 
+#if os(Linux)
+import Glibc
+#else
 import Darwin
+#endif
 import Dispatch
 
 /**
@@ -34,7 +38,7 @@ public class Socket<T: SocketAddress> {
     close() // TBD: is this OK/safe?
   }
   
-  public convenience init?(type: Int32 = SOCK_STREAM) {
+  public convenience init?(type: Int32 = sys_SOCK_STREAM) {
     let   lfd  = socket(T.domain, type, 0)
     guard lfd != -1 else { return nil }
     
@@ -99,7 +103,7 @@ public class Socket<T: SocketAddress> {
 
     let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return Darwin.bind(fd.fd, bptr, socklen_t(addr.len))
+      return sysBind(fd.fd, bptr, socklen_t(addr.len))
     }
     
     if rc == 0 {
@@ -113,10 +117,10 @@ public class Socket<T: SocketAddress> {
   }
   
   public func getsockname() -> T? {
-    return _getaname(Darwin.getsockname);
+    return _getaname(sysGetsockname)
   }
   public func getpeername() -> T? {
-    return _getaname(Darwin.getpeername);
+    return _getaname(sysGetpeername)
   }
   
   typealias GetNameFN = ( Int32, UnsafeMutablePointer<sockaddr>,
@@ -184,10 +188,20 @@ extension Socket { // Socket Options
     get { return getSocketOption(SO_REUSEADDR) }
     set { setSocketOption(SO_REUSEADDR, value: newValue) }
   }
+
+#if os(Linux)
+  // No: SO_NOSIGPIPE on Linux, use MSG_NOSIGNAL in send()
+  public var isSigPipeDisabled: Bool {
+    get { return false }
+    set { /* DANGER, DANGER, ALERT */ }
+  }
+#else
   public var isSigPipeDisabled: Bool {
     get { return getSocketOption(SO_NOSIGPIPE) }
     set { setSocketOption(SO_NOSIGPIPE, value: newValue) }
   }
+#endif
+
   public var keepAlive: Bool {
     get { return getSocketOption(SO_KEEPALIVE) }
     set { setSocketOption(SO_KEEPALIVE, value: newValue) }

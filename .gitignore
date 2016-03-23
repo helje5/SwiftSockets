@@ -9,5 +9,6 @@
 SwiftSockets.xcodeproj/project.xcworkspace/xcuserdata
 SwiftSockets.xcodeproj/xcuserdata
 .DS_Store
-SwiftSockets/.build
+*~
+.build
 
