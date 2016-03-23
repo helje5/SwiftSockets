@@ -16,7 +16,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 
 ###Targets
 
-Updated for Swift 0.2 (aka Xcode 7.0).
+Updated for Swift 0.2.2 (aka Xcode 7.3).
 
 *Note*: Linux/SPM users - there is a 
 [Linux branch](https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux)
