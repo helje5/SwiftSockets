@@ -7,12 +7,19 @@
 //
 
 import SwiftSockets
+import Dispatch
+
+#if os(Linux) // for sockaddr_in
+import Glibc
+#else
+import Darwin
+#endif
 
 class EchoServer {
 
   let port         : Int
   var listenSocket : PassiveSocketIPv4?
-  let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
+  let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)
   var openSockets  =
         [FileDescriptor:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
@@ -72,14 +79,14 @@ class EchoServer {
     listenSocket?.close()
     listenSocket = nil
   }
-  
-  func sendWelcome<T: OutputStreamType>(sock: T) {
+
+  func sendWelcome<T: OutputStreamType>(sockI: T) {
+    var sock = sockI // cannot use 'var' in parameters anymore?
     // Hm, how to use print(), this doesn't work for me:
     //   print(s, target: sock)
     // (just writes the socket as a value, likely a tuple)
     
-    var s = sock
-    s.write("\r\n" +
+    sock.write("\r\n" +
        "  /----------------------------------------------------\\\r\n" +
        "  |     Welcome to the Always Right Institute!         |\r\n"  +
        "  |    I am an echo server with a zlight twist.        |\r\n"  +
@@ -116,7 +123,7 @@ class EchoServer {
       let mblock = block.map({ $0 == 83 ? 90 : ($0 == 115 ? 122 : $0) })
       */
       var mblock = [CChar](count: count + 1, repeatedValue: 42)
-      for i in 0 ..< count {
+      for i in 0..<count {
         let c = block[i]
         mblock[i] = c == 83 ? 90 : (c == 115 ? 122 : c)
       }
@@ -133,7 +140,8 @@ class EchoServer {
     var s = k ?? "Could not process result block \(block) length \(length)"
     
     // Hu, now this is funny. In b5 \r\n is one Character (but 2 unicodeScalars)
-    if s.hasSuffix("\r\n") {
+    let suffix = String(s.characters.suffix(2))
+    if suffix == "\r\n" {
       s = s[s.startIndex..<s.endIndex.predecessor()]
     }
     
