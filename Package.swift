@@ -2,6 +2,10 @@ import PackageDescription
 
 let package = Package(
   name:         "SwiftSockets",
-  targets:      [],
+  targets:      [
+    Target(name: "SwiftSockets"),
+    Target(name: "SwiftyEchoDaemon",
+           dependencies: [ .Target(name: "SwiftSockets") ])
+  ],
   dependencies: []
 )
