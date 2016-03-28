@@ -195,6 +195,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [ ] #if swift(>=2.2)
 - [x] Swift Package Manager
   - [x] GNUmakefile support
+  - [ ] #if SWIFT_PACKAGE
 - [x] Linux support
 
 ###Why?!
