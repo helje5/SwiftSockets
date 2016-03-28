@@ -30,7 +30,7 @@ Make sure you
 [install Grand Central Dispatch](http://www.alwaysrightinstitute.com/swift-on-linux-in-vbox-on-osx/)
 into your Swift installation.
 On Linux the included ARIEchoServer/ARIFetch apps do not build, but this one
-does:
+does and is embedded:
 [SwiftyEchoDaemon](http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/).
 
 ####SwiftSockets
@@ -83,21 +83,21 @@ To use SwiftSockets in your SPM project, just add it as a dependency in your
     )
 
 
-####ARIEchoServer 
+####ARIEchoServer / SwiftyEchoDaemon
 
-Great echo server. This is actually a Cocoa app. Compile it, run it, then
+There is the ARIEchoServer for Xcode and SwiftEchoDaemon for Package Manager
+installs. Your choize, both are equally awezome.
+
+ARIEchoServer is a Cocoa app. Compile it, run it, then
 connect to it in the Terminal.app via ```telnet 1337```.
 
 ![](http://i.imgur.com/874ovtE.png)
 
-#### SwiftyEchoDaemon
-
 [The **bezt** Echo daemon ever written in Swift](http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/) - SPM version.
-This is a demo on how to use the
-[SwiftSockets Swift Package Manager version](https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux)
-on Linux or OSX.
+This is a demo on how to write a SwiftSockets server using the
+Swift Package Manager, on Linux or OSX.
 It also works w/o SPM if SwiftSockets has been built
-via makefiles.
+via Makefiles.
 
 Great echo server. Compile it via `make`, run it via `make run`, then
 connect to it in the Terminal.app via ```telnet 1337```.
