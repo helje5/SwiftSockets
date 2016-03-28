@@ -1,7 +1,7 @@
 # GNUmakefile
 
 PACKAGE_DIR=../..
-PACKAGE=SwiftyEcho
+PACKAGE=SwiftyEchoDaemon
 debug=on
 
 SwiftyEcho_SWIFT_MODULES = SwiftSockets
