@@ -22,7 +22,7 @@ ifeq ($($(PACKAGE)_SWIFT_FILES),)
 $(PACKAGE)_SWIFT_FILES = $(wildcard *.swift)
 endif
 
-MODULE_DIR=../..
+MODULE_DIR=$(PACKAGE_DIR)/..
 $(PACKAGE)_INCLUDE_DIRS += $(addsuffix /$(SWIFT_REL_BUILD_DIR),$(addprefix $(MODULE_DIR)/,$($(PACKAGE)_SWIFT_MODULES)))
 $(PACKAGE)_LIB_DIRS     += $(addsuffix /$(SWIFT_REL_BUILD_DIR),$(addprefix $(MODULE_DIR)/,$($(PACKAGE)_SWIFT_MODULES)))
 $(PACKAGE)_LIBS         += $($(PACKAGE)_SWIFT_MODULES)
