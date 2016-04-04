@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "SwiftSockets"
-  s.version          = "0.22.5"
+  s.version          = "0.22.6"
   s.summary          = "A simple GCD based socket wrapper for Swift"
   s.description      = <<-DESC
                        A simple GCD based socket wrapper for Swift.
