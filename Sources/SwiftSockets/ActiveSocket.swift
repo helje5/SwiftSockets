@@ -61,7 +61,11 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
       if readBufferSize != oldValue {
+#if swift(>=3.0)
+        readBufferPtr.deallocateCapacity(oldValue + 2)
+#else
         readBufferPtr.dealloc(oldValue + 2)
+#endif
         readBufferPtr = UnsafeMutablePointer<CChar>.alloc(readBufferSize + 2)
       }
     }
@@ -108,7 +112,11 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     isSigPipeDisabled = fd.isValid // hm, hm?
   }
   deinit {
+#if swift(>=3.0)
+    readBufferPtr.deallocateCapacity(readBufferSize + 2)
+#else
     readBufferPtr.dealloc(readBufferSize + 2)
+#endif
   }
   
   
