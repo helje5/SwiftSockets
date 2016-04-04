@@ -35,11 +35,19 @@ func gethoztbyname<T: SocketAddress>
   
   /* copy results - we just take the first match */
   var cn   : String? = nil
+#if swift(>=3.0)
+  var addr : T?      = ptr.pointee.address()
+  if rc == 0 && ptr != nil {
+    cn   = ptr.pointee.canonicalName
+    addr = ptr.pointee.address()
+  }
+#else
   var addr : T?      = ptr.memory.address()
   if rc == 0 && ptr != nil {
     cn   = ptr.memory.canonicalName
     addr = ptr.memory.address()
   }
+#endif
   
   /* report results */
   cb(name, cn, addr)

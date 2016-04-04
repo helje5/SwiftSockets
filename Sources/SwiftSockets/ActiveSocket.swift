@@ -217,7 +217,12 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   }
 }
 
-extension ActiveSocket : OutputStreamType { // writing
+#if swift(>=3.0)
+extension ActiveSocket : OutputStream
+#else
+extension ActiveSocket : OutputStreamType
+#endif
+{ // writing
   
   public func write(string: String) {
     string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
@@ -417,7 +422,11 @@ public extension ActiveSocket { // Reading
     /* actually start listening ... */
 #if os(Linux)
     // TBD: what is the better way?
+#if swift(>=3.0)
+    dispatch_resume(unsafeBitCast(readSource!, to: dispatch_object_t.self))
+#else
     dispatch_resume(unsafeBitCast(readSource!, dispatch_object_t.self))
+#endif
 #else /* os(Darwin) */
     dispatch_resume(readSource!)
 #endif /* os(Darwin) */

@@ -14,7 +14,11 @@ import Darwin
 
 
 #if os(Linux) // OSX has this
+#if swift(>=3.0)
+extension POSIXError : ErrorProtocol {}
+#else
 extension POSIXError : ErrorType {}
+#endif
 #endif
 
 /// This essentially wraps the Integer representing a file descriptor in a
@@ -41,8 +45,13 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   
   // MARK: - Operations
   
+#if swift(>=3.0)
+  public static func open(path: String, flags: CInt)
+                     -> ( ErrorProtocol?, FileDescriptor? )
+#else
   public static func open(path: String, flags: CInt)
                      -> ( ErrorType?, FileDescriptor? )
+#endif
   {
     let fd = sysOpen(path, flags)
     guard fd >= 0 else {
@@ -56,9 +65,18 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     sysClose(fd)
   }
   
-  public func read(count: Int) -> ( ErrorType?, [ UInt8 ]? ) {
+#if swift(>=3.0)
+  public func read(count: Int) -> ( ErrorProtocol?, [ UInt8 ]? )
+#else
+  public func read(count: Int) -> ( ErrorType?, [ UInt8 ]? )
+#endif
+  {
     // TODO: inefficient init. Also: reuse buffers.
+#if swift(>=3.0)
+    var buf = [ UInt8 ](repeating: 0, count: count)
+#else
     var buf = [ UInt8 ](count: count, repeatedValue: 0)
+#endif
     
     // synchronous
     
@@ -74,8 +92,13 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     return ( nil, buf )
   }
   
+#if swift(>=3.0)
+  public func write<T>(buffer: [ T ], count: Int = -1)
+                -> ( ErrorProtocol?, Int )
+#else
   public func write<T>(buffer: [ T ], count: Int = -1)
                 -> ( ErrorType?, Int )
+#endif
   {
     guard buffer.count > 0 else { return ( nil, 0 ) }
     
@@ -260,7 +283,12 @@ extension FileDescriptor: CustomStringConvertible {
 
 // MARK: - Boolean
 
-extension FileDescriptor: BooleanType { // TBD: Swift doesn't want us to do this
+#if swift(>=3.0)
+extension FileDescriptor: Boolean
+#else
+extension FileDescriptor: BooleanType
+#endif
+{ // TBD: Swift doesn't want us to do this
   
   public var boolValue : Bool {
     return isValid
