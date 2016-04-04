@@ -165,7 +165,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [x] Equatable
       - [ ] Equatable on Enums with Associated Values
     - [x] Hashable
-    - [x] SequenceType (GeneratorOf<T>)
+    - [x] Sequence (GeneratorOf<T>)
     - [x] Literal Convertibles
       - [x] StringLiteralConvertible
       - [ ] IntegerLiteralConvertible
@@ -197,6 +197,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] GNUmakefile support
   - [ ] #if SWIFT_PACKAGE
 - [x] Linux support
+- [ ] Swift 3
 
 ###Why?!
 
