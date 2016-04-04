@@ -45,13 +45,13 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   
   // MARK: - Operations
   
-#if swift(>=3.0)
+  public func close() {
+    sysClose(fd)
+  }
+  
+#if swift(>=3.0) // sigh, need to dupe whole function in #if
   public static func open(path: String, flags: CInt)
                      -> ( ErrorProtocol?, FileDescriptor? )
-#else
-  public static func open(path: String, flags: CInt)
-                     -> ( ErrorType?, FileDescriptor? )
-#endif
   {
     let fd = sysOpen(path, flags)
     guard fd >= 0 else {
@@ -60,23 +60,23 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     
     return ( nil, FileDescriptor(fd) )
   }
-  
-  public func close() {
-    sysClose(fd)
-  }
-  
-#if swift(>=3.0)
-  public func read(count: Int) -> ( ErrorProtocol?, [ UInt8 ]? )
-#else
-  public func read(count: Int) -> ( ErrorType?, [ UInt8 ]? )
-#endif
+#else // Swift 2.2+
+  public static func open(path: String, flags: CInt)
+                     -> ( ErrorType?, FileDescriptor? )
   {
-    // TODO: inefficient init. Also: reuse buffers.
-#if swift(>=3.0)
-    var buf = [ UInt8 ](repeating: 0, count: count)
-#else
-    var buf = [ UInt8 ](count: count, repeatedValue: 0)
+    let fd = sysOpen(path, flags)
+    guard fd >= 0 else {
+      return ( POSIXError(rawValue: sysErrno)!, nil )
+    }
+    
+    return ( nil, FileDescriptor(fd) )
+  }
 #endif
+  
+#if swift(>=3.0) // sigh, need to dupe whole function in #if
+  public func read(count: Int) -> ( ErrorProtocol?, [ UInt8 ]? ) {
+    // TODO: inefficient init. Also: reuse buffers.
+    var buf = [ UInt8 ](repeating: 0, count: count)
     
     // synchronous
     
@@ -91,14 +91,29 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     buf = Array(buf[0..<readCount]) // TODO: slice to array, lame
     return ( nil, buf )
   }
+#else // Swift 2.2+
+  public func read(count: Int) -> ( ErrorType?, [ UInt8 ]? ) {
+    // TODO: inefficient init. Also: reuse buffers.
+    var buf = [ UInt8 ](count: count, repeatedValue: 0)
+    
+    // synchronous
+    
+    let readCount = sysRead(fd, &buf, count)
+    guard readCount >= 0 else {
+      return ( POSIXError(rawValue: sysErrno)!, nil )
+    }
+    
+    if readCount == 0 { return ( nil, [] ) } // EOF
+    
+    // TODO: super inefficient. how to declare sth which works with either?
+    buf = Array(buf[0..<readCount]) // TODO: slice to array, lame
+    return ( nil, buf )
+  }
+#endif
   
-#if swift(>=3.0)
+#if swift(>=3.0) // sigh, need to dupe whole function in #if
   public func write<T>(buffer: [ T ], count: Int = -1)
                 -> ( ErrorProtocol?, Int )
-#else
-  public func write<T>(buffer: [ T ], count: Int = -1)
-                -> ( ErrorType?, Int )
-#endif
   {
     guard buffer.count > 0 else { return ( nil, 0 ) }
     
@@ -114,6 +129,25 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     
     return ( nil, writeCount )
   }
+#else // Swift 2.2+
+  public func write<T>(buffer: [ T ], count: Int = -1)
+                -> ( ErrorType?, Int )
+  {
+    guard buffer.count > 0 else { return ( nil, 0 ) }
+    
+    let lCount = count < 0 ? buffer.count : count
+    
+    // TODO: This is funny. It accepts an array of any type?!
+    //       Is it actually what we want?
+    let writeCount = sysWrite(fd, buffer, lCount)
+    
+    guard writeCount >= 0 else {
+      return ( POSIXError(rawValue: sysErrno)!, 0 )
+    }
+    
+    return ( nil, writeCount )
+  }
+#endif
   
   
   // MARK: - File Descriptor
@@ -284,14 +318,11 @@ extension FileDescriptor: CustomStringConvertible {
 // MARK: - Boolean
 
 #if swift(>=3.0)
-extension FileDescriptor: Boolean
-#else
-extension FileDescriptor: BooleanType
-#endif
-{ // TBD: Swift doesn't want us to do this
-  
-  public var boolValue : Bool {
-    return isValid
-  }
-  
+extension FileDescriptor: Boolean { // TBD: Swift doesn't want us to do this
+  public var boolValue : Bool { return isValid }
 }
+#else
+extension FileDescriptor: BooleanType { // TBD: Swift doesn't want us to do this
+  public var boolValue : Bool { return isValid }
+}
+#endif

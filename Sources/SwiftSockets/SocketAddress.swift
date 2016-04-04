@@ -357,13 +357,21 @@ public extension addrinfo {
     return ai_next != nil
   }
   public var next : addrinfo? {
+#if swift(>=3.0)
+    return hasNext ? ai_next.pointee : nil
+#else
     return hasNext ? ai_next.memory : nil
+#endif
   }
   
   public var canonicalName : String? {
     guard ai_canonname != nil && ai_canonname[0] != 0 else { return nil }
     
+#if swift(>=3.0)
+    return String(validatingUTF8: ai_canonname)
+#else
     return String.fromCString(ai_canonname)
+#endif
   }
   
   public var hasAddress : Bool {
@@ -371,8 +379,13 @@ public extension addrinfo {
   }
   
   public var isIPv4 : Bool {
+#if swift(>=3.0)
+    return hasAddress &&
+           (ai_addr.pointee.sa_family == sa_family_t(sockaddr_in.domain))
+#else
     return hasAddress &&
            (ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain))
+#endif
   }
   
   public var addressIPv4 : sockaddr_in?  { return address() }
@@ -382,26 +395,39 @@ public extension addrinfo {
   
   public func address<T: SocketAddress>() -> T? {
     guard ai_addr != nil else { return nil }
+#if swift(>=3.0)
+    guard ai_addr.pointee.sa_family == sa_family_t(T.domain) else { return nil }
+#else
     guard ai_addr.memory.sa_family == sa_family_t(T.domain) else { return nil }
+#endif
     
     let aiptr = UnsafePointer<T>(ai_addr) // cast
+#if swift(>=3.0)
+    return aiptr.pointee // copies the address to the return value
+#else
     return aiptr.memory // copies the address to the return value
+#endif
   }
   
   public var dynamicAddress : SocketAddress? {
     guard hasAddress else { return nil }
     
+#if swift(>=3.0)
+    if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in.domain) {
+      let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
+      return aiptr.pointee // copies the address to the return value
+    }
+    
+    if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in6.domain) {
+      let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
+      return aiptr.pointee // copies the address to the return value
+    }
+#else // Swift 2.2+
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain) {
       let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
       return aiptr.memory // copies the address to the return value
     }
     
-#if swift(>=3.0)
-    if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in6.domain) {
-      let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
-      return aiptr.pointee // copies the address to the return value
-    }
-#else
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in6.domain) {
       let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
       return aiptr.memory // copies the address to the return value
@@ -436,7 +462,7 @@ extension addrinfo : CustomStringConvertible {
         fs.append("flags[\(f)]")
       }
 #if swift(>=3.0)
-      let fss = fs.joined(",")
+      let fss = fs.joined(separator: ",")
 #else
       let fss = fs.joinWithSeparator(",")
 #endif
@@ -483,7 +509,7 @@ extension addrinfo : Sequence {
     var cursor : addrinfo? = self
     
     return AnyIterator {
-      guard let info = cursor else { return .None }
+      guard let info = cursor else { return nil }
       cursor = info.next
       return info
     }

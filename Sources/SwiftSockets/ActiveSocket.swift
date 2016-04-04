@@ -217,12 +217,8 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   }
 }
 
-#if swift(>=3.0)
-extension ActiveSocket : OutputStream
-#else
-extension ActiveSocket : OutputStreamType
-#endif
-{ // writing
+#if swift(>=3.0) // sigh, #if can't just #if the prefix, need to dupe
+extension ActiveSocket : OutputStream { // writing
   
   public func write(string: String) {
     string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
@@ -233,6 +229,19 @@ extension ActiveSocket : OutputStreamType
     }
   }
 }
+#else // Swift 2.2+
+extension ActiveSocket : OutputStreamType { // writing
+  
+  public func write(string: String) {
+    string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
+      let len = Int(strlen(cstr))
+      if len > 0 {
+        self.asyncWrite(cstr, length: len)
+      }
+    }
+  }
+}
+#endif
 
 public extension ActiveSocket { // writing
   

@@ -297,14 +297,11 @@ extension Socket: CustomStringConvertible {
 
 
 #if swift(>=3.0)
-extension Socket: Boolean
-#else
-extension Socket: BooleanType
-#endif
-{ // TBD: Swift doesn't want us to do this
-  
-  public var boolValue : Bool {
-    return isValid
-  }
-  
+extension Socket: Boolean { // TBD: Swift doesn't want us to do this
+  public var boolValue : Bool { return isValid }
 }
+#else
+extension Socket: BooleanType { // TBD: Swift doesn't want us to do this
+  public var boolValue : Bool { return isValid }
+}
+#endif
