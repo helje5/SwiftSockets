@@ -505,7 +505,7 @@ extension addrinfo : CustomStringConvertible {
 #if swift(>=3.0)
 extension addrinfo : Sequence {
   
-  public func iterate() -> AnyIterator<addrinfo> {
+  public func makeIterator() -> AnyIterator<addrinfo> {
     var cursor : addrinfo? = self
     
     return AnyIterator {
