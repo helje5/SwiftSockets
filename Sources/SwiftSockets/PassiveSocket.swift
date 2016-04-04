@@ -157,7 +157,11 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     // to expected argument type 'dispatch_object_t'
 #if os(Linux)
     // TBD: what is the better way?
+#if swift(>=3.0)
+    dispatch_resume(unsafeBitCast(listenSource, to: dispatch_object_t.self))
+#else
     dispatch_resume(unsafeBitCast(listenSource, dispatch_object_t.self))
+#endif
 #else /* os(Darwin) */
     dispatch_resume(listenSource)
 #endif /* os(Darwin) */

@@ -21,7 +21,7 @@ The project includes three targets:
 - ARIEchoServer
 - ARIFetch
 
-Updated for Swift 0.2.2 (aka Xcode 7.3).
+Updated for Swift 0.2.2 (aka Xcode 7.3), aaannd for Swift 0.3-2016-03-16.
 
 *Note for Linux users*:
 This compiles with the 2016-03-01-a snapshot via Swift Package Manager
@@ -160,12 +160,13 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] sizeof()
   - [x] Standard Protocols
     - [x] Printable
-    - [x] BooleanType (aka LogicValue)
-    - [x] OutputStreamType
+    - [x] BooleanType (aka LogicValue[1.x] aka Boolean[3.x])
+    - [x] OutputStreamType / Swift 3 OutputStream
     - [x] Equatable
       - [ ] Equatable on Enums with Associated Values
     - [x] Hashable
     - [x] SequenceType (GeneratorOf<T>)
+      - [x] Swift 3 Sequence (Iterator<T>)
     - [x] Literal Convertibles
       - [x] StringLiteralConvertible
       - [ ] IntegerLiteralConvertible
@@ -197,6 +198,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
   - [x] GNUmakefile support
   - [ ] #if SWIFT_PACKAGE
 - [x] Linux support
+- [x] Swift 3 2016-03-16
 
 ###Why?!
 

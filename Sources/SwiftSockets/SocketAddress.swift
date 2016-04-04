@@ -50,12 +50,20 @@ public extension in_addr {
     }
     
     let len   = Int(INET_ADDRSTRLEN) + 2
+#if swift(>=3.0)
+    var buf   = [CChar](repeating:0, count: len)
+#else
     var buf   = [CChar](count: len, repeatedValue: 0)
+#endif
     
     var selfCopy = self // &self doesn't work, because it can be const?
     let cs = inet_ntop(AF_INET, &selfCopy, &buf, socklen_t(len))
     
+#if swift(>=3.0)
+    return String(validatingUTF8: cs)!
+#else
     return String.fromCString(cs)!
+#endif
   }
   
 }
@@ -146,7 +154,12 @@ extension sockaddr_in: SocketAddress {
       }
       else {
         // split string at colon
+#if swift(>=3.0)
+        let components =
+	    s.characters.split(separator: ":", maxSplits: 1).map { String($0) }
+#else
         let components = s.characters.split(":", maxSplit: 1).map { String($0) }
+#endif
         if components.count == 2 {
           self.init(address: components[0], port: Int(components[1]))
         }
@@ -344,13 +357,21 @@ public extension addrinfo {
     return ai_next != nil
   }
   public var next : addrinfo? {
+#if swift(>=3.0)
+    return hasNext ? ai_next.pointee : nil
+#else
     return hasNext ? ai_next.memory : nil
+#endif
   }
   
   public var canonicalName : String? {
     guard ai_canonname != nil && ai_canonname[0] != 0 else { return nil }
     
+#if swift(>=3.0)
+    return String(validatingUTF8: ai_canonname)
+#else
     return String.fromCString(ai_canonname)
+#endif
   }
   
   public var hasAddress : Bool {
@@ -358,8 +379,13 @@ public extension addrinfo {
   }
   
   public var isIPv4 : Bool {
+#if swift(>=3.0)
+    return hasAddress &&
+           (ai_addr.pointee.sa_family == sa_family_t(sockaddr_in.domain))
+#else
     return hasAddress &&
            (ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain))
+#endif
   }
   
   public var addressIPv4 : sockaddr_in?  { return address() }
@@ -369,15 +395,34 @@ public extension addrinfo {
   
   public func address<T: SocketAddress>() -> T? {
     guard ai_addr != nil else { return nil }
+#if swift(>=3.0)
+    guard ai_addr.pointee.sa_family == sa_family_t(T.domain) else { return nil }
+#else
     guard ai_addr.memory.sa_family == sa_family_t(T.domain) else { return nil }
+#endif
     
     let aiptr = UnsafePointer<T>(ai_addr) // cast
+#if swift(>=3.0)
+    return aiptr.pointee // copies the address to the return value
+#else
     return aiptr.memory // copies the address to the return value
+#endif
   }
   
   public var dynamicAddress : SocketAddress? {
     guard hasAddress else { return nil }
     
+#if swift(>=3.0)
+    if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in.domain) {
+      let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
+      return aiptr.pointee // copies the address to the return value
+    }
+    
+    if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in6.domain) {
+      let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
+      return aiptr.pointee // copies the address to the return value
+    }
+#else // Swift 2.2+
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain) {
       let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
       return aiptr.memory // copies the address to the return value
@@ -387,6 +432,7 @@ public extension addrinfo {
       let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
       return aiptr.memory // copies the address to the return value
     }
+#endif
     
     return nil
   }
@@ -415,7 +461,11 @@ extension addrinfo : CustomStringConvertible {
       if f != 0 {
         fs.append("flags[\(f)]")
       }
+#if swift(>=3.0)
+      let fss = fs.joined(separator: ",")
+#else
       let fss = fs.joinWithSeparator(",")
+#endif
       s += " flags=" + fss
     }
     
@@ -452,6 +502,20 @@ extension addrinfo : CustomStringConvertible {
   }
 }
 
+#if swift(>=3.0)
+extension addrinfo : Sequence {
+  
+  public func makeIterator() -> AnyIterator<addrinfo> {
+    var cursor : addrinfo? = self
+    
+    return AnyIterator {
+      guard let info = cursor else { return nil }
+      cursor = info.next
+      return info
+    }
+  }
+}
+#else // Swift 2.2+
 extension addrinfo : SequenceType {
   
   public func generate() -> AnyGenerator<addrinfo> {
@@ -464,8 +528,10 @@ extension addrinfo : SequenceType {
     }
   }
 }
+#endif // Swift 2.2+
 
-public extension sa_family_t { // Swift 2 : CustomStringConvertible, already imp?!
+public extension sa_family_t {
+  // Swift 2 : CustomStringConvertible, already imp?!
   
   // TBD: does Swift 2 still pick this up?
   public var description : String {

@@ -65,7 +65,11 @@ class EchoServer {
              .onClose { ( fd: FileDescriptor ) -> Void in
         // we need to consume the return value to give peace to the closure
         dispatch_async(self.lockQueue) { [unowned self] in
+#if swift(>=3.0)
+          _ = self.openSockets.removeValue(forKey: fd)
+#else
           _ = self.openSockets.removeValueForKey(fd)
+#endif
         }
       }
       
@@ -80,22 +84,32 @@ class EchoServer {
     listenSocket = nil
   }
 
+  let welcomeText = "\r\n" +
+    "  /----------------------------------------------------\\\r\n" +
+    "  |     Welcome to the Always Right Institute!         |\r\n"  +
+    "  |    I am an echo server with a zlight twist.        |\r\n"  +
+    "  | Just type something and I'll shout it back at you. |\r\n"  +
+   "  \\----------------------------------------------------/\r\n"  +
+    "\r\nTalk to me Dave!\r\n" +
+    "> "
+
+#if swift(>=3.0)
+  func sendWelcome<T: OutputStream>(sockI: T) {
+    var sock = sockI // cannot use 'var' in parameters anymore?
+    // Hm, how to use print(), this doesn't work for me:
+    //   print(s, target: sock)
+    // (just writes the socket as a value, likely a tuple)    
+    sock.write(welcomeText)
+  }
+#else // Swift 2.2+
   func sendWelcome<T: OutputStreamType>(sockI: T) {
     var sock = sockI // cannot use 'var' in parameters anymore?
     // Hm, how to use print(), this doesn't work for me:
     //   print(s, target: sock)
-    // (just writes the socket as a value, likely a tuple)
-    
-    sock.write("\r\n" +
-       "  /----------------------------------------------------\\\r\n" +
-       "  |     Welcome to the Always Right Institute!         |\r\n"  +
-       "  |    I am an echo server with a zlight twist.        |\r\n"  +
-       "  | Just type something and I'll shout it back at you. |\r\n"  +
-      "  \\----------------------------------------------------/\r\n"  +
-      "\r\nTalk to me Dave!\r\n" +
-      "> "
-    )
+    // (just writes the socket as a value, likely a tuple)    
+    sock.write(welcomeText)
   }
+#endif
   
   func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
     // remove from openSockets if all has been read
@@ -122,7 +136,11 @@ class EchoServer {
       /* ptr has no map ;-) FIXME: add an extension 'mapWithCount'?
       let mblock = block.map({ $0 == 83 ? 90 : ($0 == 115 ? 122 : $0) })
       */
+#if swift(>=3.0)
+      var mblock = [CChar](repeating: 42, count: count + 1)
+#else
       var mblock = [CChar](count: count + 1, repeatedValue: 42)
+#endif
       for i in 0..<count {
         let c = block[i]
         mblock[i] = c == 83 ? 90 : (c == 115 ? 122 : c)
@@ -136,7 +154,11 @@ class EchoServer {
   }
 
   func logReceivedBlock(block: UnsafePointer<CChar>, length: Int) {
+#if swift(>=3.0)
+    let k = String(cString: block)
+#else
     let k = String.fromCString(block)
+#endif
     var s = k ?? "Could not process result block \(block) length \(length)"
     
     // Hu, now this is funny. In b5 \r\n is one Character (but 2 unicodeScalars)

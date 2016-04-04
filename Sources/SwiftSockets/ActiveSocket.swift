@@ -54,9 +54,22 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   var closeRequested : Bool               = false
   var didCloseRead   : Bool               = false
   var readCB         : ((ActiveSocket, Int) -> Void)? = nil
+
   
   // let the socket own the read buffer, what is the best buffer type?
-  //var readBuffer     : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
+  //   var readBuffer : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
+#if swift(>=3.0)
+  var readBufferPtr  = UnsafeMutablePointer<CChar>(allocatingCapacity: (4096 + 2))
+  var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
+    didSet {
+      if readBufferSize != oldValue {
+        readBufferPtr.deallocateCapacity(oldValue + 2)
+        readBufferPtr =
+	  UnsafeMutablePointer<CChar>(allocatingCapacity: (readBufferSize + 2))
+      }
+    }
+  }
+#else // Swift 2.2+
   var readBufferPtr  = UnsafeMutablePointer<CChar>.alloc(4096 + 2)
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
@@ -66,6 +79,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       }
     }
   }
+#endif
   
   
   public var isConnected : Bool {
@@ -108,7 +122,11 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     isSigPipeDisabled = fd.isValid // hm, hm?
   }
   deinit {
+#if swift(>=3.0)
+    readBufferPtr.deallocateCapacity(readBufferSize + 2)
+#else
     readBufferPtr.dealloc(readBufferSize + 2)
+#endif
   }
   
   
@@ -217,6 +235,19 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   }
 }
 
+#if swift(>=3.0) // sigh, #if can't just #if the prefix, need to dupe
+extension ActiveSocket : OutputStream { // writing
+  
+  public func write(string: String) {
+    string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
+      let len = Int(strlen(cstr))
+      if len > 0 {
+        self.asyncWrite(cstr, length: len)
+      }
+    }
+  }
+}
+#else // Swift 2.2+
 extension ActiveSocket : OutputStreamType { // writing
   
   public func write(string: String) {
@@ -228,6 +259,7 @@ extension ActiveSocket : OutputStreamType { // writing
     }
   }
 }
+#endif
 
 public extension ActiveSocket { // writing
   
@@ -417,7 +449,11 @@ public extension ActiveSocket { // Reading
     /* actually start listening ... */
 #if os(Linux)
     // TBD: what is the better way?
+#if swift(>=3.0)
+    dispatch_resume(unsafeBitCast(readSource!, to: dispatch_object_t.self))
+#else
     dispatch_resume(unsafeBitCast(readSource!, dispatch_object_t.self))
+#endif
 #else /* os(Darwin) */
     dispatch_resume(readSource!)
 #endif /* os(Darwin) */
