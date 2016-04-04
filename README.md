@@ -21,7 +21,7 @@ The project includes three targets:
 - ARIEchoServer
 - ARIFetch
 
-Updated for Swift 0.2.2 (aka Xcode 7.3).
+Updated for Swift 0.2.2 (aka Xcode 7.3), aaannd for Swift 0.3-2016-03-16.
 
 *Note for Linux users*:
 This compiles with the 2016-03-01-a snapshot via Swift Package Manager
