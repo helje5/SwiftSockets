@@ -54,22 +54,32 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   var closeRequested : Bool               = false
   var didCloseRead   : Bool               = false
   var readCB         : ((ActiveSocket, Int) -> Void)? = nil
+
   
   // let the socket own the read buffer, what is the best buffer type?
-  //var readBuffer     : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
+  //   var readBuffer : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
+#if swift(>=3.0)
+  var readBufferPtr  = UnsafeMutablePointer<CChar>(allocatingCapacity: (4096 + 2))
+  var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
+    didSet {
+      if readBufferSize != oldValue {
+        readBufferPtr.deallocateCapacity(oldValue + 2)
+        readBufferPtr =
+	  UnsafeMutablePointer<CChar>(allocatingCapacity: (readBufferSize + 2))
+      }
+    }
+  }
+#else // Swift 2.2+
   var readBufferPtr  = UnsafeMutablePointer<CChar>.alloc(4096 + 2)
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
       if readBufferSize != oldValue {
-#if swift(>=3.0)
-        readBufferPtr.deallocateCapacity(oldValue + 2)
-#else
         readBufferPtr.dealloc(oldValue + 2)
-#endif
         readBufferPtr = UnsafeMutablePointer<CChar>.alloc(readBufferSize + 2)
       }
     }
   }
+#endif
   
   
   public var isConnected : Bool {
