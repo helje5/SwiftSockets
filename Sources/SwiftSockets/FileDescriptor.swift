@@ -13,12 +13,14 @@ import Darwin
 #endif
 
 
-#if os(Linux) // OSX has this
+#if os(Linux)
 #if swift(>=3.0)
 extension POSIXError : ErrorProtocol {}
 #else
 extension POSIXError : ErrorType {}
 #endif
+#else
+import Foundation // Foundation defines this on OSX
 #endif
 
 /// This essentially wraps the Integer representing a file descriptor in a
