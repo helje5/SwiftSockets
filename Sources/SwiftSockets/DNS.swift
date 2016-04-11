@@ -11,7 +11,7 @@ import Glibc
 import Darwin
 #endif
 
-func gethoztbyname<T: SocketAddress>
+public func gethoztbyname<T: SocketAddress>
   (name : String, flags : Int32 = AI_CANONNAME,
    cb   : ( String, String?, T? ) -> Void)
 {
@@ -69,7 +69,7 @@ func gethoztbyname<T: SocketAddress>
  * TBD: The 'flags' has to be provided, otherwise the trailing closure is not
  *      detected right?
  */
-func gethostzbyname<T: SocketAddress>
+public func gethostzbyname<T: SocketAddress>
   (name : String, flags : Int32 = AI_CANONNAME,
    cb   : ( String, [ ( cn: String?, address: T? ) ]? ) -> Void
   ) -> Void
