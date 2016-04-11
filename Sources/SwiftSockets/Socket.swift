@@ -38,7 +38,7 @@ public class Socket<T: SocketAddress> {
     close() // TBD: is this OK/safe?
   }
   
-  public convenience init?(type: Int32 = sys_SOCK_STREAM) {
+  public convenience init?(type: Int32 = xsys.SOCK_STREAM) {
     let   lfd  = socket(T.domain, type, 0)
     guard lfd != -1 else { return nil }
     
@@ -103,7 +103,7 @@ public class Socket<T: SocketAddress> {
 
     let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return sysBind(fd.fd, bptr, socklen_t(addr.len))
+      return xsys.bind(fd.fd, bptr, socklen_t(addr.len))
     }
     
     if rc == 0 {
@@ -117,10 +117,10 @@ public class Socket<T: SocketAddress> {
   }
   
   public func getsockname() -> T? {
-    return _getaname(sysGetsockname)
+    return _getaname(xsys.getsockname)
   }
   public func getpeername() -> T? {
-    return _getaname(sysGetpeername)
+    return _getaname(xsys.getpeername)
   }
   
   typealias GetNameFN = ( Int32, UnsafeMutablePointer<sockaddr>,

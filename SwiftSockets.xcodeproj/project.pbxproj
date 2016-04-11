@@ -24,6 +24,8 @@
 		3710EA151BF54A3B0002A4DB /* DNS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81DC1F71965A42600BD826B /* DNS.swift */; };
 		3710EA171BF54A3E0002A4DB /* SwiftSockets.h in Headers */ = {isa = PBXBuildFile; fileRef = E88984B9194A751E00A831A3 /* SwiftSockets.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E8386B6B1CA9723C0013C2EF /* EchoServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8386B6A1CA9723C0013C2EF /* EchoServer.swift */; };
+		E84F40DC1CBBD5F700544DE5 /* xsys.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84F40DB1CBBD5F700544DE5 /* xsys.swift */; };
+		E84F40DD1CBBD5F700544DE5 /* xsys.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84F40DB1CBBD5F700544DE5 /* xsys.swift */; };
 		E85D5FE9194B917900ECC32A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85D5FE8194B917900ECC32A /* main.swift */; };
 		E85D5FEB194B917900ECC32A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85D5FEA194B917900ECC32A /* AppDelegate.swift */; };
 		E85D5FED194B917900ECC32A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E85D5FEC194B917900ECC32A /* Images.xcassets */; };
@@ -47,6 +49,7 @@
 		E8305D74194B06E20073740A /* UnixUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UnixUtils.swift; path = Sources/SwiftSockets/UnixUtils.swift; sourceTree = SOURCE_ROOT; };
 		E8386B6A1CA9723C0013C2EF /* EchoServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = EchoServer.swift; path = Sources/SwiftyEchoDaemon/EchoServer.swift; sourceTree = SOURCE_ROOT; };
 		E83FFF33197DF00E00A51E6F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		E84F40DB1CBBD5F700544DE5 /* xsys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = xsys.swift; path = Sources/SwiftSockets/xsys.swift; sourceTree = SOURCE_ROOT; };
 		E85D5FE4194B917900ECC32A /* ARIFetch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIFetch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E85D5FE7194B917900ECC32A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E85D5FE8194B917900ECC32A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -153,6 +156,7 @@
 				E8CFF6A61B53DDE9001A3B6E /* FileDescriptor.swift */,
 				E8305D74194B06E20073740A /* UnixUtils.swift */,
 				E81DC1F71965A42600BD826B /* DNS.swift */,
+				E84F40DB1CBBD5F700544DE5 /* xsys.swift */,
 				E88984B7194A751E00A831A3 /* Supporting Files */,
 			);
 			path = SwiftSockets;
@@ -368,6 +372,7 @@
 				3710E9F91BF5486B0002A4DB /* Socket.swift in Sources */,
 				3710E9FF1BF5486B0002A4DB /* DNS.swift in Sources */,
 				3710E9FC1BF5486B0002A4DB /* ActiveSocket.swift in Sources */,
+				E84F40DC1CBBD5F700544DE5 /* xsys.swift in Sources */,
 				3710E9FE1BF5486B0002A4DB /* UnixUtils.swift in Sources */,
 				3710E9FA1BF5486B0002A4DB /* SocketAddress.swift in Sources */,
 				3710E9FD1BF5486B0002A4DB /* FileDescriptor.swift in Sources */,
@@ -382,6 +387,7 @@
 				3710EA0F1BF54A3B0002A4DB /* Socket.swift in Sources */,
 				3710EA151BF54A3B0002A4DB /* DNS.swift in Sources */,
 				3710EA121BF54A3B0002A4DB /* ActiveSocket.swift in Sources */,
+				E84F40DD1CBBD5F700544DE5 /* xsys.swift in Sources */,
 				3710EA141BF54A3B0002A4DB /* UnixUtils.swift in Sources */,
 				3710EA101BF54A3B0002A4DB /* SocketAddress.swift in Sources */,
 				3710EA131BF54A3B0002A4DB /* FileDescriptor.swift in Sources */,

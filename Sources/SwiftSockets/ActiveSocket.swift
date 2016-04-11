@@ -101,7 +101,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
                                  // though it should work right away?
   }
   */
-  public convenience init?(type: Int32 = sys_SOCK_STREAM) {
+  public convenience init?(type: Int32 = xsys.SOCK_STREAM) {
     // TODO: copy of Socket.init(type:), but required to compile. Not sure
     // what's going on with init inheritance here. Do I *have to* read the
     // manual???
@@ -149,7 +149,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       // Seen this crash - if close() is called from within the readCB?
       readCB = nil // break potential cycles
       if debugClose { debugPrint("   shutdown read channel ...") }
-      sysShutdown(fd.fd, sys_SHUT_RD);
+      xsys.shutdown(fd.fd, xsys.SHUT_RD);
       
       didCloseRead = true
     }
@@ -185,7 +185,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     let lfd = fd.fd
     let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return sysConnect(lfd, bptr, socklen_t(addr.len)) //only returns block
+      return xsys.connect(lfd, bptr, socklen_t(addr.len)) //only returns block
     }
     
     guard rc == 0 else {
@@ -392,7 +392,7 @@ public extension ActiveSocket { // Reading
     
     // FIXME: If I just close the Terminal which hosts telnet this continues
     //        to read garbage from the server. Even with SIGPIPE off.
-    readCount = sysRead(fd.fd, readBufferPtr, bufsize)
+    readCount = xsys.read(fd.fd, readBufferPtr, bufsize)
     guard readCount >= 0 else {
       readBufferPtr[0] = 0
       return ( readCount, bptr, errno )

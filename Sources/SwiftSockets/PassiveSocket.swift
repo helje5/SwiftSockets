@@ -53,7 +53,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     // does not work anymore in b5?: I again need to copy&paste
     // self.init(type: SOCK_STREAM)
     // DUPE:
-    let lfd = socket(T.domain, sys_SOCK_STREAM, 0)
+    let lfd = xsys.socket(T.domain, xsys.SOCK_STREAM, 0)
     guard lfd != -1 else { return nil }
 
     self.init(fd: FileDescriptor(lfd))
@@ -83,7 +83,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     guard isValid      else { return false }
     guard !isListening else { return true }
     
-    let rc = sysListen(fd.fd, Int32(backlog))
+    let rc = xsys.listen(fd.fd, Int32(backlog))
     guard rc == 0 else { return false }
     
     self.backlog       = backlog
@@ -131,7 +131,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
         let newFD = withUnsafeMutablePointer(&baddr) {
           ptr -> Int32 in
           let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
-          return sysAccept(lfd, bptr, &baddrlen);// buflenptr)
+          return xsys.accept(lfd, bptr, &baddrlen);// buflenptr)
         }
         
         if newFD != -1 {
