@@ -265,7 +265,7 @@ extension sockaddr_in6: SocketAddress {
 #else
     sin6_len      = sockaddr_in6.size
 #endif
-    sin6_family   = sa_family_t(sockaddr_in.domain)
+    sin6_family   = sa_family_t(sockaddr_in6.domain)
     sin6_port     = 0
     sin6_flowinfo = 0
     sin6_addr     = in6addr_any
