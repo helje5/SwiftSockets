@@ -339,7 +339,7 @@ public extension addrinfo {
   public init() {
     ai_flags     = 0 // AI_CANONNAME, AI_PASSIVE, AI_NUMERICHOST
     ai_family    = AF_UNSPEC // AF_INET or AF_INET6 or AF_UNSPEC
-    ai_socktype  = sys_SOCK_STREAM
+    ai_socktype  = xsys.SOCK_STREAM
     ai_protocol  = 0   // or IPPROTO_xxx for IPv4
     ai_addrlen   = 0   // length of ai_addr below
     ai_canonname = nil // UnsafePointer<Int8>
@@ -471,10 +471,10 @@ extension addrinfo : CustomStringConvertible {
     
     if ai_family != AF_UNSPEC { s += sa_family_t(ai_family).description }
     switch ai_socktype {
-      case 0:           break
-      case sys_SOCK_STREAM: s += " stream"
-      case sys_SOCK_DGRAM:  s += " datagram"
-      default:              s += " type[\(ai_socktype)]"
+      case 0:                break
+      case xsys.SOCK_STREAM: s += " stream"
+      case xsys.SOCK_DGRAM:  s += " datagram"
+      default:               s += " type[\(ai_socktype)]"
     }
     
     if let cn = canonicalName {

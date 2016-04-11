@@ -12,6 +12,8 @@ import Glibc
 import Darwin
 #endif
 
+//import xsys - a struct in here
+
 
 #if os(Linux)
 #if swift(>=3.0)
@@ -48,16 +50,16 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   // MARK: - Operations
   
   public func close() {
-    sysClose(fd)
+    xsys.close(fd)
   }
   
 #if swift(>=3.0) // sigh, need to dupe whole function in #if
   public static func open(path: String, flags: CInt)
                      -> ( ErrorProtocol?, FileDescriptor? )
   {
-    let fd = sysOpen(path, flags)
+    let fd = xsys.open(path, flags)
     guard fd >= 0 else {
-      return ( POSIXError(rawValue: sysErrno)!, nil )
+      return ( POSIXError(rawValue: xsys.errno)!, nil )
     }
     
     return ( nil, FileDescriptor(fd) )
@@ -66,9 +68,9 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   public static func open(path: String, flags: CInt)
                      -> ( ErrorType?, FileDescriptor? )
   {
-    let fd = sysOpen(path, flags)
+    let fd = xsys.open(path, flags)
     guard fd >= 0 else {
-      return ( POSIXError(rawValue: sysErrno)!, nil )
+      return ( POSIXError(rawValue: xsys.errno)!, nil )
     }
     
     return ( nil, FileDescriptor(fd) )
@@ -82,9 +84,9 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     
     // synchronous
     
-    let readCount = sysRead(fd, &buf, count)
+    let readCount = xsys.read(fd, &buf, count)
     guard readCount >= 0 else {
-      return ( POSIXError(rawValue: sysErrno)!, nil )
+      return ( POSIXError(rawValue: xsys.errno)!, nil )
     }
     
     if readCount == 0 { return ( nil, [] ) } // EOF
@@ -100,9 +102,9 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     
     // synchronous
     
-    let readCount = sysRead(fd, &buf, count)
+    let readCount = xsys.read(fd, &buf, count)
     guard readCount >= 0 else {
-      return ( POSIXError(rawValue: sysErrno)!, nil )
+      return ( POSIXError(rawValue: xsys.errno)!, nil )
     }
     
     if readCount == 0 { return ( nil, [] ) } // EOF
@@ -123,10 +125,10 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     
     // TODO: This is funny. It accepts an array of any type?!
     //       Is it actually what we want?
-    let writeCount = sysWrite(fd, buffer, lCount)
+    let writeCount = xsys.write(fd, buffer, lCount)
     
     guard writeCount >= 0 else {
-      return ( POSIXError(rawValue: sysErrno)!, 0 )
+      return ( POSIXError(rawValue: xsys.errno)!, 0 )
     }
     
     return ( nil, writeCount )
@@ -141,10 +143,10 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     
     // TODO: This is funny. It accepts an array of any type?!
     //       Is it actually what we want?
-    let writeCount = sysWrite(fd, buffer, lCount)
+    let writeCount = xsys.write(fd, buffer, lCount)
     
     guard writeCount >= 0 else {
-      return ( POSIXError(rawValue: sysErrno)!, 0 )
+      return ( POSIXError(rawValue: xsys.errno)!, 0 )
     }
     
     return ( nil, writeCount )
@@ -181,11 +183,11 @@ extension FileDescriptor { // Socket Flags
   
   public var flags : Int32? {
     get {
-      let rc = ari_fcntlVi(fd, F_GETFL, 0)
+      let rc = xsys.fcntlVi(fd, F_GETFL, 0)
       return rc >= 0 ? rc : nil
     }
     set {
-      let rc = ari_fcntlVi(fd, F_SETFL, Int32(newValue!))
+      let rc = xsys.fcntlVi(fd, F_SETFL, Int32(newValue!))
       if rc == -1 {
         print("Could not set new socket flags \(rc)")
       }
@@ -253,7 +255,7 @@ public extension FileDescriptor {
     let ctimeout = timeout != nil ? Int32(timeout!) : -1 /* wait forever */
     
     var fds = pollfd(fd: self.fd, events: CShort(events), revents: 0)
-    let rc  = sysPoll(&fds, 1, ctimeout)
+    let rc  = xsys.poll(&fds, 1, ctimeout)
     
     guard rc >= 0 else {
       print("poll() returned an error")
@@ -273,7 +275,7 @@ public extension FileDescriptor {
   var numberOfBytesAvailableForReading : Int? {
     // Note: this doesn't seem to work with GCD, returns 0
     var count = Int32(0)
-    let rc    = ari_ioctlVip(fd, sysFIONREAD, &count);
+    let rc    = xsys.ioctlVip(fd, xsys.FIONREAD, &count);
     print("rc \(rc)")
     return rc != -1 ? Int(count) : nil
   }
