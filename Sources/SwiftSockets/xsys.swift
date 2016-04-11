@@ -46,6 +46,8 @@ public typealias xsysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
     
     // ioctl
     public static let FIONREAD : CUnsignedLong = CUnsignedLong(Glibc.FIONREAD)
+    public static let fcntlVi  = ari_fcntlVi
+    public static let ioctlVip = ari_ioctlVip
   }
 
   public enum POSIXError : CInt {
@@ -92,5 +94,7 @@ public typealias xsysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
       ( IOC_OUT
         | ((CUnsignedLong(sizeof(Int32)) & CUnsignedLong(IOCPARM_MASK)) << 16)
         | (102 /* 'f' */ << 8) | 127)
+    public static let fcntlVi  = ari_fcntlVi
+    public static let ioctlVip = ari_ioctlVip
   }
 #endif

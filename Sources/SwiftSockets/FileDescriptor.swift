@@ -183,11 +183,11 @@ extension FileDescriptor { // Socket Flags
   
   public var flags : Int32? {
     get {
-      let rc = ari_fcntlVi(fd, F_GETFL, 0)
+      let rc = xsys.fcntlVi(fd, F_GETFL, 0)
       return rc >= 0 ? rc : nil
     }
     set {
-      let rc = ari_fcntlVi(fd, F_SETFL, Int32(newValue!))
+      let rc = xsys.fcntlVi(fd, F_SETFL, Int32(newValue!))
       if rc == -1 {
         print("Could not set new socket flags \(rc)")
       }
@@ -275,7 +275,7 @@ public extension FileDescriptor {
   var numberOfBytesAvailableForReading : Int? {
     // Note: this doesn't seem to work with GCD, returns 0
     var count = Int32(0)
-    let rc    = ari_ioctlVip(fd, xsys.FIONREAD, &count);
+    let rc    = xsys.ioctlVip(fd, xsys.FIONREAD, &count);
     print("rc \(rc)")
     return rc != -1 ? Int(count) : nil
   }
