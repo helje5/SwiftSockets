@@ -41,6 +41,15 @@ public typealias xsysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
     public static let SOCK_DGRAM  : Int32 = Int32(Glibc.SOCK_DGRAM.rawValue)
     public static let SHUT_RD     : Int32 = Int32(Glibc.SHUT_RD)
     
+    public typealias sa_family_t = Glibc.sa_family_t
+    public static let AF_UNSPEC   = Glibc.AF_UNSPEC
+    public static let AF_INET     = Glibc.AF_INET
+    public static let AF_INET6    = Glibc.AF_INET6
+    public static let AF_LOCAL    = Glibc.AF_LOCAL
+    public static let PF_UNSPEC   = Glibc.PF_UNSPEC
+    
+    public typealias addrinfo = Glibc.addrinfo
+    
     // POSIXError
     public static var errno : Int32 { return Glibc.errno }
     
@@ -82,6 +91,15 @@ public typealias xsysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
     public static let SOCK_DGRAM  = Darwin.SOCK_DGRAM
     public static let SHUT_RD     = Darwin.SHUT_RD
     
+    public typealias sa_family_t = Darwin.sa_family_t
+    public static let AF_UNSPEC   = Darwin.AF_UNSPEC
+    public static let AF_INET     = Darwin.AF_INET
+    public static let AF_INET6    = Darwin.AF_INET6
+    public static let AF_LOCAL    = Darwin.AF_LOCAL
+    public static let PF_UNSPEC   = Darwin.PF_UNSPEC
+    
+    public typealias addrinfo = Darwin.addrinfo
+
     // POSIXError
     public static var errno : Int32 { return Darwin.errno }
     
