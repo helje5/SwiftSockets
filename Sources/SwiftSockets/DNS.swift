@@ -25,9 +25,8 @@ public func gethoztbyname<T: SocketAddress>
   
   /* run lookup (synchronously, can be slow!) */
   // b3: (cs : CString) doesn't pick up the right overload?
-  let rc = name.withCString { (cs : UnsafePointer<CChar>) -> Int32 in
-    return getaddrinfo(cs, nil, &hints, &ptr) // returns just the block!
-  }
+  let rc = getaddrinfo(name, nil, &hints, &ptr)
+
   guard rc == 0 else {
     cb(name, nil, nil)
     return
@@ -83,10 +82,8 @@ public func gethostzbyname<T: SocketAddress>
   defer { freeaddrinfo(ptr) } /* free OS resources (TBD: works with nil?) */
   
   /* run lookup (synchronously, can be slow!) */
-  let rc = name.withCString { (cs : UnsafePointer<CChar>) -> Int32 in
-    return getaddrinfo(cs, nil, &hints, &ptr) // returns just the block!
-  }
-  if rc != 0 {
+  let rc = getaddrinfo(name, nil, &hints, &ptr)
+  guard rc == 0 else {
     cb(name, nil)
     return
   }

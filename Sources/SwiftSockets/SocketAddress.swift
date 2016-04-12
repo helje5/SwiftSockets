@@ -35,7 +35,7 @@ public extension in_addr {
       else {
         var buf = INADDR_ANY // Swift wants some initialization
         
-        s.withCString { cs in inet_pton(AF_INET, cs, &buf) }
+        inet_pton(AF_INET, s, &buf)
         s_addr = buf.s_addr
       }
     }
