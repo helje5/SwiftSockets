@@ -307,7 +307,7 @@ public extension ActiveSocket { // writing
     guard canWrite else { return false }
     
     let writelen = buffer.count
-    let bufsize  = writelen * sizeof(T)
+    let bufsize  = writelen * strideof(T)
     guard bufsize > 0 else { // Nothing to write ..
       return true
     }
@@ -336,7 +336,7 @@ public extension ActiveSocket { // writing
     guard canWrite else { return false }
     
     let writelen = length
-    let bufsize  = writelen * sizeof(T)
+    let bufsize  = writelen * strideof(T)
     guard bufsize > 0 else { // Nothing to write ..
       return true
     }

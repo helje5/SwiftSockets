@@ -158,6 +158,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [x] withCString {}
   - [x] UnsafePointer
   - [x] sizeof()
+  - [x] strideof()
   - [x] Standard Protocols
     - [x] Printable
     - [x] BooleanType (aka LogicValue[1.x] aka Boolean[3.x])

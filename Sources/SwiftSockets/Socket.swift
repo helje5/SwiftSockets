@@ -237,7 +237,7 @@ extension Socket { // Socket Options
     
     var buf = value
     let rc  = setsockopt(fd.fd, SOL_SOCKET, option,
-                         &buf, socklen_t(sizeof(Int32)))
+                         &buf, socklen_t(strideof(Int32)))
     
     if rc != 0 { // ps: Great Error Handling
       print("Could not set option \(option) on socket \(self)")
@@ -253,7 +253,7 @@ extension Socket { // Socket Options
     }
     
     var buf    = Int32(0)
-    var buflen = socklen_t(sizeof(Int32))
+    var buflen = socklen_t(strideof(Int32))
     
     let rc = getsockopt(fd.fd, SOL_SOCKET, option, &buf, &buflen)
     if rc != 0 { // ps: Great Error Handling
