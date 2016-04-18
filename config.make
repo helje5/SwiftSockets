@@ -54,14 +54,14 @@ SWIFTC=$(SWIFT_BIN)c
 
 ifeq ($(debug),on)
   ifeq ($(HAVE_SPM),yes)
-    SWIFT_INTERNAL_BUILD_FLAGS += -c debug
+    SWIFT_INTERNAL_BUILD_FLAGS += --configuration debug
   else
     SWIFT_INTERNAL_BUILD_FLAGS += -g
   endif
   SWIFT_REL_BUILD_DIR=.build/debug
 else
   ifeq ($(HAVE_SPM),yes)
-    SWIFT_INTERNAL_BUILD_FLAGS += -c release
+    SWIFT_INTERNAL_BUILD_FLAGS += --configuration release
   endif
   SWIFT_REL_BUILD_DIR=.build/release
 endif
