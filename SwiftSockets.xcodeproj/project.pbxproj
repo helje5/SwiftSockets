@@ -69,6 +69,11 @@
 		E88984F0194A760300A831A3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		E88984F3194A760300A831A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		E8CFF6A61B53DDE9001A3B6E /* FileDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FileDescriptor.swift; path = Sources/SwiftSockets/FileDescriptor.swift; sourceTree = SOURCE_ROOT; };
+		E8D257B21CC525C000961842 /* AppKitDebug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = AppKitDebug.xcconfig; path = xcconfig/AppKitDebug.xcconfig; sourceTree = "<group>"; };
+		E8D257B31CC525C000961842 /* AppKitRelease.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = AppKitRelease.xcconfig; path = xcconfig/AppKitRelease.xcconfig; sourceTree = "<group>"; };
+		E8D257B41CC525C000961842 /* SwiftModuleFW.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SwiftModuleFW.xcconfig; path = xcconfig/SwiftModuleFW.xcconfig; sourceTree = "<group>"; };
+		E8D257B51CC525C000961842 /* UIKitDebug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = UIKitDebug.xcconfig; path = xcconfig/UIKitDebug.xcconfig; sourceTree = "<group>"; };
+		E8D257B61CC525C000961842 /* UIKitRelease.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = UIKitRelease.xcconfig; path = xcconfig/UIKitRelease.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,6 +135,7 @@
 			children = (
 				E83FFF33197DF00E00A51E6F /* README.md */,
 				E862B87B1BDFB70B002A4EA5 /* SwiftSockets.podspec */,
+				E8D257B11CC5258B00961842 /* Configs */,
 				E88984B6194A751E00A831A3 /* SwiftSockets */,
 				E88984E9194A760300A831A3 /* SwiftyEchoDaemon */,
 				E85D5FE5194B917900ECC32A /* ARIFetch */,
@@ -194,6 +200,18 @@
 				E88984EC194A760300A831A3 /* main.swift */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E8D257B11CC5258B00961842 /* Configs */ = {
+			isa = PBXGroup;
+			children = (
+				E8D257B21CC525C000961842 /* AppKitDebug.xcconfig */,
+				E8D257B31CC525C000961842 /* AppKitRelease.xcconfig */,
+				E8D257B41CC525C000961842 /* SwiftModuleFW.xcconfig */,
+				E8D257B51CC525C000961842 /* UIKitDebug.xcconfig */,
+				E8D257B61CC525C000961842 /* UIKitRelease.xcconfig */,
+			);
+			name = Configs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -443,6 +461,7 @@
 /* Begin XCBuildConfiguration section */
 		3710E9F71BF548480002A4DB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E8D257B21CC525C000961842 /* AppKitDebug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -500,6 +519,7 @@
 		};
 		3710E9F81BF548480002A4DB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E8D257B31CC525C000961842 /* AppKitRelease.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -551,6 +571,7 @@
 		};
 		3710EA0D1BF548C80002A4DB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E8D257B51CC525C000961842 /* UIKitDebug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -607,6 +628,7 @@
 		};
 		3710EA0E1BF548C80002A4DB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E8D257B61CC525C000961842 /* UIKitRelease.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -658,6 +680,7 @@
 		};
 		E85D5FFE194B917900ECC32A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E8D257B21CC525C000961842 /* AppKitDebug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -706,6 +729,7 @@
 		};
 		E85D5FFF194B917900ECC32A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E8D257B31CC525C000961842 /* AppKitRelease.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -763,6 +787,7 @@
 		};
 		E8898502194A760300A831A3 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E8D257B21CC525C000961842 /* AppKitDebug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -804,13 +829,13 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.alwaysrightinstitute.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		E8898503194A760300A831A3 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E8D257B31CC525C000961842 /* AppKitRelease.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -846,7 +871,6 @@
 				METAL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.alwaysrightinstitute.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
 			};
 			name = Release;
 		};
