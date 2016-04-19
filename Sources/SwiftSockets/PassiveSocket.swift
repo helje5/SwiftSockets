@@ -150,7 +150,8 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
           print("Failed to accept() socket: \(self) \(errno)")
         }
         
-      } while (true);
+      }
+      while true
     }
 
     // cannot convert value of type 'dispatch_source_t' (aka 'COpaquePointer')
