@@ -124,7 +124,7 @@ extension sockaddr_in: SocketAddress {
   public init() {
 #if os(Linux) // no sin_len on Linux
 #else
-    sin_len    = sockaddr_in.size
+    sin_len    = self.dynamicType.size // no way to access the static type here?
 #endif
     sin_family = sa_family_t(sockaddr_in.domain)
     sin_port   = 0
@@ -263,7 +263,7 @@ extension sockaddr_in6: SocketAddress {
   public init() {
 #if os(Linux) // no sin_len on Linux
 #else
-    sin6_len      = sockaddr_in6.size
+    sin6_len = self.dynamicType.size // no way to access the static type here?
 #endif
     sin6_family   = sa_family_t(sockaddr_in6.domain)
     sin6_port     = 0
