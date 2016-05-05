@@ -1,5 +1,6 @@
 // SwiftyEcho
 
+import Dispatch
 #if os(Linux) // for sockaddr_in
 import Glibc
 let sysSleep = Glibc.sleep
