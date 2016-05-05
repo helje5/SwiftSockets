@@ -6,6 +6,12 @@
 //
 //
 
+#if os(Linux)
+import Glibc
+#else
+import Darwin
+#endif
+
 // Note: This cannot conform to SocketAddress because it doesn't have a static
 //       domain.
 public enum sockaddr_any {
