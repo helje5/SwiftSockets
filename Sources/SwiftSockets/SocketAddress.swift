@@ -60,7 +60,7 @@ public extension in_addr {
     let cs = inet_ntop(AF_INET, &selfCopy, &buf, socklen_t(len))
     
 #if swift(>=3.0)
-    return String(validatingUTF8: cs)!
+    return String(validatingUTF8: cs!)!
 #else
     return String.fromCString(cs)!
 #endif
@@ -395,15 +395,16 @@ public extension addrinfo {
   
   public func address<T: SocketAddress>() -> T? {
     guard ai_addr != nil else { return nil }
-#if swift(>=3.0)
+#if swift(>=3.0) // #swift3-ptr
     guard ai_addr.pointee.sa_family == sa_family_t(T.domain) else { return nil }
 #else
     guard ai_addr.memory.sa_family == sa_family_t(T.domain) else { return nil }
 #endif
     
     let aiptr = UnsafePointer<T>(ai_addr) // cast
-#if swift(>=3.0)
-    return aiptr.pointee // copies the address to the return value
+#if swift(>=3.0) // #swift3-ptr
+    // copies the address to the return value
+    return aiptr != nil ? aiptr!.pointee : nil
 #else
     return aiptr.memory // copies the address to the return value
 #endif
@@ -412,15 +413,18 @@ public extension addrinfo {
   public var dynamicAddress : SocketAddress? {
     guard hasAddress else { return nil }
     
-#if swift(>=3.0)
+#if swift(>=3.0) // #swift3-ptr
     if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in.domain) {
       let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
-      return aiptr.pointee // copies the address to the return value
+      // copies the address to the return value
+      guard aiptr != nil else { return nil }
+      return aiptr!.pointee
     }
     
     if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in6.domain) {
       let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
-      return aiptr.pointee // copies the address to the return value
+      guard aiptr != nil else { return nil }
+      return aiptr!.pointee // copies the address to the return value
     }
 #else // Swift 2.2+
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain) {

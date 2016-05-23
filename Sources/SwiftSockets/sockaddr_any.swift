@@ -3,13 +3,13 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 12/04/16.
-//
+//  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
-import Glibc
+  import Glibc
 #else
-import Darwin
+  import Darwin
 #endif
 
 // Note: This cannot conform to SocketAddress because it doesn't have a static
@@ -22,9 +22,9 @@ public enum sockaddr_any {
   
   public var domain: Int32 {
     switch self {
-    case .AF_INET:  return xsys.AF_INET
-    case .AF_INET6: return xsys.AF_INET6
-    case .AF_LOCAL: return xsys.AF_LOCAL
+      case .AF_INET:  return xsys.AF_INET
+      case .AF_INET6: return xsys.AF_INET6
+      case .AF_LOCAL: return xsys.AF_LOCAL
     }
   }
   
@@ -43,11 +43,11 @@ public enum sockaddr_any {
     }
 #endif
   }
-
+  
   public var port : Int? {
     get {
       switch self {
-	case .AF_INET (let addr): return Int(ntohs(addr.sin_port))
+        case .AF_INET (let addr): return Int(ntohs(addr.sin_port))
         case .AF_INET6(let addr): return Int(ntohs(addr.sin6_port))
         case .AF_LOCAL:           return nil
       }
@@ -61,10 +61,10 @@ public enum sockaddr_any {
       }
     }
   }
-
-
-  // initializers (can this be done in a better way?)                                                               
-
+  
+  
+  // initializers (can this be done in a better way?)
+  
   public init(_ address: sockaddr_in) {
     self = .AF_INET(address)
   }
@@ -74,34 +74,46 @@ public enum sockaddr_any {
   public init(_ address: sockaddr_un) {
     self = .AF_LOCAL(address)
   }
-
+  
   public init?<T: SocketAddress>(_ address: T?) {
     guard let address = address else { return nil }
-
-    // a little hacky ...                                                                                           
+    
+    // a little hacky ...
     switch T.domain {
       case xsys.AF_INET:
+#if swift(>=3.0)
+        let lAddress = unsafeBitCast(address, to: xsys_sockaddr_in.self)
+#else
         let lAddress = unsafeBitCast(address, xsys_sockaddr_in.self)
+#endif
         self = .AF_INET(lAddress)
-
+      
       case xsys.AF_INET6:
-        let lAddress = unsafeBitCast(address, sockaddr_in6.self)
+#if swift(>=3.0)
+        let lAddress = unsafeBitCast(address, to: xsys_sockaddr_in6.self)
+#else
+        let lAddress = unsafeBitCast(address, xsys_sockaddr_in6.self)
+#endif
         self = .AF_INET6(lAddress)
-
-      case xsys.AF_LOCAL: // TODO: this is likely wrong too (variable length!)                                      
-        let lAddress = unsafeBitCast(address, sockaddr_un.self)
+      
+      case xsys.AF_LOCAL: // TODO: this is likely wrong too (variable length!)
+#if swift(>=3.0)
+        let lAddress = unsafeBitCast(address, to: xsys_sockaddr_un.self)
+#else
+        let lAddress = unsafeBitCast(address, xsys_sockaddr_un.self)
+#endif
         self = .AF_LOCAL(lAddress)
-
+      
       default:
         print("Unexpected socket address: \(address)")
         return nil
     }
   }
-
-
-  // TODO: how to implement this? Is it even possible? (is the associated value                                     
-  //       memory-stable, or do we get a local copy?)                                                               
-  // public var genericPointer : UnsafePointer<sockaddr> { .. }                                                     
+  
+  
+  // TODO: how to implement this? Is it even possible? (is the associated value
+  //       memory-stable, or do we get a local copy?)
+  // public var genericPointer : UnsafePointer<sockaddr> { .. }
 }
 
 extension sockaddr_any: CustomStringConvertible {
