@@ -53,7 +53,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     // does not work anymore in b5?: I again need to copy&paste
     // self.init(type: SOCK_STREAM)
     // DUPE:
-    let lfd = socket(T.domain, sys_SOCK_STREAM, 0)
+    let lfd = xsys.socket(T.domain, xsys.SOCK_STREAM, 0)
     guard lfd != -1 else { return nil }
 
     self.init(fd: FileDescriptor(lfd))
@@ -79,19 +79,19 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   /* start listening */
   
-  public func listen(backlog: Int = 5) -> Bool {
+  public func listen(backlog bl: Int = 5) -> Bool {
     guard isValid      else { return false }
     guard !isListening else { return true }
     
-    let rc = sysListen(fd.fd, Int32(backlog))
+    let rc = xsys.listen(fd.fd, Int32(bl))
     guard rc == 0 else { return false }
     
-    self.backlog       = backlog
+    self.backlog       = bl
     self.isNonBlocking = true
     return true
   }
   
-  public func listen(queue: dispatch_queue_t, backlog: Int = 5,
+  public func listen(queue q: dispatch_queue_t, backlog: Int = 5,
                      accept: ( ActiveSocket<T> ) -> Void)
     -> Bool
   {
@@ -101,18 +101,27 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     /* setup GCD dispatch source */
 
 #if os(Linux) // is this GCD Linux vs GCD OSX or Swift 2.1 vs 2.2?
+#if swift(>=3.0)
     let listenSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
       0,
-      queue
+      q
+    )!
+#else
+    let listenSource = dispatch_source_create(
+      DISPATCH_SOURCE_TYPE_READ,
+      UInt(fd.fd), // is this going to bite us?
+      0,
+      q
     )
+#endif
 #else // os(Darwin)
     guard let listenSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
       0,
-      queue
+      q
     )
     else {
       return false
@@ -131,14 +140,14 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
         let newFD = withUnsafeMutablePointer(&baddr) {
           ptr -> Int32 in
           let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
-          return sysAccept(lfd, bptr, &baddrlen);// buflenptr)
+          return xsys.accept(lfd, bptr, &baddrlen);// buflenptr)
         }
         
         if newFD != -1 {
           // we pass over the queue, seems convenient. Not sure what kind of
           // queue setup a typical server would want to have
           let newSocket = ActiveSocket<T>(fd: FileDescriptor(newFD),
-                                          remoteAddress: baddr, queue: queue)
+                                          remoteAddress: baddr, queue: q)
           newSocket.isSigPipeDisabled = true // Note: not on Linux!
           
           accept(newSocket)
@@ -150,7 +159,8 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
           print("Failed to accept() socket: \(self) \(errno)")
         }
         
-      } while (true);
+      }
+      while true
     }
 
     // cannot convert value of type 'dispatch_source_t' (aka 'COpaquePointer')
@@ -166,7 +176,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     dispatch_resume(listenSource)
 #endif /* os(Darwin) */
     
-    guard listen(backlog) else {
+    guard listen(backlog: backlog) else {
       dispatch_source_cancel(listenSource)
       return false
     }

@@ -15,11 +15,19 @@ import Glibc
 import Darwin
 #endif
 
+#if swift(>=3.0)
+typealias OutputStreamType = OutputStream
+#endif
+
 class EchoServer {
 
   let port         : Int
   var listenSocket : PassiveSocketIPv4?
+#if swift(>=3.0)
+  let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
+#else
   let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)
+#endif
   var openSockets  =
         [FileDescriptor:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
@@ -28,7 +36,7 @@ class EchoServer {
     self.port = port
   }
   
-  func log(s: String) {
+  func log(string s: String) {
     if let lcb = appLog {
       lcb(s)
     }
@@ -37,21 +45,26 @@ class EchoServer {
     }
   }
   
+  
   func start() {
     listenSocket = PassiveSocketIPv4(address: sockaddr_in(port: port))
     if listenSocket == nil || !listenSocket! { // neat, eh? ;-)
-      log("ERROR: could not create socket ...")
+      log(string: "ERROR: could not create socket ...")
       return
     }
     
-    log("Listen socket \(listenSocket)")
+    log(string: "Listen socket \(listenSocket)")
     
+#if swift(>=3.0) // #swift3-gcd
+    let queue = dispatch_get_global_queue(0, 0)!
+#else
     let queue = dispatch_get_global_queue(0, 0)
-    
+#endif
+
     // Note: capturing self here
-    listenSocket!.listen(queue, backlog: 5) { newSock in
+    listenSocket!.listen(queue: queue, backlog: 5) { newSock in
       
-      self.log("got new socket: \(newSock) nio=\(newSock.isNonBlocking)")
+      self.log(string: "got new sock: \(newSock) nio=\(newSock.isNonBlocking)")
       newSock.isNonBlocking = true
       
       dispatch_async(self.lockQueue) {
@@ -59,13 +72,13 @@ class EchoServer {
         self.openSockets[newSock.fd] = newSock
       }
       
-      self.sendWelcome(newSock)
+      self.send(welcome: newSock)
       
-      newSock.onRead  { self.handleIncomingData($0, expectedCount: $1) }
+      newSock.onRead  { self.handleIncomingData(socket: $0, expectedCount: $1) }
              .onClose { ( fd: FileDescriptor ) -> Void in
         // we need to consume the return value to give peace to the closure
         dispatch_async(self.lockQueue) { [unowned self] in
-#if swift(>=3.0)
+#if swift(>=3.0) // #swift3-fd
           _ = self.openSockets.removeValue(forKey: fd)
 #else
           _ = self.openSockets.removeValueForKey(fd)
@@ -76,7 +89,7 @@ class EchoServer {
       
     }
     
-    log("Started running listen socket \(listenSocket)")
+    log(string: "Started running listen socket \(listenSocket)")
   }
   
   func stop() {
@@ -93,42 +106,32 @@ class EchoServer {
     "\r\nTalk to me Dave!\r\n" +
     "> "
 
-#if swift(>=3.0)
-  func sendWelcome<T: OutputStream>(sockI: T) {
+  func send<T: OutputStreamType>(welcome sockI: T) {
     var sock = sockI // cannot use 'var' in parameters anymore?
     // Hm, how to use print(), this doesn't work for me:
     //   print(s, target: sock)
     // (just writes the socket as a value, likely a tuple)    
     sock.write(welcomeText)
   }
-#else // Swift 2.2+
-  func sendWelcome<T: OutputStreamType>(sockI: T) {
-    var sock = sockI // cannot use 'var' in parameters anymore?
-    // Hm, how to use print(), this doesn't work for me:
-    //   print(s, target: sock)
-    // (just writes the socket as a value, likely a tuple)    
-    sock.write(welcomeText)
-  }
-#endif
   
-  func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
+  func handleIncomingData<T>(socket s: ActiveSocket<T>, expectedCount: Int) {
     // remove from openSockets if all has been read
     repeat {
       // FIXME: This currently continues to read garbage if I just close the
       //        Terminal which hosts telnet. Even with sigpipe off.
-      let (count, block, errno) = socket.read()
+      let (count, block, errno) = s.read()
       
       if count < 0 && errno == EWOULDBLOCK {
         break
       }
       
       if count < 1 {
-        log("EOF \(socket) (err=\(errno))")
-        socket.close()
+        log(string: "EOF \(socket) (err=\(errno))")
+        s.close()
         return
       }
       
-      logReceivedBlock(block, length: count)
+      logReceived(block: block, length: count)
       
       // maps the whole block. asyncWrite does not accept slices,
       // can we add this?
@@ -147,27 +150,32 @@ class EchoServer {
       }
       mblock[count] = 0
       
-      socket.asyncWrite(mblock, length: count)
+      s.asyncWrite(buffer: mblock, length: count)
     } while (true)
     
-    socket.write("> ")
+    s.write("> ")
   }
 
-  func logReceivedBlock(block: UnsafePointer<CChar>, length: Int) {
-#if swift(>=3.0)
-    let k = String(cString: block)
+  func logReceived(block b: UnsafePointer<CChar>, length: Int) {
+#if swift(>=3.0) // #swift3-cstr
+    let k = String(cString: b)
 #else
-    let k = String.fromCString(block)
+    let k = String.fromCString(b)
 #endif
-    var s = k ?? "Could not process result block \(block) length \(length)"
+    var s = k ?? "Could not process result block \(b) length \(length)"
     
     // Hu, now this is funny. In b5 \r\n is one Character (but 2 unicodeScalars)
     let suffix = String(s.characters.suffix(2))
     if suffix == "\r\n" {
-      s = s[s.startIndex..<s.endIndex.predecessor()]
+#if swift(>=3.0) // #swift3-fd
+      let to = s.index(before: s.endIndex)
+#else
+      let to = s.endIndex.predecessor()
+#endif
+      s = s[s.startIndex..<to]
     }
     
-    log("read string: \(s)")
+    log(string: "read string: \(s)")
   }
   
   final let alwaysRight = "Yes, indeed!"

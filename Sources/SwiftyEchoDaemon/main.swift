@@ -1,5 +1,6 @@
 // SwiftyEcho
 
+import Dispatch
 #if os(Linux) // for sockaddr_in
 import Glibc
 let sysSleep = Glibc.sleep
@@ -15,6 +16,5 @@ echod.start()
 
 print("Connect in e.g. Terminal via 'telnet 127.0.0.1 \(port)'")
 
-sysSleep(300000)
-print("Stopping.")
-
+dispatch_main()
+// dispatch_main never returns. print("Stopping.")

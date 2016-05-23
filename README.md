@@ -1,5 +1,9 @@
 SwiftSockets
 ============
+![Mac OS X](https://img.shields.io/badge/os-Mac%20OS%20X-green.svg?style=flat)
+![iOS](https://img.shields.io/badge/os-iOS-green.svg?style=flat)
+![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
+![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)
 
 A simple GCD based socket library for Swift.
 
@@ -21,7 +25,7 @@ The project includes three targets:
 - ARIEchoServer
 - ARIFetch
 
-Updated for Swift 0.2.2 (aka Xcode 7.3), aaannd for Swift 0.3-2016-03-16.
+Updated for Swift 0.2.2 (aka Xcode 7.3), aand for Swift 0.3-2016-05-09.
 
 *Note for Linux users*:
 This compiles with the 2016-03-01-a snapshot via Swift Package Manager
@@ -42,7 +46,7 @@ library.
 Server Sample:
 ```swift
 let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))!
-  .listen(dispatch_get_global_queue(0, 0), backlog: 5) {
+  .listen(queue: dispatch_get_global_queue(0, 0), backlog: 5) {
     print("Wait, someone is attempting to talk to me!")
     $0.close()
     print("All good, go ahead!")
@@ -158,6 +162,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
     - [x] withCString {}
   - [x] UnsafePointer
   - [x] sizeof()
+  - [x] strideof()
   - [x] Standard Protocols
     - [x] Printable
     - [x] BooleanType (aka LogicValue[1.x] aka Boolean[3.x])
@@ -171,7 +176,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
       - [x] StringLiteralConvertible
       - [ ] IntegerLiteralConvertible
   - [x] Left shift AND right shift
-  - [ ] Enums on steroids
+  - [x] Enums on steroids
   - [ ] Dynamic type system, reflection
   - [x] Operator overloading
   - [ ] UCS-4 identifiers (🐔🐔🐔)

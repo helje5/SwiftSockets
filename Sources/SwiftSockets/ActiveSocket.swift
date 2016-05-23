@@ -101,7 +101,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
                                  // though it should work right away?
   }
   */
-  public convenience init?(type: Int32 = sys_SOCK_STREAM) {
+  public convenience init?(type: Int32 = xsys.SOCK_STREAM) {
     // TODO: copy of Socket.init(type:), but required to compile. Not sure
     // what's going on with init inheritance here. Do I *have to* read the
     // manual???
@@ -149,7 +149,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       // Seen this crash - if close() is called from within the readCB?
       readCB = nil // break potential cycles
       if debugClose { debugPrint("   shutdown read channel ...") }
-      sysShutdown(fd.fd, sys_SHUT_RD);
+      xsys.shutdown(fd.fd, xsys.SHUT_RD);
       
       didCloseRead = true
     }
@@ -185,7 +185,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     let lfd = fd.fd
     let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return sysConnect(lfd, bptr, socklen_t(addr.len)) //only returns block
+      return xsys.connect(lfd, bptr, socklen_t(addr.len)) //only returns block
     }
     
     guard rc == 0 else {
@@ -235,30 +235,27 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   }
 }
 
-#if swift(>=3.0) // sigh, #if can't just #if the prefix, need to dupe
-extension ActiveSocket : OutputStream { // writing
-  
-  public func write(string: String) {
-    string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
-      let len = Int(strlen(cstr))
-      if len > 0 {
-        self.asyncWrite(cstr, length: len)
-      }
-    }
-  }
-}
-#else // Swift 2.2+
 extension ActiveSocket : OutputStreamType { // writing
   
   public func write(string: String) {
     string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
       let len = Int(strlen(cstr))
       if len > 0 {
-        self.asyncWrite(cstr, length: len)
+        self.asyncWrite(buffer: cstr, length: len)
       }
     }
   }
 }
+
+#if swift(>=3.0) // sigh, #if can't just #if the prefix, need to dupe
+public typealias OutputStreamType = OutputStream
+extension ActiveSocket { // writing
+  
+  public func write(_ string: String) {
+    write(string: string)
+  }
+}
+#else // Swift 2.2+
 #endif
 
 public extension ActiveSocket { // writing
@@ -278,16 +275,16 @@ public extension ActiveSocket { // writing
     return true
   }
   
-  public func write(data: dispatch_data_t) {
+  public func write(data d: dispatch_data_t) {
     sendCount += 1
-    if debugAsyncWrites { debugPrint("async send[\(data)]") }
+    if debugAsyncWrites { debugPrint("async send[\(d)]") }
     
     // in here we capture self, which I think is right.
-    dispatch_write(fd.fd, data, queue!) {
+    dispatch_write(fd.fd, d, queue!) {
       asyncData, error in
       
       if self.debugAsyncWrites {
-        debugPrint("did send[\(self.sendCount)] data \(data) error \(error)")
+        debugPrint("did send[\(self.sendCount)] data \(d) error \(error)")
       }
       
       self.sendCount = self.sendCount - 1 // -- fails?
@@ -297,17 +294,20 @@ public extension ActiveSocket { // writing
         self.close()
         self.closeRequested = false
       }
-    }
-    
+    }    
+  }
+  public func write(data d: dispatch_data_t?) {
+    guard d != nil else { return }
+    write(data: d!)
   }
   
-  public func asyncWrite<T>(buffer: [T]) -> Bool {
+  public func asyncWrite<T>(buffer b: [T]) -> Bool {
     // While [T] seems to convert to ConstUnsafePointer<T>, this method
     // has the added benefit of being able to derive the buffer length
     guard canWrite else { return false }
     
-    let writelen = buffer.count
-    let bufsize  = writelen * sizeof(T)
+    let writelen = b.count
+    let bufsize  = writelen * strideof(T)
     guard bufsize > 0 else { // Nothing to write ..
       return true
     }
@@ -320,23 +320,23 @@ public extension ActiveSocket { // writing
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
 #if os(Linux)
-    let asyncData = dispatch_data_create(buffer, bufsize, queue!, nil)
+    let asyncData = dispatch_data_create(b, bufsize, queue!, nil)
 #else /* os(Darwin) */ // TBD
-    guard let asyncData = dispatch_data_create(buffer, bufsize, queue!, nil) else {
+    guard let asyncData = dispatch_data_create(b, bufsize, queue!, nil) else {
       return false
     }
 #endif /* os(Darwin) */
     
-    write(asyncData)
+    write(data: asyncData)
     return true
   }
   
-  public func asyncWrite<T>(buffer: UnsafePointer<T>, length:Int) -> Bool {
+  public func asyncWrite<T>(buffer b: UnsafePointer<T>, length:Int) -> Bool {
     // FIXME: can we remove this dupe of the [T] version?
     guard canWrite else { return false }
     
     let writelen = length
-    let bufsize  = writelen * sizeof(T)
+    let bufsize  = writelen * strideof(T)
     guard bufsize > 0 else { // Nothing to write ..
       return true
     }
@@ -349,24 +349,23 @@ public extension ActiveSocket { // writing
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
 #if os(Linux)
-    let asyncData = dispatch_data_create(buffer, bufsize, queue!, nil);
+    let asyncData = dispatch_data_create(b, bufsize, queue!, nil);
 #else /* os(Darwin) */
-    guard let asyncData = dispatch_data_create(buffer, bufsize,
-                            queue!, nil) else {
+    guard let asyncData = dispatch_data_create(b, bufsize, queue!, nil) else {
       return false
     }
 #endif /* os(Darwin) */
 
-    write(asyncData)
+    write(data: asyncData)
     return true
   }
   
-  public func send<T>(buffer: [T], length: Int? = nil) -> Int {
+  public func send<T>(buffer b: [T], length: Int? = nil) -> Int {
     // var writeCount : Int = 0
-    let bufsize    = length ?? buffer.count
+    let bufsize    = length ?? b.count
     
     // this is funky
-    let ( _, writeCount ) = fd.write(buffer, count: bufsize)
+    let ( _, writeCount ) = fd.write(buffer: b, count: bufsize)
 
     return writeCount
   }
@@ -392,7 +391,7 @@ public extension ActiveSocket { // Reading
     
     // FIXME: If I just close the Terminal which hosts telnet this continues
     //        to read garbage from the server. Even with SIGPIPE off.
-    readCount = sysRead(fd.fd, readBufferPtr, bufsize)
+    readCount = xsys.read(fd.fd, readBufferPtr, bufsize)
     guard readCount >= 0 else {
       readBufferPtr[0] = 0
       return ( readCount, bptr, errno )

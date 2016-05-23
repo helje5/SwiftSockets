@@ -38,7 +38,7 @@ public class Socket<T: SocketAddress> {
     close() // TBD: is this OK/safe?
   }
   
-  public convenience init?(type: Int32 = sys_SOCK_STREAM) {
+  public convenience init?(type: Int32 = xsys.SOCK_STREAM) {
     let   lfd  = socket(T.domain, type, 0)
     guard lfd != -1 else { return nil }
     
@@ -103,7 +103,7 @@ public class Socket<T: SocketAddress> {
 
     let rc = withUnsafePointer(&addr) { ptr -> Int32 in
       let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return sysBind(fd.fd, bptr, socklen_t(addr.len))
+      return xsys.bind(fd.fd, bptr, socklen_t(addr.len))
     }
     
     if rc == 0 {
@@ -117,15 +117,15 @@ public class Socket<T: SocketAddress> {
   }
   
   public func getsockname() -> T? {
-    return _getaname(sysGetsockname)
+    return _getaname(fn: xsys.getsockname)
   }
   public func getpeername() -> T? {
-    return _getaname(sysGetpeername)
+    return _getaname(fn: xsys.getpeername)
   }
   
   typealias GetNameFN = ( Int32, UnsafeMutablePointer<sockaddr>,
                           UnsafeMutablePointer<socklen_t>) -> Int32
-  func _getaname(nfn: GetNameFN) -> T? {
+  func _getaname(fn nfn: GetNameFN) -> T? {
     guard fd.isValid else { return nil }
     
     // FIXME: tried to encapsulate this in a sockaddrbuf which does all the
@@ -237,7 +237,7 @@ extension Socket { // Socket Options
     
     var buf = value
     let rc  = setsockopt(fd.fd, SOL_SOCKET, option,
-                         &buf, socklen_t(sizeof(Int32)))
+                         &buf, socklen_t(strideof(Int32)))
     
     if rc != 0 { // ps: Great Error Handling
       print("Could not set option \(option) on socket \(self)")
@@ -253,7 +253,7 @@ extension Socket { // Socket Options
     }
     
     var buf    = Int32(0)
-    var buflen = socklen_t(sizeof(Int32))
+    var buflen = socklen_t(strideof(Int32))
     
     let rc = getsockopt(fd.fd, SOL_SOCKET, option, &buf, &buflen)
     if rc != 0 { // ps: Great Error Handling
@@ -271,17 +271,31 @@ extension Socket { // Socket Options
     return v != nil ? (v! == 0 ? false : true) : false
   }
   
+#if swift(>=3.0) // #swift3-1st-kwarg
+  public func setSocketOption(_ option: Int32, value: Int32) -> Bool {
+    return setSocketOption(option: option, value: value)
+  }
+  public func getSocketOption(_ option: Int32) -> Int32? {
+    return getSocketOption(option: option)
+  }
+  public func setSocketOption(_ option: Int32, value: Bool) -> Bool {
+    return setSocketOption(option: option, value: value)
+  }
+  public func getSocketOption(_ option: Int32) -> Bool {
+    return getSocketOption(option: option)
+  }
+#endif
 }
 
 
-extension Socket { // poll()
+public extension Socket { // poll()
   
   public var isDataAvailable: Bool { return fd.isDataAvailable }
   
-  public func pollFlag(flag: Int32) -> Bool { return fd.pollFlag(flag) }
+  public func pollFlag(flag: Int32) -> Bool { return fd.poll(flag: flag) }
   
   public func poll(events: Int32, timeout: UInt? = 0) -> Int32? {
-    return fd.poll(events, timeout: timeout)
+    return fd.poll(events: events, timeout: timeout)
   }
   
 }
@@ -295,13 +309,17 @@ extension Socket: CustomStringConvertible {
   
 }
 
-
-#if swift(>=3.0)
-extension Socket: Boolean { // TBD: Swift doesn't want us to do this
-  public var boolValue : Bool { return isValid }
-}
-#else
 extension Socket: BooleanType { // TBD: Swift doesn't want us to do this
   public var boolValue : Bool { return isValid }
+}
+
+
+#if swift(>=3.0)
+public typealias BooleanType = Boolean
+
+public extension Socket { // #swift3-1st-kwarg
+  public func bind(_ address: T) -> Bool {
+    return bind(address: address)
+  }
 }
 #endif

@@ -35,7 +35,7 @@ public extension in_addr {
       else {
         var buf = INADDR_ANY // Swift wants some initialization
         
-        s.withCString { cs in inet_pton(AF_INET, cs, &buf) }
+        inet_pton(AF_INET, s, &buf)
         s_addr = buf.s_addr
       }
     }
@@ -60,7 +60,7 @@ public extension in_addr {
     let cs = inet_ntop(AF_INET, &selfCopy, &buf, socklen_t(len))
     
 #if swift(>=3.0)
-    return String(validatingUTF8: cs)!
+    return String(validatingUTF8: cs!)!
 #else
     return String.fromCString(cs)!
 #endif
@@ -117,14 +117,14 @@ public protocol SocketAddress {
 
 extension sockaddr_in: SocketAddress {
   
-  public static var domain = AF_INET // if you make this a let, swiftc segfaults
-  public static var size   = __uint8_t(sizeof(sockaddr_in))
+  public static let domain = AF_INET
+  public static let size   = __uint8_t(strideof(sockaddr_in))
     // how to refer to self?
   
   public init() {
 #if os(Linux) // no sin_len on Linux
 #else
-    sin_len    = sockaddr_in.size
+    sin_len    = self.dynamicType.size // no way to access the static type here?
 #endif
     sin_family = sa_family_t(sockaddr_in.domain)
     sin_port   = 0
@@ -257,15 +257,15 @@ extension sockaddr_in: CustomStringConvertible {
 
 extension sockaddr_in6: SocketAddress {
   
-  public static var domain = AF_INET6
-  public static var size   = __uint8_t(sizeof(sockaddr_in6))
+  public static let domain = AF_INET6
+  public static let size   = __uint8_t(strideof(sockaddr_in6))
   
   public init() {
 #if os(Linux) // no sin_len on Linux
 #else
-    sin6_len      = sockaddr_in6.size
+    sin6_len = self.dynamicType.size // no way to access the static type here?
 #endif
-    sin6_family   = sa_family_t(sockaddr_in.domain)
+    sin6_family   = sa_family_t(sockaddr_in6.domain)
     sin6_port     = 0
     sin6_flowinfo = 0
     sin6_addr     = in6addr_any
@@ -290,8 +290,8 @@ extension sockaddr_un: SocketAddress {
   // TBD: sockaddr_un would be interesting as the size of the structure is
   //      technically dynamic (embedded string)
   
-  public static var domain = AF_UNIX
-  public static var size   = __uint8_t(sizeof(sockaddr_un)) // CAREFUL
+  public static let domain = AF_UNIX
+  public static let size   = __uint8_t(strideof(sockaddr_un)) // CAREFUL
   
   public init() {
 #if os(Linux) // no sin_len on Linux
@@ -339,7 +339,7 @@ public extension addrinfo {
   public init() {
     ai_flags     = 0 // AI_CANONNAME, AI_PASSIVE, AI_NUMERICHOST
     ai_family    = AF_UNSPEC // AF_INET or AF_INET6 or AF_UNSPEC
-    ai_socktype  = sys_SOCK_STREAM
+    ai_socktype  = xsys.SOCK_STREAM
     ai_protocol  = 0   // or IPPROTO_xxx for IPv4
     ai_addrlen   = 0   // length of ai_addr below
     ai_canonname = nil // UnsafePointer<Int8>
@@ -395,15 +395,16 @@ public extension addrinfo {
   
   public func address<T: SocketAddress>() -> T? {
     guard ai_addr != nil else { return nil }
-#if swift(>=3.0)
+#if swift(>=3.0) // #swift3-ptr
     guard ai_addr.pointee.sa_family == sa_family_t(T.domain) else { return nil }
 #else
     guard ai_addr.memory.sa_family == sa_family_t(T.domain) else { return nil }
 #endif
     
     let aiptr = UnsafePointer<T>(ai_addr) // cast
-#if swift(>=3.0)
-    return aiptr.pointee // copies the address to the return value
+#if swift(>=3.0) // #swift3-ptr
+    // copies the address to the return value
+    return aiptr != nil ? aiptr!.pointee : nil
 #else
     return aiptr.memory // copies the address to the return value
 #endif
@@ -412,15 +413,18 @@ public extension addrinfo {
   public var dynamicAddress : SocketAddress? {
     guard hasAddress else { return nil }
     
-#if swift(>=3.0)
+#if swift(>=3.0) // #swift3-ptr
     if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in.domain) {
       let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
-      return aiptr.pointee // copies the address to the return value
+      // copies the address to the return value
+      guard aiptr != nil else { return nil }
+      return aiptr!.pointee
     }
     
     if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in6.domain) {
       let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
-      return aiptr.pointee // copies the address to the return value
+      guard aiptr != nil else { return nil }
+      return aiptr!.pointee // copies the address to the return value
     }
 #else // Swift 2.2+
     if ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain) {
@@ -471,10 +475,10 @@ extension addrinfo : CustomStringConvertible {
     
     if ai_family != AF_UNSPEC { s += sa_family_t(ai_family).description }
     switch ai_socktype {
-      case 0:           break
-      case sys_SOCK_STREAM: s += " stream"
-      case sys_SOCK_DGRAM:  s += " datagram"
-      default:              s += " type[\(ai_socktype)]"
+      case 0:                break
+      case xsys.SOCK_STREAM: s += " stream"
+      case xsys.SOCK_DGRAM:  s += " datagram"
+      default:               s += " type[\(ai_socktype)]"
     }
     
     if let cn = canonicalName {
