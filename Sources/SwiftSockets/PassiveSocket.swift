@@ -101,12 +101,21 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     /* setup GCD dispatch source */
 
 #if os(Linux) // is this GCD Linux vs GCD OSX or Swift 2.1 vs 2.2?
+#if swift(>=3.0)
+    let listenSource = dispatch_source_create(
+      DISPATCH_SOURCE_TYPE_READ,
+      UInt(fd.fd), // is this going to bite us?
+      0,
+      q
+    )!
+#else
     let listenSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
       0,
       q
     )
+#endif
 #else // os(Darwin)
     guard let listenSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,

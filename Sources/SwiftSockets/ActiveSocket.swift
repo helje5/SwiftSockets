@@ -294,8 +294,11 @@ public extension ActiveSocket { // writing
         self.close()
         self.closeRequested = false
       }
-    }
-    
+    }    
+  }
+  public func write(data d: dispatch_data_t?) {
+    guard d != nil else { return }
+    write(data: d!)
   }
   
   public func asyncWrite<T>(buffer b: [T]) -> Bool {
