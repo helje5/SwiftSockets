@@ -25,7 +25,7 @@ The project includes three targets:
 - ARIEchoServer
 - ARIFetch
 
-Updated for Swift 0.2.2 (aka Xcode 7.3), aaannd for Swift 0.3-2016-03-16.
+Updated for Swift 0.2.2 (aka Xcode 7.3), aand for Swift 0.3-2016-05-09.
 
 *Note for Linux users*:
 This compiles with the 2016-03-01-a snapshot via Swift Package Manager
@@ -46,7 +46,7 @@ library.
 Server Sample:
 ```swift
 let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))!
-  .listen(dispatch_get_global_queue(0, 0), backlog: 5) {
+  .listen(queue: dispatch_get_global_queue(0, 0), backlog: 5) {
     print("Wait, someone is attempting to talk to me!")
     $0.close()
     print("All good, go ahead!")
