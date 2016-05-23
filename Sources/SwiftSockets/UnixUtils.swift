@@ -17,10 +17,17 @@ import Darwin
 
 // MARK: - network utility functions
 
+#if swift(>=3.0) // #swift3-1st-kwarg
+func ntohs(_ value: CUnsignedShort) -> CUnsignedShort {
+  // hm, htons is not a func in OSX and the macro is not mapped
+  return (value << 8) + (value >> 8);
+}
+#else
 func ntohs(value: CUnsignedShort) -> CUnsignedShort {
   // hm, htons is not a func in OSX and the macro is not mapped
   return (value << 8) + (value >> 8);
 }
+#endif
 let htons = ntohs // same thing, swap bytes :-)
 
 
@@ -53,25 +60,28 @@ typealias fcntlViType  =
 typealias ioctlVipType =
     @convention(c) (Int32, CUnsignedLong, UnsafeMutablePointer<Int32>) -> Int32
 
-func ari_fcntlVi(fildes: Int32, _ cmd: Int32, _ val: Int32) -> Int32 {
-  // this works on Linux x64 and OSX 10.11/Intel, but obviously this depends on
-  // the ABI and is pure luck aka Wrong
-#if swift(>=3.0)
+// this works on Linux x64 and OSX 10.11/Intel, but obviously this depends on
+// the ABI and is pure luck aka Wrong
+#if swift(>=3.0) // #swift3-ptr #swift3-1st-arg
+public func ari_fcntlVi(_ fildes: Int32, _ cmd: Int32, _ val: Int32) -> Int32 {
   let fp = unsafeBitCast(fnFcntl, to: fcntlViType.self)
-#else
-  let fp = unsafeBitCast(fnFcntl, fcntlViType.self)
-#endif
   return fp(fildes, cmd, val)
 }
-func ari_ioctlVip(fildes: Int32, _ cmd: CUnsignedLong,
-                  _ val: UnsafeMutablePointer<Int32>) -> Int32
+public func ari_ioctlVip(_ fildes: Int32, _ cmd: CUnsignedLong,
+                         _ val: UnsafeMutablePointer<Int32>) -> Int32
 {
-  // this works on Linux x64 and OSX 10.11/Intel, but obviously this depends on
-  // the ABI and is pure luck aka Wrong
-#if swift(>=3.0)
   let fp = unsafeBitCast(fnIoctl, to: ioctlVipType.self)
-#else
-  let fp = unsafeBitCast(fnIoctl, ioctlVipType.self)
-#endif
   return fp(fildes, cmd, val)
 }
+#else // Swift 2.2
+public func ari_fcntlVi(fildes: Int32, _ cmd: Int32, _ val: Int32) -> Int32 {
+  let fp = unsafeBitCast(fnFcntl, fcntlViType.self)
+  return fp(fildes, cmd, val)
+}
+public func ari_ioctlVip(fildes: Int32, _ cmd: CUnsignedLong,
+                         _ val: UnsafeMutablePointer<Int32>) -> Int32
+{
+  let fp = unsafeBitCast(fnIoctl, ioctlVipType.self)
+  return fp(fildes, cmd, val)
+}
+#endif // Swift 2.2

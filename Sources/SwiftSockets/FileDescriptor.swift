@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 13/07/15.
-//  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2016 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
@@ -14,13 +14,12 @@ import Darwin
 
 //import xsys - a struct in here
 
+#if swift(>=3.0) // #swift3-fd
+public typealias ErrorType = ErrorProtocol
+#endif
 
 #if os(Linux)
-#if swift(>=3.0)
-extension POSIXError : ErrorProtocol {}
-#else
 extension POSIXError : ErrorType {}
-#endif
 #else
 import Foundation // Foundation defines this on OSX
 #endif
@@ -29,9 +28,9 @@ import Foundation // Foundation defines this on OSX
 /// struct for the whole reason to attach methods to it.
 public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
 
-  public static let stdin  = FileDescriptor(STDIN_FILENO)
-  public static let stdout = FileDescriptor(STDOUT_FILENO)
-  public static let stderr = FileDescriptor(STDERR_FILENO)
+  public static let stdin  = FileDescriptor(xsys.STDIN_FILENO)
+  public static let stdout = FileDescriptor(xsys.STDOUT_FILENO)
+  public static let stderr = FileDescriptor(xsys.STDERR_FILENO)
   
   public let fd : Int32
   
@@ -49,22 +48,6 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   
   // MARK: - Operations
   
-  public func close() {
-    xsys.close(fd)
-  }
-  
-#if swift(>=3.0) // sigh, need to dupe whole function in #if
-  public static func open(path: String, flags: CInt)
-                     -> ( ErrorProtocol?, FileDescriptor? )
-  {
-    let fd = xsys.open(path, flags)
-    guard fd >= 0 else {
-      return ( POSIXError(rawValue: xsys.errno)!, nil )
-    }
-    
-    return ( nil, FileDescriptor(fd) )
-  }
-#else // Swift 2.2+
   public static func open(path: String, flags: CInt)
                      -> ( ErrorType?, FileDescriptor? )
   {
@@ -75,31 +58,19 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     
     return ( nil, FileDescriptor(fd) )
   }
-#endif
   
-#if swift(>=3.0) // sigh, need to dupe whole function in #if
-  public func read(count: Int) -> ( ErrorProtocol?, [ UInt8 ]? ) {
-    // TODO: inefficient init. Also: reuse buffers.
-    var buf = [ UInt8 ](repeating: 0, count: count)
-    
-    // synchronous
-    
-    let readCount = xsys.read(fd, &buf, count)
-    guard readCount >= 0 else {
-      return ( POSIXError(rawValue: xsys.errno)!, nil )
-    }
-    
-    if readCount == 0 { return ( nil, [] ) } // EOF
-    
-    // TODO: super inefficient. how to declare sth which works with either?
-    buf = Array(buf[0..<readCount]) // TODO: slice to array, lame
-    return ( nil, buf )
+  public func close() {
+    xsys.close(fd)
   }
-#else // Swift 2.2+
+  
   public func read(count: Int) -> ( ErrorType?, [ UInt8 ]? ) {
     // TODO: inefficient init. Also: reuse buffers.
+#if swift(>=3.0) // #swift3-fd
+    var buf = [ UInt8 ](repeating: 0, count: count)
+#else
     var buf = [ UInt8 ](count: count, repeatedValue: 0)
-    
+#endif
+
     // synchronous
     
     let readCount = xsys.read(fd, &buf, count)
@@ -113,37 +84,17 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     buf = Array(buf[0..<readCount]) // TODO: slice to array, lame
     return ( nil, buf )
   }
-#endif
   
-#if swift(>=3.0) // sigh, need to dupe whole function in #if
-  public func write<T>(buffer: [ T ], count: Int = -1)
-                -> ( ErrorProtocol?, Int )
-  {
-    guard buffer.count > 0 else { return ( nil, 0 ) }
-    
-    let lCount = count < 0 ? buffer.count : count
-    
-    // TODO: This is funny. It accepts an array of any type?!
-    //       Is it actually what we want?
-    let writeCount = xsys.write(fd, buffer, lCount)
-    
-    guard writeCount >= 0 else {
-      return ( POSIXError(rawValue: xsys.errno)!, 0 )
-    }
-    
-    return ( nil, writeCount )
-  }
-#else // Swift 2.2+
-  public func write<T>(buffer: [ T ], count: Int = -1)
+  public func write<T>(buffer b: [ T ], count: Int = -1)
                 -> ( ErrorType?, Int )
   {
-    guard buffer.count > 0 else { return ( nil, 0 ) }
+    guard b.count > 0 else { return ( nil, 0 ) }
     
-    let lCount = count < 0 ? buffer.count : count
+    let lCount = count < 0 ? b.count : count
     
     // TODO: This is funny. It accepts an array of any type?!
     //       Is it actually what we want?
-    let writeCount = xsys.write(fd, buffer, lCount)
+    let writeCount = xsys.write(fd, b, lCount)
     
     guard writeCount >= 0 else {
       return ( POSIXError(rawValue: xsys.errno)!, 0 )
@@ -151,7 +102,6 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
     
     return ( nil, writeCount )
   }
-#endif
   
   
   // MARK: - File Descriptor
@@ -159,7 +109,8 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   public var isValid   : Bool { return fd >= 0 }
   
   public var isStdInOutErr : Bool {
-    return fd == STDIN_FILENO || fd == STDOUT_FILENO || fd == STDERR_FILENO
+    return fd == xsys.STDIN_FILENO ||
+           fd == xsys.STDOUT_FILENO || fd == xsys.STDERR_FILENO
   }
   
   
@@ -168,9 +119,9 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   // must live in the main-class as 'declarations in extensions cannot be
   // overridden yet' (Same in Swift 2.0)
   func descriptionAttributes() -> String {
-    if fd == STDIN_FILENO  { return " stdin"  }
-    if fd == STDOUT_FILENO { return " stdout" }
-    if fd == STDERR_FILENO { return " stderr" }
+    if fd == xsys.STDIN_FILENO  { return " stdin"  }
+    if fd == xsys.STDOUT_FILENO { return " stdout" }
+    if fd == xsys.STDERR_FILENO { return " stderr" }
     let s = fd >= 0 ? " fd=\(fd)" : " closed"
     return s
   }
@@ -226,12 +177,12 @@ extension FileDescriptor { // Socket Flags
 
 public extension FileDescriptor {
   
-  public var isDataAvailable: Bool { return pollFlag(POLLRDNORM) }
+  public var isDataAvailable: Bool { return poll(flag: POLLRDNORM) }
   
-  public func pollFlag(flag: Int32) -> Bool {
-    let rc: Int32? = poll(flag, timeout: 0)
+  public func poll(flag f: Int32) -> Bool {
+    let rc: Int32? = poll(events: f, timeout: 0)
     if let flags = rc {
-      if (flags & flag) != 0 {
+      if (flags & f) != 0 {
         return true
       }
     }
@@ -248,13 +199,13 @@ public extension FileDescriptor {
   // Swift doesn't allow let's in here?!
   var debugPoll : Bool { return false }
   
-  public func poll(events: Int32, timeout: UInt? = 0) -> Int32? {
+  public func poll(events levents: Int32, timeout: UInt? = 0) -> Int32? {
     // This is declared as Int32 because the POLLRDNORM and such are
     guard isValid else { return nil }
     
     let ctimeout = timeout != nil ? Int32(timeout!) : -1 /* wait forever */
     
-    var fds = pollfd(fd: self.fd, events: CShort(events), revents: 0)
+    var fds = pollfd(fd: self.fd, events: CShort(levents), revents: 0)
     let rc  = xsys.poll(&fds, 1, ctimeout)
     
     guard rc >= 0 else {
@@ -263,7 +214,7 @@ public extension FileDescriptor {
     }
     
     if debugPoll {
-      let s = pollMaskToString(fds.revents)
+      let s = pollMaskToString(mask: fds.revents)
       print("Poll result \(rc) flags \(fds.revents)\(s)")
     }
     
@@ -281,7 +232,7 @@ public extension FileDescriptor {
   }
 }
 
-private func pollMaskToString(mask16: Int16) -> String {
+private func pollMaskToString(mask mask16: Int16) -> String {
   var s = ""
   let mask = Int32(mask16)
   if 0 != (mask & POLLIN)     { s += " IN"  }
@@ -321,12 +272,10 @@ extension FileDescriptor: CustomStringConvertible {
 
 // MARK: - Boolean
 
-#if swift(>=3.0)
-extension FileDescriptor: Boolean { // TBD: Swift doesn't want us to do this
-  public var boolValue : Bool { return isValid }
-}
-#else
 extension FileDescriptor: BooleanType { // TBD: Swift doesn't want us to do this
-  public var boolValue : Bool { return isValid }
+  
+  public var boolValue : Bool {
+    return isValid
+  }
+  
 }
-#endif

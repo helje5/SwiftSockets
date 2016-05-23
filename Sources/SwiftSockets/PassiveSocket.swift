@@ -79,19 +79,19 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   /* start listening */
   
-  public func listen(backlog: Int = 5) -> Bool {
+  public func listen(backlog bl: Int = 5) -> Bool {
     guard isValid      else { return false }
     guard !isListening else { return true }
     
-    let rc = xsys.listen(fd.fd, Int32(backlog))
+    let rc = xsys.listen(fd.fd, Int32(bl))
     guard rc == 0 else { return false }
     
-    self.backlog       = backlog
+    self.backlog       = bl
     self.isNonBlocking = true
     return true
   }
   
-  public func listen(queue: dispatch_queue_t, backlog: Int = 5,
+  public func listen(queue q: dispatch_queue_t, backlog: Int = 5,
                      accept: ( ActiveSocket<T> ) -> Void)
     -> Bool
   {
@@ -105,14 +105,14 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
       DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
       0,
-      queue
+      q
     )
 #else // os(Darwin)
     guard let listenSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
       0,
-      queue
+      q
     )
     else {
       return false
@@ -138,7 +138,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
           // we pass over the queue, seems convenient. Not sure what kind of
           // queue setup a typical server would want to have
           let newSocket = ActiveSocket<T>(fd: FileDescriptor(newFD),
-                                          remoteAddress: baddr, queue: queue)
+                                          remoteAddress: baddr, queue: q)
           newSocket.isSigPipeDisabled = true // Note: not on Linux!
           
           accept(newSocket)
@@ -167,7 +167,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     dispatch_resume(listenSource)
 #endif /* os(Darwin) */
     
-    guard listen(backlog) else {
+    guard listen(backlog: backlog) else {
       dispatch_source_cancel(listenSource)
       return false
     }
