@@ -36,6 +36,12 @@ public typealias xsysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
     public static let read  = Glibc.read
     public static let write = Glibc.write
     
+    // stdio
+    public static let STDIN_FILENO  = Glibc.STDIN_FILENO
+    public static let STDOUT_FILENO = Glibc.STDOUT_FILENO
+    public static let STDERR_FILENO = Glibc.STDERR_FILENO
+    // public let NOFILE        = Glibc.NOFILE // missing on Linux
+    
     // socket
     public static let socket      = Glibc.socket
     public static let poll        = Glibc.poll
@@ -95,6 +101,12 @@ public typealias xsysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
     public static let read  = Darwin.read
     public static let write = Darwin.write
 
+    // stdio
+    public static let STDIN_FILENO  = Darwin.STDIN_FILENO
+    public static let STDOUT_FILENO = Darwin.STDOUT_FILENO
+    public static let STDERR_FILENO = Darwin.STDERR_FILENO
+    public static let NOFILE        = Darwin.NOFILE
+    
     // socket
     public static let socket      = Darwin.socket
     public static let poll        = Darwin.poll
