@@ -1,35 +1,31 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>SwiftSockets by AlwaysRightInstitute</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-light.css">
-    <meta name="viewport" content="width=device-width">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>SwiftSockets</h1>
-        <p>A simple GCD based socket wrapper for Swift.</p>
+    <section class="page-header">
+      <h1 class="project-name">SwiftSockets</h1>
+      <h2 class="project-tagline">A simple GCD based socket wrapper for Swift.</h2>
+      <a href="https://github.com/AlwaysRightInstitute/SwiftSockets" class="btn">View on GitHub</a>
+      <a href="https://github.com/AlwaysRightInstitute/SwiftSockets/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-        <p class="view"><a href="https://github.com/AlwaysRightInstitute/SwiftSockets">View the Project on GitHub <small>AlwaysRightInstitute/SwiftSockets</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/AlwaysRightInstitute/SwiftSockets/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/AlwaysRightInstitute/SwiftSockets">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
+    <section class="main-content">
+      <h1>
 <a id="swiftsockets" class="anchor" href="#swiftsockets" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SwiftSockets</h1>
+
+<p><img src="https://img.shields.io/badge/os-Mac%20OS%20X-green.svg?style=flat" alt="Mac OS X">
+<img src="https://img.shields.io/badge/os-iOS-green.svg?style=flat" alt="iOS">
+<img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
+<img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat" alt="MIT"></p>
 
 <p>A simple GCD based socket library for Swift.</p>
 
@@ -55,7 +51,7 @@ Any suggestions on how to improve the code are welcome. I expect lots and lots
 <li>ARIFetch</li>
 </ul>
 
-<p>Updated for Swift 0.2.2 (aka Xcode 7.3).</p>
+<p>Updated for Swift 0.2.2 (aka Xcode 7.3), aand for Swift 0.3-2016-05-09.</p>
 
 <p><em>Note for Linux users</em>:
 This compiles with the 2016-03-01-a snapshot via Swift Package Manager
@@ -64,7 +60,7 @@ Make sure you
 <a href="http://www.alwaysrightinstitute.com/swift-on-linux-in-vbox-on-osx/">install Grand Central Dispatch</a>
 into your Swift installation.
 On Linux the included ARIEchoServer/ARIFetch apps do not build, but this one
-does:
+does and is embedded:
 <a href="http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/">SwiftyEchoDaemon</a>.</p>
 
 <h4>
@@ -77,7 +73,7 @@ library.</p>
 <p>Server Sample:</p>
 
 <div class="highlight highlight-source-swift"><pre><span class="pl-k">let</span> socket <span class="pl-k">=</span> PassiveSocket<span class="pl-k">&lt;</span>sockaddr_in<span class="pl-k">&gt;</span>(address: sockaddr_in(port: <span class="pl-c1">4242</span>))<span class="pl-k">!</span>
-  <span class="pl-k">.</span>listen(dispatch_get_global_queue(<span class="pl-c1">0</span>, <span class="pl-c1">0</span>), backlog: <span class="pl-c1">5</span>) {
+  <span class="pl-k">.</span>listen(queue: dispatch_get_global_queue(<span class="pl-c1">0</span>, <span class="pl-c1">0</span>), backlog: <span class="pl-c1">5</span>) {
     <span class="pl-c1">print</span>(<span class="pl-s"><span class="pl-pds">"</span>Wait, someone is attempting to talk to me!<span class="pl-pds">"</span></span>)
     $<span class="pl-c1">0</span><span class="pl-k">.</span>close()
     <span class="pl-c1">print</span>(<span class="pl-s"><span class="pl-pds">"</span>All good, go ahead!<span class="pl-pds">"</span></span>)
@@ -118,22 +114,21 @@ let package = Package(
 </code></pre>
 
 <h4>
-<a id="ariechoserver" class="anchor" href="#ariechoserver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ARIEchoServer</h4>
+<a id="ariechoserver--swiftyechodaemon" class="anchor" href="#ariechoserver--swiftyechodaemon" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ARIEchoServer / SwiftyEchoDaemon</h4>
 
-<p>Great echo server. This is actually a Cocoa app. Compile it, run it, then
+<p>There is the ARIEchoServer for Xcode and SwiftEchoDaemon for Package Manager
+installs. Your choize, both are equally awezome.</p>
+
+<p>ARIEchoServer is a Cocoa app. Compile it, run it, then
 connect to it in the Terminal.app via <code>telnet 1337</code>.</p>
 
 <p><img src="http://i.imgur.com/874ovtE.png" alt=""></p>
 
-<h4>
-<a id="swiftyechodaemon" class="anchor" href="#swiftyechodaemon" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SwiftyEchoDaemon</h4>
-
 <p><a href="http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/">The <strong>bezt</strong> Echo daemon ever written in Swift</a> - SPM version.
-This is a demo on how to use the
-<a href="https://github.com/AlwaysRightInstitute/SwiftSockets/tree/feature/linux">SwiftSockets Swift Package Manager version</a>
-on Linux or OSX.
+This is a demo on how to write a SwiftSockets server using the
+Swift Package Manager, on Linux or OSX.
 It also works w/o SPM if SwiftSockets has been built
-via makefiles.</p>
+via Makefiles.</p>
 
 <p>Great echo server. Compile it via <code>make</code>, run it via <code>make run</code>, then
 connect to it in the Terminal.app via <code>telnet 1337</code>.</p>
@@ -232,12 +227,13 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 </li>
 <li>[x] UnsafePointer</li>
 <li>[x] sizeof()</li>
+<li>[x] strideof()</li>
 <li>[x] Standard Protocols
 
 <ul>
 <li>[x] Printable</li>
-<li>[x] BooleanType (aka LogicValue)</li>
-<li>[x] OutputStreamType</li>
+<li>[x] BooleanType (aka LogicValue[1.x] aka Boolean[3.x])</li>
+<li>[x] OutputStreamType / Swift 3 OutputStream</li>
 <li>[x] Equatable
 
 <ul>
@@ -245,7 +241,12 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 </ul>
 </li>
 <li>[x] Hashable</li>
-<li>[x] SequenceType (GeneratorOf)</li>
+<li>[x] SequenceType (GeneratorOf)
+
+<ul>
+<li>[x] Swift 3 Sequence (Iterator)</li>
+</ul>
+</li>
 <li>[x] Literal Convertibles
 
 <ul>
@@ -256,7 +257,7 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 </ul>
 </li>
 <li>[x] Left shift AND right shift</li>
-<li>[ ] Enums on steroids</li>
+<li>[x] Enums on steroids</li>
 <li>[ ] Dynamic type system, reflection</li>
 <li>[x] Operator overloading</li>
 <li>[ ] UCS-4 identifiers (<g-emoji alias="chicken" fallback-src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f414.png">🐔</g-emoji><g-emoji alias="chicken" fallback-src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f414.png">🐔</g-emoji><g-emoji alias="chicken" fallback-src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f414.png">🐔</g-emoji>)</li>
@@ -295,9 +296,11 @@ awesome headers, then shows the results the server sends. Cocoa app.</p>
 
 <ul>
 <li>[x] GNUmakefile support</li>
+<li>[ ] #if SWIFT_PACKAGE</li>
 </ul>
 </li>
 <li>[x] Linux support</li>
+<li>[x] Swift 3 2016-03-16</li>
 </ul>
 
 <h3>
@@ -315,13 +318,15 @@ wrapped Objective-C? :-)</p>
 <p><a href="http://twitter.com/helje5">@helje5</a> | <a href="mailto:helge@alwaysrightinstitute.com">helge@alwaysrightinstitute.com</a></p>
 
 <p><img src="http://www.alwaysrightinstitute.com/images/ARI-symbol-logo.png" alt=""></p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/AlwaysRightInstitute">AlwaysRightInstitute</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/AlwaysRightInstitute/SwiftSockets">SwiftSockets</a> is maintained by <a href="https://github.com/AlwaysRightInstitute">AlwaysRightInstitute</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+
+    </section>
+
+  
   </body>
 </html>
