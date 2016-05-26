@@ -6,5 +6,5 @@ $(PACKAGE)_TYPE = tool
 
 SwiftyEchoDaemon_SWIFT_MODULES = SwiftSockets
 
-include $(PACKAGE_DIR)/config.make
-include $(PACKAGE_DIR)/rules.make
+include $(PACKAGE_DIR)/xcconfig/config.make
+include $(PACKAGE_DIR)/xcconfig/rules.make
