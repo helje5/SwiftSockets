@@ -1,18 +1,14 @@
-os:
-- linux
-- osx
-
 language:  generic
-
-sudo:      required
-
-dist:      trusty
-osx_image: xcode7.3
 
 matrix:
     include:
-        - os:  Linux
-          env: SWIFT_SNAPSHOT_NAME=DEVELOPMENT-SNAPSHOT-2016-05-09-a
+        - os:   Linux
+          dist: wily
+          env:  SWIFT_SNAPSHOT_NAME=DEVELOPMENT-SNAPSHOT-2016-05-09-a
+          sudo: required
+        - os:   osx
+          osx_image: xcode7.3
+          env:  SWIFT_SNAPSHOT_NAME=DEVELOPMENT-SNAPSHOT-2016-05-09-a
 
 install:
     - ./.travis/install.sh
@@ -22,7 +18,3 @@ script:
     - export PATH="${SWIFTENV_ROOT}/bin:${SWIFTENV_ROOT}/shims:$PATH"
     - env|sort
     - make
-
-#    - export OS="`lsb_release -si | tr A-Z a-z`"
-#    - export VER="`lsb_release -sr`"
-#    - make # SWIFT_SNAPSHOT=swift-${SWIFT_SNAPSHOT_NAME}-${OS}${VER}
