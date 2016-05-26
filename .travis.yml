@@ -9,6 +9,6 @@ install:
 - eval "git clone --depth 1 https://github.com/kylef/swiftenv.git ~/.swiftenv"
 - export SWIFTENV_ROOT="$HOME/.swiftenv"
 - export PATH="$SWIFTENV_ROOT/bin:$SWIFTENV_ROOT/shims:$PATH"
-- swiftenv install
+- swiftenv install DEVELOPMENT-SNAPSHOT-2016-05-09-a
 script:
 - swift build
