@@ -28,11 +28,19 @@ TT_SNAP_DIR=`echo $TT_SWIFT_BINARY | sed "s|/usr/bin/swift||g"`
 
 # Install GCD
 
-if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then  
+if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
+  IS_SWIFT_22=`swift --version|grep 2.2|wc -l|sed s/1/yes/|sed s/0/no`
+  
   git clone --recursive ${TT_GCD_URL} gcd-${SWIFT_SNAPSHOT_NAME}
   cd gcd-${SWIFT_SNAPSHOT_NAME}
-  git checkout ${TT_GCD_SWIFT3_BRANCH}
-  git pull
+
+  if [[ $IS_SWIFT22 = "no" ]]; then
+    git checkout ${TT_GCD_SWIFT3_BRANCH}
+    git pull
+  else
+    sudo ln ${TT_SNAP_DIR}/usr/bin/swiftc /usr/bin/swiftc
+    sudo ln ${TT_SNAP_DIR}/usr/bin/swift  /usr/bin/swift
+  fi
   ./autogen.sh
   
   ./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
