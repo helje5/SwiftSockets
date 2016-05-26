@@ -29,12 +29,22 @@ TT_SNAP_DIR=`echo $TT_SWIFT_BINARY | sed "s|/usr/bin/swift||g"`
 
 # Install GCD
 
-git clone --recursive ${TT_GCD_URL} gcd
-cd gcd
-git checkout ${TT_GCD_SWIFT3_BRANCH}
-git pull
-./autogen.sh
-
-./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
-make
-make install
+if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+  # GCD prerequisites
+  sudo apt-get install autoconf libtool pkg-config \
+       libblocksruntime-dev \
+       libkqueue-dev \
+       libpthread-workqueue-dev \
+       systemtap-sdt-dev \
+       libbsd-dev libbsd0 libbsd0-dbg
+  
+  git clone --recursive ${TT_GCD_URL} gcd
+  cd gcd
+  git checkout ${TT_GCD_SWIFT3_BRANCH}
+  git pull
+  ./autogen.sh
+  
+  ./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
+  make
+  make install
+fi
