@@ -28,15 +28,7 @@ TT_SNAP_DIR=`echo $TT_SWIFT_BINARY | sed "s|/usr/bin/swift||g"`
 
 # Install GCD
 
-if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
-  # GCD prerequisites
-  sudo apt-get install autoconf libtool pkg-config \
-       libblocksruntime-dev \
-       libkqueue-dev \
-       libpthread-workqueue-dev \
-       systemtap-sdt-dev \
-       libbsd-dev libbsd0 libbsd0-dbg
-  
+if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then  
   git clone --recursive ${TT_GCD_URL} gcd-${SWIFT_SNAPSHOT_NAME}
   cd gcd-${SWIFT_SNAPSHOT_NAME}
   git checkout ${TT_GCD_SWIFT3_BRANCH}
