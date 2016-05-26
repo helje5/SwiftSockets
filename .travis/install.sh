@@ -37,8 +37,8 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
        systemtap-sdt-dev \
        libbsd-dev libbsd0 libbsd0-dbg
   
-  git clone --recursive ${TT_GCD_URL} gcd
-  cd gcd
+  git clone --recursive ${TT_GCD_URL} gcd-${SWIFT_SNAPSHOT_NAME}
+  cd gcd-${SWIFT_SNAPSHOT_NAME}
   git checkout ${TT_GCD_SWIFT3_BRANCH}
   git pull
   ./autogen.sh
