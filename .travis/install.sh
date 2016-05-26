@@ -29,6 +29,9 @@ TT_SNAP_DIR=`echo $TT_SWIFT_BINARY | sed "s|/usr/bin/swift||g"`
 
 # Install GCD
 
+env
+TRAVIS_OS_NAME=linux
+
 if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
   # GCD prerequisites
   sudo apt-get install autoconf libtool pkg-config \
