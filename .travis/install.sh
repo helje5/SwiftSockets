@@ -19,6 +19,13 @@ export PATH="${SWIFTENV_ROOT}/bin:${SWIFTENV_ROOT}/shims:$PATH"
 
 swiftenv install ${SWIFT_SNAPSHOT_NAME}
 
+if [ `which swift` ]; then
+    echo "Installed Swift: `which swift`"
+else
+    echo "Failed to install Swift?"
+    exit 42
+fi
+
 
 # Environment
 
