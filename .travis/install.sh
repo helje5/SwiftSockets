@@ -50,6 +50,4 @@ fi
 
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
   echo ${TT_SWIFT_BINARY}
-  find /Library/Developer/Toolchains
-  find ${SWIFTENV_ROOT}  
 fi
