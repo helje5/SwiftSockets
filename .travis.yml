@@ -16,5 +16,11 @@ matrix:
 
 install:
     - ./.travis/install.sh
-script: make
 
+script:
+    - env
+    - export SWIFTENV_ROOT="$HOME/.swiftenv"
+    - export PATH="${SWIFTENV_ROOT}/bin:${SWIFTENV_ROOT}/shims:$PATH"
+    - export OS="`lsb_release -si | tr A-Z a-z`"
+    - export VER="`lsb_release -sr`"
+    - make SWIFT_SNAPSHOT=swift-${SWIFT_SNAPSHOT_NAME}-${OS}${VER}

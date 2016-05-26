@@ -12,7 +12,7 @@ TT_GCD_SWIFT3_BRANCH=experimental/foundation
 git clone --depth 1 ${TT_SWIFTENV_URL} ~/.swiftenv
 
 export SWIFTENV_ROOT="$HOME/.swiftenv"
-export PATH="$SWIFTENV_ROOT/bin:$SWIFTENV_ROOT/shims:$PATH"
+export PATH="${SWIFTENV_ROOT}/bin:${SWIFTENV_ROOT}/shims:$PATH"
 
 
 # Install Swift
