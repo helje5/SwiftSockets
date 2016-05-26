@@ -18,9 +18,11 @@ install:
     - ./.travis/install.sh
 
 script:
+    - export SWIFTENV_ROOT="$HOME/.swiftenv"
+    - export PATH="${SWIFTENV_ROOT}/bin:${SWIFTENV_ROOT}/shims:$PATH"
     - env|sort
-#    - export SWIFTENV_ROOT="$HOME/.swiftenv"
-#    - export PATH="${SWIFTENV_ROOT}/bin:${SWIFTENV_ROOT}/shims:$PATH"
+    - make
+
 #    - export OS="`lsb_release -si | tr A-Z a-z`"
 #    - export VER="`lsb_release -sr`"
-    - make # SWIFT_SNAPSHOT=swift-${SWIFT_SNAPSHOT_NAME}-${OS}${VER}
+#    - make # SWIFT_SNAPSHOT=swift-${SWIFT_SNAPSHOT_NAME}-${OS}${VER}
