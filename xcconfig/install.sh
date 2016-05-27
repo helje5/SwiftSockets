@@ -50,7 +50,6 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
 
   if [[ $IS_SWIFT22 = "no" ]]; then
     git checkout ${TT_GCD_SWIFT3_BRANCH}
-    cp ${TRAVIS_BUILD_DIR}/xcconfig/dispatch.h-patched-swift3 dispatch/dispatch.h
   else
     git checkout ${TT_GCD_SWIFT22_1404_HASH}
   fi
@@ -62,8 +61,13 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   ./autogen.sh
   ./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
   
+  if [[ $IS_SWIFT22 = "no" ]]; then
+    echo "Copying patched dispatch.h"
+    cp ${TRAVIS_BUILD_DIR}/xcconfig/dispatch.h-patched-swift3 dispatch/dispatch.h
+  fi
+  
   #cd src && dtrace -h -s provider.d && cd ..
-  cp ${TRAVIS_BUILD_DIR}/xcconfig/trusty-provider.d ${GCD_DIRNAME}/src
+  cp ${TRAVIS_BUILD_DIR}/xcconfig/trusty-provider.d src
   
   make all
   make install
