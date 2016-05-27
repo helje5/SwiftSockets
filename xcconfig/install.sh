@@ -51,8 +51,10 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   export CC=clang
   ./autogen.sh
   ./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
-  cd src && dtrace -h -s provider.d
-  make -s && make install
+  cd src && dtrace -h -s provider.d && cd ..
+  cat Makefile
+  make all
+  make install
 fi
 
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
