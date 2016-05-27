@@ -5,9 +5,9 @@
 TT_SWIFTENV_URL="https://github.com/kylef/swiftenv.git"
 TT_GCD_URL="https://github.com/apple/swift-corelibs-libdispatch.git"
 
-#TT_GCD_SWIFT3_BRANCH=experimental/foundation
+TT_GCD_SWIFT3_BRANCH=experimental/foundation
 #TT_GCD_SWIFT22_1404_HASH=65330e06d9bbf75a4c6ddc349548536746845059
-TT_GCD_SWIFT3_BRANCH=master
+#TT_GCD_SWIFT3_BRANCH=master
 TT_GCD_SWIFT22_1404_HASH=master
 
 # swiftenv
@@ -60,7 +60,7 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   echo "PWD"
   pwd
   #cd src && dtrace -h -s provider.d && cd ..
-  cp xcconfig/trusty-provider.d gcd-${SWIFT_SNAPSHOT_NAME}/src
+  cp ${TRAVIS_BUILD_DIR}/xcconfig/trusty-provider.d gcd-${SWIFT_SNAPSHOT_NAME}/src
   #cat Makefile
   make all
   make install
