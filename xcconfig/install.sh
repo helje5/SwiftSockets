@@ -57,7 +57,10 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   export CC=clang
   ./autogen.sh
   ./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
-  cd src && dtrace -h -s provider.d && cd ..
+  echo "PWD"
+  pwd
+  #cd src && dtrace -h -s provider.d && cd ..
+  cp xcconfig/trusty-provider.d gcd-${SWIFT_SNAPSHOT_NAME}/src
   cat Makefile
   make all
   make install
