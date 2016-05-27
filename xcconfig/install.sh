@@ -5,9 +5,9 @@
 TT_SWIFTENV_URL="https://github.com/kylef/swiftenv.git"
 TT_GCD_URL="https://github.com/apple/swift-corelibs-libdispatch.git"
 
-TT_GCD_SWIFT3_BRANCH=experimental/foundation
+#TT_GCD_SWIFT3_BRANCH=experimental/foundation
 #TT_GCD_SWIFT22_1404_HASH=65330e06d9bbf75a4c6ddc349548536746845059
-#TT_GCD_SWIFT3_BRANCH=master
+TT_GCD_SWIFT3_BRANCH=master
 TT_GCD_SWIFT22_1404_HASH=master
 
 # swiftenv
@@ -50,6 +50,7 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
 
   if [[ $IS_SWIFT22 = "no" ]]; then
     git checkout ${TT_GCD_SWIFT3_BRANCH}
+    cp ${TRAVIS_BUILD_DIR}/xcconfig/dispatch.h-patched-swift3 dispatch/dispatch.h
   else
     git checkout ${TT_GCD_SWIFT22_1404_HASH}
   fi
@@ -60,11 +61,10 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   export CC=clang
   ./autogen.sh
   ./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
-  echo "PWD"
-  pwd
+  
   #cd src && dtrace -h -s provider.d && cd ..
   cp ${TRAVIS_BUILD_DIR}/xcconfig/trusty-provider.d gcd-${SWIFT_SNAPSHOT_NAME}/src
-  #cat Makefile
+  
   make all
   make install
   
