@@ -42,8 +42,11 @@ TT_SNAP_DIR=`echo $TT_SWIFT_BINARY | sed "s|/usr/bin/swift||g"`
 if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   IS_SWIFT_22=`swift --version|grep 2.2|wc -l|sed s/1/yes/|sed s/0/no/`
   
-  git clone --recursive ${TT_GCD_URL} gcd-${SWIFT_SNAPSHOT_NAME}
-  cd gcd-${SWIFT_SNAPSHOT_NAME}
+  #GCD_DIRNAME="gcd-${SWIFT_SNAPSHOT_NAME}"
+  GCD_DIRNAME=gcd
+  
+  git clone --recursive ${TT_GCD_URL} ${GCD_DIRNAME}
+  cd ${GCD_DIRNAME}
 
   if [[ $IS_SWIFT22 = "no" ]]; then
     git checkout ${TT_GCD_SWIFT3_BRANCH}
