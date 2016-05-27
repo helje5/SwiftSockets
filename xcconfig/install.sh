@@ -63,7 +63,7 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   ./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
   
   #cd src && dtrace -h -s provider.d && cd ..
-  cp ${TRAVIS_BUILD_DIR}/xcconfig/trusty-provider.d gcd-${SWIFT_SNAPSHOT_NAME}/src
+  cp ${TRAVIS_BUILD_DIR}/xcconfig/trusty-provider.d ${GCD_DIRNAME}/src
   
   make all
   make install
