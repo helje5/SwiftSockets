@@ -6,6 +6,7 @@ TT_SWIFTENV_URL="https://github.com/kylef/swiftenv.git"
 TT_GCD_URL="https://github.com/apple/swift-corelibs-libdispatch.git"
 
 TT_GCD_SWIFT3_BRANCH=experimental/foundation
+TT_GCD_SWIFT22_1404_HASH=65330e06d9bbf75a4c6ddc349548536746845059
 
 # swiftenv
 
@@ -43,15 +44,14 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
 
   if [[ $IS_SWIFT22 = "no" ]]; then
     git checkout ${TT_GCD_SWIFT3_BRANCH}
-    git pull
   else
-    sudo ln ${TT_SNAP_DIR}/usr/bin/swiftc /usr/bin/swiftc
-    sudo ln ${TT_SNAP_DIR}/usr/bin/swift  /usr/bin/swift
+    git checkout ${TT_GCD_SWIFT22_1404_HASH}
   fi
+  
+  export CC=clang
   ./autogen.sh
-  
   ./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
-  
+  cd src && dtrace -h -s provider.d
   make -s && make install
 fi
 
