@@ -64,6 +64,9 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   if [[ $IS_SWIFT22 = "no" ]]; then
     echo "Copying patched dispatch.h"
     cp ${TRAVIS_BUILD_DIR}/xcconfig/dispatch.h-patched-swift3 dispatch/dispatch.h
+    ls dispatch
+  else
+    echo "NOT copying dispatch.h"
   fi
   
   #cd src && dtrace -h -s provider.d && cd ..
