@@ -61,9 +61,11 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   pwd
   #cd src && dtrace -h -s provider.d && cd ..
   cp xcconfig/trusty-provider.d gcd-${SWIFT_SNAPSHOT_NAME}/src
-  cat Makefile
+  #cat Makefile
   make all
   make install
+  
+  find ~ -name "*dispatch*"
 fi
 
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
