@@ -427,7 +427,7 @@ public extension ActiveSocket { // Reading
     /* setup GCD dispatch source */
     
     readSource = dispatch_source_create(
-      DISPATCH_SOURCE_TYPE_READ,
+      Dispatch.DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
       0,
       queue!
