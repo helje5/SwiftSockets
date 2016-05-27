@@ -28,6 +28,7 @@ else
     echo "Failed to install Swift?"
     exit 42
 fi
+swift --version
 
 
 # Environment
