@@ -2,7 +2,9 @@
 
 if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   # GCD prerequisites
-  sudo apt-get install -y autoconf libtool pkg-config \
+    sudo apt-get install -y \
+       clang \
+       autoconf libtool pkg-config \
        libblocksruntime-dev \
        libkqueue-dev \
        libpthread-workqueue-dev \
