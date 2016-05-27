@@ -40,7 +40,7 @@ TT_SNAP_DIR=`echo $TT_SWIFT_BINARY | sed "s|/usr/bin/swift||g"`
 # Install GCD
 
 if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
-  IS_SWIFT_22=`swift --version|grep 2.2|wc -l|sed s/1/yes/|sed s/0/no/`"
+  IS_SWIFT_22="`swift --version|grep 2.2|wc -l|sed s/1/yes/|sed s/0/no/`"
   echo "${IS_SWIFT_22}"
   
   #GCD_DIRNAME="gcd-${SWIFT_SNAPSHOT_NAME}"
