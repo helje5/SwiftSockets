@@ -40,7 +40,8 @@ TT_SNAP_DIR=`echo $TT_SWIFT_BINARY | sed "s|/usr/bin/swift||g"`
 # Install GCD
 
 if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
-  IS_SWIFT_22=`swift --version|grep 2.2|wc -l|sed s/1/yes/|sed s/0/no/`
+  IS_SWIFT_22="`swift --version|grep 2.2|wc -l|sed s/1/yes/|sed s/0/no/`"
+  echo "${IS_SWIFT_22}"
   
   #GCD_DIRNAME="gcd-${SWIFT_SNAPSHOT_NAME}"
   GCD_DIRNAME=gcd
@@ -48,9 +49,8 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   git clone --recursive ${TT_GCD_URL} ${GCD_DIRNAME}
   cd ${GCD_DIRNAME}
 
-  if [[ $IS_SWIFT22 = "no" ]]; then
+  if [[ $IS_SWIFT_22 = "no" ]]; then
     git checkout ${TT_GCD_SWIFT3_BRANCH}
-    cp ${TRAVIS_BUILD_DIR}/xcconfig/dispatch.h-patched-swift3 dispatch/dispatch.h
   else
     git checkout ${TT_GCD_SWIFT22_1404_HASH}
   fi
@@ -61,9 +61,21 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   export CC=clang
   ./autogen.sh
   ./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
+
+  echo "---"
+  
+  if [[ $IS_SWIFT_22 = "no" ]]; then
+    echo "Copying patched dispatch.h"
+    cp ${TRAVIS_BUILD_DIR}/xcconfig/dispatch.h-patched-swift3 dispatch/dispatch.h
+    ls dispatch
+  else
+    echo "NOT copying dispatch.h"
+  fi
+  
+  echo "---"
   
   #cd src && dtrace -h -s provider.d && cd ..
-  cp ${TRAVIS_BUILD_DIR}/xcconfig/trusty-provider.d gcd-${SWIFT_SNAPSHOT_NAME}/src
+  cp ${TRAVIS_BUILD_DIR}/xcconfig/trusty-provider.d src
   
   make all
   make install
