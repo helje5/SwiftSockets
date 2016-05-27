@@ -51,8 +51,8 @@ if [[ "$TRAVIS_OS_NAME" == "Linux" ]]; then
   ./autogen.sh
   
   ./configure --with-swift-toolchain=${TT_SNAP_DIR}/usr --prefix=${TT_SNAP_DIR}/usr
-  make
-  make install
+  
+  make -s && make install
 fi
 
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then

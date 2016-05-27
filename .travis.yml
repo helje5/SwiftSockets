@@ -15,13 +15,13 @@ matrix:
         #  env:  SWIFT_SNAPSHOT_NAME=DEVELOPMENT-SNAPSHOT-2016-05-09-a
 
 before_install:
-    - ./.xcconfig/before-install.sh
+    - ./xcconfig/before-install.sh
 
 install:
-    - ./.xcconfig/install.sh
+    - ./xcconfig/install.sh
 
 script:
     - export SWIFTENV_ROOT="$HOME/.swiftenv"
     - export PATH="${SWIFTENV_ROOT}/bin:${SWIFTENV_ROOT}/shims:$PATH"
-    - env|sort
+    # - env|sort
     - make
