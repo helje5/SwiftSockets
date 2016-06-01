@@ -1,10 +1,13 @@
 language:  generic
 
+# https://swift.org/builds/swift-3.0-preview-1-branch/ubuntu1404/swift-3.0-preview-1-SNAPSHOT-2016-05-31-a/swift-3.0-preview-1-SNAPSHOT-2016-05-31-a-ubuntu14.04.tar.gz
+# DEVELOPMENT-SNAPSHOT-2016-05-09-a
+
 matrix:
     include:
         - os:   Linux
           dist: trusty
-          env:  SWIFT_SNAPSHOT_NAME=DEVELOPMENT-SNAPSHOT-2016-05-09-a
+          env:  "SWIFT_SNAPSHOT_NAME=https://swift.org/builds/swift-3.0-preview-1-branch/ubuntu1404/swift-3.0-preview-1-SNAPSHOT-2016-05-31-a/swift-3.0-preview-1-SNAPSHOT-2016-05-31-a-ubuntu14.04.tar.gz"
           sudo: required
         - os:   Linux
           dist: trusty
