@@ -5,7 +5,7 @@ SwiftSockets
 ![iOS](https://img.shields.io/badge/os-iOS-green.svg?style=flat)
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 ![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)
-![Travis](https://api.travis-ci.org/AlwaysRightInstitute/SwiftSockets.svg?branch=develop&style=flat)
+![Travis](https://api.travis-ci.org/AlwaysRightInstitute/SwiftSockets.svg?branch=master&style=flat)
 
 A simple GCD based socket library for Swift.
 
@@ -29,10 +29,10 @@ The project includes three targets:
 - ARIEchoServer
 - ARIFetch
 
-Updated for Swift 0.2.2 (aka Xcode 7.3), aand for Swift 0.3-2016-05-09.
+Updated for Swift 0.2.2 (aka Xcode 7.3), aand for Swift 0.3-2016-05-31.
 
 *Note for Linux users*:
-This compiles with the 2016-03-01-a snapshot via Swift Package Manager
+This compiles with the 2016-03-31-a snapshot via Swift Package Manager
 as well as with the Swift 2.2 release using the embedded makefiles.
 Make sure you 
 [install Grand Central Dispatch](http://www.alwaysrightinstitute.com/swift-on-linux-in-vbox-on-osx/)
