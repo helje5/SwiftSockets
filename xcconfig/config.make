@@ -1,8 +1,10 @@
 # GNUmakefile
 
 debug=on
-swiftv=3
+swiftv=3 # rather use swiftenv for this
 timeswiftc=no
+
+NOZE_DID_INCLUDE_CONFIG_MAKE=yes
 
 
 # Common configurations
@@ -16,8 +18,8 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
   # Swift version to use
 
-  SWIFT3_SNAPSHOT=swift-DEVELOPMENT-SNAPSHOT-2016-05-09-a
-  SWIFT2_SNAPSHOT=swift-2.2.1-SNAPSHOT-2016-04-23-a
+  #SWIFT3_SNAPSHOT=DEVELOPMENT-SNAPSHOT-2016-05-31-a
+  #SWIFT2_SNAPSHOT=swift-2.2.1-SNAPSHOT-2016-04-23-a
   ifeq ($(swiftv),3)
     SWIFT_SNAPSHOT=$(SWIFT3_SNAPSHOT)
   else
@@ -51,7 +53,7 @@ else
   OS=$(shell lsb_release -si | tr A-Z a-z)
   VER=$(shell lsb_release -sr)
 
-  #SWIFT_SNAPSHOT=swift-DEVELOPMENT-SNAPSHOT-2016-03-01-a-$(OS)$(VER)
+  #SWIFT_SNAPSHOT=swift-DEVELOPMENT-SNAPSHOT-2016-05-31-a-$(OS)$(VER)
   SWIFT_SNAPSHOT=
 
   ifneq ($(SWIFT_SNAPSHOT),)
@@ -109,7 +111,7 @@ SWIFTC=$(SWIFT_BIN)c
 
 # Tests
 
-SWIFT_INTERNAL_TEST_FLAGS := $(SWIFT_INTERNAL_BUILD_FLAGS)
+SWIFT_INTERNAL_TEST_FLAGS := # $(SWIFT_INTERNAL_BUILD_FLAGS)
 
 # Debug or Release?
 
@@ -139,3 +141,4 @@ SWIFT_INTERNAL_LINK_FLAGS    += -L$(SWIFT_BUILD_DIR)
 SWIFT_BUILD_TOOL=$(SWIFT_BIN) build $(SWIFT_INTERNAL_BUILD_FLAGS)
 SWIFT_TEST_TOOL =$(SWIFT_BIN) test  $(SWIFT_INTERNAL_TEST_FLAGS)
 SWIFT_CLEAN_TOOL=$(SWIFT_BIN) build --clean
+
