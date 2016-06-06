@@ -10,6 +10,8 @@ A simple GCD based socket library for Swift.
 SwiftSockets is kind of a demo on how to integrate Swift with raw C APIs. More
 for stealing Swift coding ideas than for actually using the code in a real
 world project. In most real world Swift apps you have access to Cocoa, use it.
+If you need a Swift networking toolset for the server side,
+consider: [**Noze.io**](http://noze.io/).
 
 It also comes with a great Echo daemon as a demo, it's always there if you need
 a chat.
