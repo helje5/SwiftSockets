@@ -6,8 +6,6 @@
 //
 //
 
-import Foundation
-
 #if swift(>=3.0) // #swift3-fd #swift3-cstr
 extension String {
 
