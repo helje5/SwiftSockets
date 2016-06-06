@@ -62,7 +62,7 @@ class EchoServer {
 #endif
 
     // Note: capturing self here
-    listenSocket!.listen(queue: queue, backlog: 5) { newSock in
+    _ = listenSocket!.listen(queue: queue, backlog: 5) { newSock in
       
       self.log(string: "got new sock: \(newSock) nio=\(newSock.isNonBlocking)")
       newSock.isNonBlocking = true
@@ -74,15 +74,12 @@ class EchoServer {
       
       self.send(welcome: newSock)
       
-      newSock.onRead  { self.handleIncomingData(socket: $0, expectedCount: $1) }
-             .onClose { ( fd: FileDescriptor ) -> Void in
+      _ = newSock
+        .onRead  { self.handleIncomingData(socket: $0, expectedCount: $1) }
+        .onClose { ( fd: FileDescriptor ) -> Void in
         // we need to consume the return value to give peace to the closure
         dispatch_async(self.lockQueue) { [unowned self] in
-#if swift(>=3.0) // #swift3-fd
           _ = self.openSockets.removeValue(forKey: fd)
-#else
-          _ = self.openSockets.removeValueForKey(fd)
-#endif
         }
       }
       
@@ -150,28 +147,20 @@ class EchoServer {
       }
       mblock[count] = 0
       
-      s.asyncWrite(buffer: mblock, length: count)
+      _ = s.asyncWrite(buffer: mblock, length: count)
     } while (true)
     
     s.write("> ")
   }
 
   func logReceived(block b: UnsafePointer<CChar>, length: Int) {
-#if swift(>=3.0) // #swift3-cstr
-    let k = String(cString: b)
-#else
     let k = String.fromCString(b)
-#endif
     var s = k ?? "Could not process result block \(b) length \(length)"
     
     // Hu, now this is funny. In b5 \r\n is one Character (but 2 unicodeScalars)
     let suffix = String(s.characters.suffix(2))
     if suffix == "\r\n" {
-#if swift(>=3.0) // #swift3-fd
       let to = s.index(before: s.endIndex)
-#else
-      let to = s.endIndex.predecessor()
-#endif
       s = s[s.startIndex..<to]
     }
     

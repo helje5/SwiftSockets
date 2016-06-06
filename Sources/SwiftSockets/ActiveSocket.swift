@@ -59,7 +59,8 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   // let the socket own the read buffer, what is the best buffer type?
   //   var readBuffer : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
 #if swift(>=3.0)
-  var readBufferPtr  = UnsafeMutablePointer<CChar>(allocatingCapacity: (4096 + 2))
+  var readBufferPtr  =
+        UnsafeMutablePointer<CChar>(allocatingCapacity: (4096 + 2))
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
       if readBufferSize != oldValue {
@@ -169,7 +170,9 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   /* connect */
   
-  public func connect(address: T, onConnect: ( ActiveSocket<T> ) -> Void) -> Bool {
+  public func connect(address: T,
+                      onConnect: ( ActiveSocket<T> ) -> Void) -> Bool
+  {
     // FIXME: make connect() asynchronous via GCD
     
     guard !isConnected else {
@@ -469,3 +472,13 @@ public extension ActiveSocket { // ioctl
   }
   
 }
+
+#if swift(>=3.0) // #swift3-1st-kwarg
+extension ActiveSocket {
+  public func connect(_ address: T,
+                      onConnect: ( ActiveSocket<T> ) -> Void) -> Bool
+  {
+    return connect(address: address, onConnect: onConnect)
+  }
+}
+#endif
