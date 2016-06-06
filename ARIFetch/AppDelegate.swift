@@ -21,7 +21,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func applicationDidFinishLaunching(aNotification: NSNotification) {
-    fetch(nil)
+    #if swift(>=3.0) // #swift3-1st-kwarg
+      fetch(sender: nil)
+    #else
+      fetch(nil)
+    #endif
   }
 
   func applicationWillTerminate(aNotification: NSNotification) {
@@ -46,8 +50,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     let s = socket!
     
-    s.onRead  { self.handleIncomingData($0, expectedCount: $1) }
-    s.onClose { fd in print("Closing \(fd) ..."); }
+    _ = s.onRead  { self.handleIncomingData(socket: $0, expectedCount: $1) }
+    _ = s.onClose { fd in print("Closing \(fd) ..."); }
     
     // connect
     
@@ -74,7 +78,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
-  func handleIncomingData<T>(socket: ActiveSocket<T>, expectedCount: Int) {
+  func handleIncomingData<T>(socket s: ActiveSocket<T>, expectedCount: Int) {
+    let socket = s
     repeat {
       let (count, block, errno) = socket.read()
       
@@ -99,7 +104,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       
       // log to view. Careful, must run in main thread!
       dispatch_async(dispatch_get_main_queue()) {
-        self.resultView.appendString(data)
+        self.resultView.appendString(string: data)
       }
     } while (true)
   }
@@ -108,15 +113,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 extension NSTextView {
   
-  func appendString(string: String) {
+  func appendString(string s: String) {
     if let ts = textStorage {
-      let ls = NSAttributedString(string: string)
+      let ls = NSAttributedString(string: s)
+#if swift(>=3.0) // #swift3-1st-kwarg
+      ts.append(ls)
+#else
       ts.appendAttributedString(ls)
+#endif
     }
-    if let s = self.string {
-      let charCount = (s as NSString).length
-      self.scrollRangeToVisible(NSMakeRange(charCount, 0))
-    }
+
+    let charCount = (s as NSString).length
+    self.scrollRangeToVisible(NSMakeRange(charCount, 0))
     needsDisplay = true
   }
   

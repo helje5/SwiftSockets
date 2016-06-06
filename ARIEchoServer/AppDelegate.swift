@@ -25,7 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let port = 1337
     
     echod = EchoServer(port: port)
-    echod!.appLog = { self.log($0) }
+    echod!.appLog = { self.log(string: $0) }
     echod!.start()
     
     label.stringValue =
@@ -37,28 +37,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
   
   
-  func log(string: String) {
+  func log(string s: String) {
     // log to shell
-    print(string)
+    print(s)
     
     // log to view. Careful, must run in main thread!
     dispatch_async(dispatch_get_main_queue()) {
-      self.logView.appendString(string + "\n")
+      self.logView.appendString(string: s + "\n")
     }
   }
 }
 
 extension NSTextView {
   
-  func appendString(string: String) {
+  func appendString(string s: String) {
     if let ts = textStorage {
-      let ls = NSAttributedString(string: string)
+      let ls = NSAttributedString(string: s)
+#if swift(>=3.0) // #swift3-1st-kwarg
+      ts.append(ls)
+#else
       ts.appendAttributedString(ls)
+#endif
     }
-    if let s = self.string {
-      let charCount = (s as NSString).length
-      self.scrollRangeToVisible(NSMakeRange(charCount, 0))
-    }
+
+    let charCount = (s as NSString).length
+    self.scrollRangeToVisible(NSMakeRange(charCount, 0))
     needsDisplay = true
   }
   

@@ -59,7 +59,8 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   // let the socket own the read buffer, what is the best buffer type?
   //   var readBuffer : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
 #if swift(>=3.0)
-  var readBufferPtr  = UnsafeMutablePointer<CChar>(allocatingCapacity: (4096 + 2))
+  var readBufferPtr  =
+        UnsafeMutablePointer<CChar>(allocatingCapacity: (4096 + 2))
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
       if readBufferSize != oldValue {
@@ -149,7 +150,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       // Seen this crash - if close() is called from within the readCB?
       readCB = nil // break potential cycles
       if debugClose { debugPrint("   shutdown read channel ...") }
-      xsys.shutdown(fd.fd, xsys.SHUT_RD);
+      _ = xsys.shutdown(fd.fd, xsys.SHUT_RD);
       
       didCloseRead = true
     }
@@ -169,7 +170,9 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   /* connect */
   
-  public func connect(address: T, onConnect: ( ActiveSocket<T> ) -> Void) -> Bool {
+  public func connect(address: T,
+                      onConnect: ( ActiveSocket<T> ) -> Void) -> Bool
+  {
     // FIXME: make connect() asynchronous via GCD
     
     guard !isConnected else {
@@ -212,7 +215,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     readCB = cb
     
     if hasNewCB && !hadCB {
-      startEventHandler()
+      _ = startEventHandler()
     }
     
     return self
@@ -241,7 +244,7 @@ extension ActiveSocket : OutputStreamType { // writing
     string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
       let len = Int(strlen(cstr))
       if len > 0 {
-        self.asyncWrite(buffer: cstr, length: len)
+        _ = self.asyncWrite(buffer: cstr, length: len)
       }
     }
   }
@@ -427,7 +430,7 @@ public extension ActiveSocket { // Reading
     /* setup GCD dispatch source */
     
     readSource = dispatch_source_create(
-      DISPATCH_SOURCE_TYPE_READ,
+      Dispatch.DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
       0,
       queue!
@@ -469,3 +472,13 @@ public extension ActiveSocket { // ioctl
   }
   
 }
+
+#if swift(>=3.0) // #swift3-1st-kwarg
+extension ActiveSocket {
+  public func connect(_ address: T,
+                      onConnect: ( ActiveSocket<T> ) -> Void) -> Bool
+  {
+    return connect(address: address, onConnect: onConnect)
+  }
+}
+#endif

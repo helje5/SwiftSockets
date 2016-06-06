@@ -186,7 +186,7 @@ extension Socket { // Socket Options
 
   public var reuseAddress: Bool {
     get { return getSocketOption(SO_REUSEADDR) }
-    set { setSocketOption(SO_REUSEADDR, value: newValue) }
+    set { _ = setSocketOption(SO_REUSEADDR, value: newValue) }
   }
 
 #if os(Linux)
@@ -198,30 +198,30 @@ extension Socket { // Socket Options
 #else
   public var isSigPipeDisabled: Bool {
     get { return getSocketOption(SO_NOSIGPIPE) }
-    set { setSocketOption(SO_NOSIGPIPE, value: newValue) }
+    set { _ = setSocketOption(SO_NOSIGPIPE, value: newValue) }
   }
 #endif
 
   public var keepAlive: Bool {
     get { return getSocketOption(SO_KEEPALIVE) }
-    set { setSocketOption(SO_KEEPALIVE, value: newValue) }
+    set { _ = setSocketOption(SO_KEEPALIVE, value: newValue) }
   }
   public var dontRoute: Bool {
     get { return getSocketOption(SO_DONTROUTE) }
-    set { setSocketOption(SO_DONTROUTE, value: newValue) }
+    set { _ = setSocketOption(SO_DONTROUTE, value: newValue) }
   }
   public var socketDebug: Bool {
     get { return getSocketOption(SO_DEBUG) }
-    set { setSocketOption(SO_DEBUG, value: newValue) }
+    set { _ = setSocketOption(SO_DEBUG, value: newValue) }
   }
   
   public var sendBufferSize: Int32 {
     get { return getSocketOption(SO_SNDBUF) ?? -42    }
-    set { setSocketOption(SO_SNDBUF, value: newValue) }
+    set { _ = setSocketOption(SO_SNDBUF, value: newValue) }
   }
   public var receiveBufferSize: Int32 {
     get { return getSocketOption(SO_RCVBUF) ?? -42    }
-    set { setSocketOption(SO_RCVBUF, value: newValue) }
+    set { _ = setSocketOption(SO_RCVBUF, value: newValue) }
   }
   public var socketError: Int32 {
     return getSocketOption(SO_ERROR) ?? -42

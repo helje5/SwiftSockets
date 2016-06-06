@@ -60,7 +60,7 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   }
   
   public func close() {
-    xsys.close(fd)
+    _ = xsys.close(fd)
   }
   
   public func read(count: Int) -> ( ErrorType?, [ UInt8 ]? ) {

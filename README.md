@@ -1,9 +1,11 @@
 SwiftSockets
 ============
+![Swift2n3](https://img.shields.io/badge/Swift-2.2%2C%203.0-blue.svg)
 ![Mac OS X](https://img.shields.io/badge/os-Mac%20OS%20X-green.svg?style=flat)
 ![iOS](https://img.shields.io/badge/os-iOS-green.svg?style=flat)
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 ![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)
+![Travis](https://api.travis-ci.org/AlwaysRightInstitute/SwiftSockets.svg?branch=develop&style=flat)
 
 A simple GCD based socket library for Swift.
 
