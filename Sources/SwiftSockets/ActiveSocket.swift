@@ -150,7 +150,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       // Seen this crash - if close() is called from within the readCB?
       readCB = nil // break potential cycles
       if debugClose { debugPrint("   shutdown read channel ...") }
-      xsys.shutdown(fd.fd, xsys.SHUT_RD);
+      _ = xsys.shutdown(fd.fd, xsys.SHUT_RD);
       
       didCloseRead = true
     }
@@ -215,7 +215,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     readCB = cb
     
     if hasNewCB && !hadCB {
-      startEventHandler()
+      _ = startEventHandler()
     }
     
     return self
@@ -244,7 +244,7 @@ extension ActiveSocket : OutputStreamType { // writing
     string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
       let len = Int(strlen(cstr))
       if len > 0 {
-        self.asyncWrite(buffer: cstr, length: len)
+        _ = self.asyncWrite(buffer: cstr, length: len)
       }
     }
   }
