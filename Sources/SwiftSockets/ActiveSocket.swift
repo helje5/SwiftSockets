@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 6/11/14.
-//  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
@@ -170,7 +170,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   /* connect */
   
-  public func connect(address: T,
+  public func connect(_ address: T,
                       onConnect: ( ActiveSocket<T> ) -> Void) -> Bool
   {
     // FIXME: make connect() asynchronous via GCD
@@ -238,9 +238,9 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   }
 }
 
-extension ActiveSocket : OutputStreamType { // writing
+extension ActiveSocket : OutputStream { // writing
   
-  public func write(string: String) {
+  public func write(_ string: String) {
     string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
       let len = Int(strlen(cstr))
       if len > 0 {
@@ -249,17 +249,6 @@ extension ActiveSocket : OutputStreamType { // writing
     }
   }
 }
-
-#if swift(>=3.0) // sigh, #if can't just #if the prefix, need to dupe
-public typealias OutputStreamType = OutputStream
-extension ActiveSocket { // writing
-  
-  public func write(_ string: String) {
-    write(string: string)
-  }
-}
-#else // Swift 2.2+
-#endif
 
 public extension ActiveSocket { // writing
   
@@ -451,11 +440,7 @@ public extension ActiveSocket { // Reading
     /* actually start listening ... */
 #if os(Linux)
     // TBD: what is the better way?
-#if swift(>=3.0)
     dispatch_resume(unsafeBitCast(readSource!, to: dispatch_object_t.self))
-#else
-    dispatch_resume(unsafeBitCast(readSource!, dispatch_object_t.self))
-#endif
 #else /* os(Darwin) */
     dispatch_resume(readSource!)
 #endif /* os(Darwin) */
@@ -472,13 +457,3 @@ public extension ActiveSocket { // ioctl
   }
   
 }
-
-#if swift(>=3.0) // #swift3-1st-kwarg
-extension ActiveSocket {
-  public func connect(_ address: T,
-                      onConnect: ( ActiveSocket<T> ) -> Void) -> Bool
-  {
-    return connect(address: address, onConnect: onConnect)
-  }
-}
-#endif

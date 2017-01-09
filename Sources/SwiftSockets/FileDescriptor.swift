@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 13/07/15.
-//  Copyright (c) 2014-2016 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
@@ -265,17 +265,6 @@ extension FileDescriptor: CustomStringConvertible {
   
   public var description : String {
     return "<FileDescriptor:" + descriptionAttributes() + ">"
-  }
-  
-}
-
-
-// MARK: - Boolean
-
-extension FileDescriptor: BooleanType { // TBD: Swift doesn't want us to do this
-  
-  public var boolValue : Bool {
-    return isValid
   }
   
 }

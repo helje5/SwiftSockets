@@ -8,7 +8,6 @@
 
 import Foundation
 
-#if swift(>=3.0) // #swift3-cstr
 extension String {
 
   static func fromCString(_ cs: UnsafePointer<CChar>) -> String? {
@@ -16,4 +15,3 @@ extension String {
   }
   
 }
-#endif

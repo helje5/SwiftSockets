@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 6/11/14.
-//  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
@@ -29,7 +29,7 @@ public typealias PassiveSocketIPv4 = PassiveSocket<sockaddr_in>
  *
  *   let socket = PassiveSocket(address: sockaddr_in(port: 4242))
  *
- *   socket.listen(dispatch_get_global_queue(0, 0), backlog: 5) {
+ *   socket.listen(DispatchQueue.global(), backlog: 5) {
  *     print("Wait, someone is attempting to talk to me!")
  *     $0.close()
  *     print("All good, go ahead!")
@@ -39,7 +39,7 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
   
   public var backlog      : Int? = nil
   public var isListening  : Bool { return backlog != nil }
-  public var listenSource : dispatch_source_t? = nil
+  public var listenSource : DispatchSourceProtocol? = nil
   
   /* init */
   // The overloading behaviour gets more weird every release?

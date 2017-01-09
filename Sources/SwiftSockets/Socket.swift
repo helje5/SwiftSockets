@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Heß on 6/9/14.
-//  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
@@ -90,7 +90,7 @@ public class Socket<T: SocketAddress> {
   
   /* bind the socket. */
   
-  public func bind(address: T) -> Bool {
+  public func bind(_ address: T) -> Bool {
     guard fd.isValid else { return false }
     
     guard !isBound else {
@@ -230,14 +230,13 @@ extension Socket { // Socket Options
   /* socket options (TBD: would we use subscripts for such?) */
   
   
-  public func setSocketOption(option: Int32, value: Int32) -> Bool {
+  public func setSocketOption(_ option: Int32, value: Int32) -> Bool {
     if !isValid {
       return false
     }
     
     var buf = value
-    let rc  = setsockopt(fd.fd, SOL_SOCKET, option,
-                         &buf, socklen_t(strideof(Int32)))
+    let rc  = setsockopt(fd.fd, SOL_SOCKET, option, &buf, socklen_t(4))
     
     if rc != 0 { // ps: Great Error Handling
       print("Could not set option \(option) on socket \(self)")
@@ -247,13 +246,13 @@ extension Socket { // Socket Options
   
   // TBD: Can't overload optionals in a useful way?
   // func getSocketOption(option: Int32) -> Int32
-  public func getSocketOption(option: Int32) -> Int32? {
+  public func getSocketOption(_ option: Int32) -> Int32? {
     if !isValid {
       return nil
     }
     
     var buf    = Int32(0)
-    var buflen = socklen_t(strideof(Int32))
+    var buflen = socklen_t(4)
     
     let rc = getsockopt(fd.fd, SOL_SOCKET, option, &buf, &buflen)
     if rc != 0 { // ps: Great Error Handling
@@ -263,28 +262,13 @@ extension Socket { // Socket Options
     return buf
   }
   
-  public func setSocketOption(option: Int32, value: Bool) -> Bool {
+  public func setSocketOption(_ option: Int32, value: Bool) -> Bool {
     return setSocketOption(option, value: value ? 1 : 0)
   }
-  public func getSocketOption(option: Int32) -> Bool {
+  public func getSocketOption(_ option: Int32) -> Bool {
     let v: Int32? = getSocketOption(option)
     return v != nil ? (v! == 0 ? false : true) : false
   }
-  
-#if swift(>=3.0) // #swift3-1st-kwarg
-  public func setSocketOption(_ option: Int32, value: Int32) -> Bool {
-    return setSocketOption(option: option, value: value)
-  }
-  public func getSocketOption(_ option: Int32) -> Int32? {
-    return getSocketOption(option: option)
-  }
-  public func setSocketOption(_ option: Int32, value: Bool) -> Bool {
-    return setSocketOption(option: option, value: value)
-  }
-  public func getSocketOption(_ option: Int32) -> Bool {
-    return getSocketOption(option: option)
-  }
-#endif
 }
 
 
@@ -308,18 +292,3 @@ extension Socket: CustomStringConvertible {
   }
   
 }
-
-extension Socket: BooleanType { // TBD: Swift doesn't want us to do this
-  public var boolValue : Bool { return isValid }
-}
-
-
-#if swift(>=3.0)
-public typealias BooleanType = Boolean
-
-public extension Socket { // #swift3-1st-kwarg
-  public func bind(_ address: T) -> Bool {
-    return bind(address: address)
-  }
-}
-#endif

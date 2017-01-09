@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Heß on 6/12/14.
-//  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
@@ -118,13 +118,13 @@ public protocol SocketAddress {
 extension sockaddr_in: SocketAddress {
   
   public static let domain = AF_INET
-  public static let size   = __uint8_t(strideof(sockaddr_in))
+  public static let size   = __uint8_t(MemoryLayout<sockaddr_in>.stride)
     // how to refer to self?
   
   public init() {
 #if os(Linux) // no sin_len on Linux
 #else
-    sin_len    = self.dynamicType.size // no way to access the static type here?
+    sin_len    = type(of: self).size // no way to access the static type here?
 #endif
     sin_family = sa_family_t(sockaddr_in.domain)
     sin_port   = 0
@@ -258,12 +258,12 @@ extension sockaddr_in: CustomStringConvertible {
 extension sockaddr_in6: SocketAddress {
   
   public static let domain = AF_INET6
-  public static let size   = __uint8_t(strideof(sockaddr_in6))
+  public static let size   = __uint8_t(MemoryLayout<sockaddr_in6>.stride)
   
   public init() {
 #if os(Linux) // no sin_len on Linux
 #else
-    sin6_len = self.dynamicType.size // no way to access the static type here?
+    sin6_len = type(of: self).size // no way to access the static type here?
 #endif
     sin6_family   = sa_family_t(sockaddr_in6.domain)
     sin6_port     = 0
@@ -291,7 +291,7 @@ extension sockaddr_un: SocketAddress {
   //      technically dynamic (embedded string)
   
   public static let domain = AF_UNIX
-  public static let size   = __uint8_t(strideof(sockaddr_un)) // CAREFUL
+  public static let size = __uint8_t(MemoryLayot<sockaddr_un>.stride) // CAREFUL
   
   public init() {
 #if os(Linux) // no sin_len on Linux

@@ -3,6 +3,7 @@
 //  ARIFetch
 //
 //  Created by Helge Hess on 6/13/14.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 //
 
@@ -21,11 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func applicationDidFinishLaunching(aNotification: NSNotification) {
-    #if swift(>=3.0) // #swift3-1st-kwarg
-      fetch(sender: nil)
-    #else
-      fetch(nil)
-    #endif
+    fetch(sender: nil)
   }
 
   func applicationWillTerminate(aNotification: NSNotification) {
@@ -116,11 +113,7 @@ extension NSTextView {
   func appendString(string s: String) {
     if let ts = textStorage {
       let ls = NSAttributedString(string: s)
-#if swift(>=3.0) // #swift3-1st-kwarg
       ts.append(ls)
-#else
-      ts.appendAttributedString(ls)
-#endif
     }
 
     let charCount = (s as NSString).length

@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 6/10/14.
-//  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
@@ -17,17 +17,11 @@ import Darwin
 
 // MARK: - network utility functions
 
-#if swift(>=3.0) // #swift3-1st-kwarg
 func ntohs(_ value: CUnsignedShort) -> CUnsignedShort {
+  // FIXME: Swift has this builtin
   // hm, htons is not a func in OSX and the macro is not mapped
   return (value << 8) + (value >> 8);
 }
-#else
-func ntohs(value: CUnsignedShort) -> CUnsignedShort {
-  // hm, htons is not a func in OSX and the macro is not mapped
-  return (value << 8) + (value >> 8);
-}
-#endif
 let htons = ntohs // same thing, swap bytes :-)
 
 
@@ -36,11 +30,11 @@ let htons = ntohs // same thing, swap bytes :-)
 
 import Dispatch
 
-extension dispatch_source_t {
+extension DispatchSourceProtocol {
   
-  func onEvent(cb: (dispatch_source_t, CUnsignedLong) -> Void) {
-    dispatch_source_set_event_handler(self) {
-      let data = dispatch_source_get_data(self)
+  func onEvent(cb: @escaping (DispatchSourceProtocol, UInt) -> Void) {
+    self.setEventHandler {
+      let data = self.data
       cb(self, data)
     }
   }
