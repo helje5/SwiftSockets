@@ -22,11 +22,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     return resultViewParent.contentView.documentView as! NSTextView
   }
 
-  func applicationDidFinishLaunching(aNotification: NSNotification) {
+  func applicationDidFinishLaunching(_ aNotification: Notification) {
     fetch(sender: nil)
   }
 
-  func applicationWillTerminate(aNotification: NSNotification) {
+  func applicationWillTerminate(_ aNotification: Notification) {
     socket?.close()
   }
   

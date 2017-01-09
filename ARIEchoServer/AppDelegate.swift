@@ -23,7 +23,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   
   var echod : EchoServer?
   
-  func applicationDidFinishLaunching(aNotification: NSNotification) {
+  func applicationDidFinishLaunching(_ aNotification: Notification) {
     let port = 1337
     
     echod = EchoServer(port: port)
@@ -34,7 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       "Connect in e.g. Terminal via 'telnet 127.0.0.1 \(port)'"
   }
 
-  func applicationWillTerminate(aNotification: NSNotification) {
+  func applicationWillTerminate(_ aNotification: Notification) {
     echod?.stop()
   }
   
