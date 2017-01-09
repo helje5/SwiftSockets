@@ -10,6 +10,7 @@
 import Cocoa
 import SwiftSockets
 
+@NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
                             
   @IBOutlet var window           : NSWindow!
@@ -97,10 +98,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       // FIXME: I think I know why. It may happen if the block boundary is
       //        within a UTF-8 sequence?
       // The end of the block is 100,-30,-128,0
-      let data = String.fromCString(block)! // ignore error, abort
+      let data = String(validatingUTF8: block)! // ignore error, abort
       
       // log to view. Careful, must run in main thread!
-      dispatch_async(dispatch_get_main_queue()) {
+      DispatchQueue.main.async {
         self.resultView.appendString(string: data)
       }
     } while (true)

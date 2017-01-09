@@ -71,7 +71,7 @@ func gethostzbyname<T: SocketAddress>
   hints.ai_flags  = flags  // AI_CANONNAME, AI_NUMERICHOST, etc
   hints.ai_family = T.domain
   
-  var ptr = UnsafeMutablePointer<addrinfo>(nil)
+  var ptr : UnsafeMutablePointer<addrinfo>? = nil
   defer { freeaddrinfo(ptr) } /* free OS resources (TBD: works with nil?) */
   
   /* run lookup (synchronously, can be slow!) */
@@ -89,17 +89,10 @@ func gethostzbyname<T: SocketAddress>
   
   if rc == 0 && ptr != nil {
     var pairs = Array<hapair>()
-#if swift(>=3.0)
     for info in ptr!.pointee {
       let pair : hapair = ( info.canonicalName, info.address() )
       pairs.append(pair)
     }
-#else
-    for info in ptr.memory {
-      let pair : hapair = ( info.canonicalName, info.address() )
-      pairs.append(pair)
-    }
-#endif
     results = pairs
   }
   

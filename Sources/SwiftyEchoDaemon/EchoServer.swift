@@ -40,7 +40,7 @@ class EchoServer {
   
   func start() {
     listenSocket = PassiveSocketIPv4(address: sockaddr_in(port: port))
-    if listenSocket == nil || !listenSocket! { // neat, eh? ;-)
+    if listenSocket == nil || !listenSocket!.isValid { // neat, eh? ;-)
       log(string: "ERROR: could not create socket ...")
       return
     }
@@ -55,7 +55,7 @@ class EchoServer {
       self.log(string: "got new sock: \(newSock) nio=\(newSock.isNonBlocking)")
       newSock.isNonBlocking = true
       
-      dispatch_async(self.lockQueue) {
+      self.lockQueue.async {
         // Note: we need to keep the socket around!!
         self.openSockets[newSock.fd] = newSock
       }
@@ -66,7 +66,7 @@ class EchoServer {
         .onRead  { self.handleIncomingData(socket: $0, expectedCount: $1) }
         .onClose { ( fd: FileDescriptor ) -> Void in
         // we need to consume the return value to give peace to the closure
-        dispatch_async(self.lockQueue) { [unowned self] in
+        self.lockQueue.async { [unowned self] in
           _ = self.openSockets.removeValue(forKey: fd)
         }
       }
@@ -91,7 +91,7 @@ class EchoServer {
     "\r\nTalk to me Dave!\r\n" +
     "> "
 
-  func send<T: OutputStreamType>(welcome sockI: T) {
+  func send<T: TextOutputStream>(welcome sockI: T) {
     var sock = sockI // cannot use 'var' in parameters anymore?
     // Hm, how to use print(), this doesn't work for me:
     //   print(s, target: sock)
@@ -138,7 +138,7 @@ class EchoServer {
   }
 
   func logReceived(block b: UnsafePointer<CChar>, length: Int) {
-    let k = String.fromCString(b)
+    let k = String(validatingUTF8: b)
     var s = k ?? "Could not process result block \(b) length \(length)"
     
     // Hu, now this is funny. In b5 \r\n is one Character (but 2 unicodeScalars)

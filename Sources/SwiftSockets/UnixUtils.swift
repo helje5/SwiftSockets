@@ -56,7 +56,6 @@ typealias ioctlVipType =
 
 // this works on Linux x64 and OSX 10.11/Intel, but obviously this depends on
 // the ABI and is pure luck aka Wrong
-#if swift(>=3.0) // #swift3-ptr #swift3-1st-arg
 public func ari_fcntlVi(_ fildes: Int32, _ cmd: Int32, _ val: Int32) -> Int32 {
   let fp = unsafeBitCast(fnFcntl, to: fcntlViType.self)
   return fp(fildes, cmd, val)
@@ -67,15 +66,3 @@ public func ari_ioctlVip(_ fildes: Int32, _ cmd: CUnsignedLong,
   let fp = unsafeBitCast(fnIoctl, to: ioctlVipType.self)
   return fp(fildes, cmd, val)
 }
-#else // Swift 2.2
-public func ari_fcntlVi(fildes: Int32, _ cmd: Int32, _ val: Int32) -> Int32 {
-  let fp = unsafeBitCast(fnFcntl, fcntlViType.self)
-  return fp(fildes, cmd, val)
-}
-public func ari_ioctlVip(fildes: Int32, _ cmd: CUnsignedLong,
-                         _ val: UnsafeMutablePointer<Int32>) -> Int32
-{
-  let fp = unsafeBitCast(fnIoctl, ioctlVipType.self)
-  return fp(fildes, cmd, val)
-}
-#endif // Swift 2.2

@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 12/04/16.
-//  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
@@ -81,27 +81,15 @@ public enum sockaddr_any {
     // a little hacky ...
     switch T.domain {
       case xsys.AF_INET:
-#if swift(>=3.0)
         let lAddress = unsafeBitCast(address, to: xsys_sockaddr_in.self)
-#else
-        let lAddress = unsafeBitCast(address, xsys_sockaddr_in.self)
-#endif
         self = .AF_INET(lAddress)
       
       case xsys.AF_INET6:
-#if swift(>=3.0)
         let lAddress = unsafeBitCast(address, to: xsys_sockaddr_in6.self)
-#else
-        let lAddress = unsafeBitCast(address, xsys_sockaddr_in6.self)
-#endif
         self = .AF_INET6(lAddress)
       
       case xsys.AF_LOCAL: // TODO: this is likely wrong too (variable length!)
-#if swift(>=3.0)
         let lAddress = unsafeBitCast(address, to: xsys_sockaddr_un.self)
-#else
-        let lAddress = unsafeBitCast(address, xsys_sockaddr_un.self)
-#endif
         self = .AF_LOCAL(lAddress)
       
       default:

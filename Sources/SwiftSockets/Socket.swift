@@ -101,9 +101,11 @@ public class Socket<T: SocketAddress> {
     // Note: must be 'var' for ptr stuff, can't use let
     var addr = address
 
-    let rc = withUnsafePointer(&addr) { ptr -> Int32 in
-      let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return xsys.bind(fd.fd, bptr, socklen_t(addr.len))
+    let rc = withUnsafePointer(to: &addr) { ptr -> Int32 in
+      return ptr.withMemoryRebound(to: xsys_sockaddr.self, capacity: 1) {
+        bptr in
+        return xsys.bind(fd.fd, bptr, socklen_t(address.len))
+      }
     }
     
     if rc == 0 {
@@ -135,10 +137,13 @@ public class Socket<T: SocketAddress> {
     
     // Note: we are not interested in the length here, would be relevant
     //       for AF_UNIX sockets
-    let rc = withUnsafeMutablePointer(&baddr) {
+    let rc = withUnsafeMutablePointer(to: &baddr) {
       ptr -> Int32 in
-      let bptr = UnsafeMutablePointer<sockaddr>(ptr) // cast
-      return nfn(fd.fd, bptr, &baddrlen)
+      // TODO: is this right, or is there a better way?
+      return ptr.withMemoryRebound(to: xsys_sockaddr.self, capacity: 1) {
+        bptr in
+        return nfn(fd.fd, bptr, &baddrlen)
+      }
     }
     
     guard rc == 0 else {

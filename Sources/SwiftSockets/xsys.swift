@@ -3,6 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 11/04/16.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 //
 
@@ -138,7 +139,7 @@ public typealias xsysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
     // hh: not sure this is producing the right value
     public static let FIONREAD : CUnsignedLong =
       ( IOC_OUT
-        | ((CUnsignedLong(sizeof(Int32)) & CUnsignedLong(IOCPARM_MASK)) << 16)
+        | ((CUnsignedLong(4) & CUnsignedLong(IOCPARM_MASK)) << 16)
         | (102 /* 'f' */ << 8) | 127)
     public static let fcntlVi  = ari_fcntlVi
     public static let ioctlVip = ari_ioctlVip

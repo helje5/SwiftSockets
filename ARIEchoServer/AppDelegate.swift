@@ -3,11 +3,13 @@
 //  ARIEchoServer
 //
 //  Created by Helge Heß on 6/13/14.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 //
 
 import Cocoa
 
+@NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
   
   @IBOutlet var window        : NSWindow!
@@ -42,7 +44,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     print(s)
     
     // log to view. Careful, must run in main thread!
-    dispatch_async(dispatch_get_main_queue()) {
+    DispatchQueue.main.async {
       self.logView.appendString(string: s + "\n")
     }
   }
