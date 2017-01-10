@@ -16,5 +16,5 @@ echod.start()
 
 print("Connect in e.g. Terminal via 'telnet 127.0.0.1 \(port)'")
 
-dispatch_main()
+dispatchMain()
 // dispatch_main never returns. print("Stopping.")
