@@ -114,6 +114,9 @@ public typealias xsysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
     // extra
     case ECANCELED = 125
   }
+  
+  extension POSIXErrorCode : Error {}
+  
   public enum POSIXError : CInt {
     case EPERM
   }
