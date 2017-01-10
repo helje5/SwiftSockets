@@ -117,15 +117,12 @@ public class PassiveSocket<T: SocketAddress>: Socket<T> {
     )
 #endif
 #else // os(Darwin)
-    guard let listenSource = dispatch_source_create(
+    let listenSource = dispatch_source_create(
       DISPATCH_SOURCE_TYPE_READ,
       UInt(fd.fd), // is this going to bite us?
       0,
       q
     )
-    else {
-      return false
-    }
 #endif // os(Darwin)
     
     let lfd = fd.fd
