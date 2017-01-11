@@ -1,9 +1,9 @@
 SwiftSockets
 ============
-![Swift2n3](https://img.shields.io/badge/Swift-2.2%2C%203.0-blue.svg)
-![Mac OS X](https://img.shields.io/badge/os-Mac%20OS%20X-green.svg?style=flat)
+![Swift2](https://img.shields.io/badge/Swift-2-blue.svg)
+![macOS](https://img.shields.io/badge/os-Mac%20OS%20X-green.svg?style=flat)
 ![iOS](https://img.shields.io/badge/os-iOS-green.svg?style=flat)
-![Linux](https://img.shields.io/badge/os-Linux-green.svg?style=flat)
+![tuxOS](https://img.shields.io/badge/os-Linux-green.svg?style=flat)
 ![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)
 ![Travis](https://api.travis-ci.org/AlwaysRightInstitute/SwiftSockets.svg?branch=develop&style=flat)
 
@@ -29,10 +29,10 @@ The project includes three targets:
 - ARIEchoServer
 - ARIFetch
 
-Updated for Swift 0.2.2 (aka Xcode 7.3), aand for Swift 0.3-2016-05-31.
+Updated for Swift 0.2.3 (aka Xcode 8.2), and for Swift 3.0 (different branch).
 
 *Note for Linux users*:
-This compiles with the 2016-05-31-a snapshot via Swift Package Manager
+This compiles via Swift Package Manager
 as well as with the Swift 2.2 release using the embedded makefiles.
 Make sure you 
 [install Grand Central Dispatch](http://noze.io/install-swift/#linux-install-libdispatch)
