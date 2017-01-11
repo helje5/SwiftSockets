@@ -322,13 +322,7 @@ public extension ActiveSocket { // writing
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-#if os(Linux)
     let asyncData = dispatch_data_create(b, bufsize, queue!, nil)
-#else /* os(Darwin) */ // TBD
-    guard let asyncData = dispatch_data_create(b, bufsize, queue!, nil) else {
-      return false
-    }
-#endif /* os(Darwin) */
     
     write(data: asyncData)
     return true
@@ -351,13 +345,7 @@ public extension ActiveSocket { // writing
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-#if os(Linux)
     let asyncData = dispatch_data_create(b, bufsize, queue!, nil);
-#else /* os(Darwin) */
-    guard let asyncData = dispatch_data_create(b, bufsize, queue!, nil) else {
-      return false
-    }
-#endif /* os(Darwin) */
 
     write(data: asyncData)
     return true
