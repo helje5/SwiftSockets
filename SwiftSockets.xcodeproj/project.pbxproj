@@ -38,7 +38,6 @@
 		E88984F4194A760300A831A3 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E88984F2194A760300A831A3 /* MainMenu.xib */; };
 		E8961A6F1BFA24F400B3707D /* SwiftSockets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3710E9F11BF548480002A4DB /* SwiftSockets.framework */; };
 		E8961A701BFA24FC00B3707D /* SwiftSockets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3710E9F11BF548480002A4DB /* SwiftSockets.framework */; };
-		E8F134491D05A1AE005A0AE0 /* Swift3.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F134481D05A1AE005A0AE0 /* Swift3.swift */; };
 		E8F152D61D05A374009581A7 /* Swift3.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F152D51D05A374009581A7 /* Swift3.swift */; };
 /* End PBXBuildFile section */
 
@@ -76,7 +75,6 @@
 		E8D257B41CC525C000961842 /* SwiftModuleFW.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SwiftModuleFW.xcconfig; path = xcconfig/SwiftModuleFW.xcconfig; sourceTree = "<group>"; };
 		E8D257B51CC525C000961842 /* UIKitDebug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = UIKitDebug.xcconfig; path = xcconfig/UIKitDebug.xcconfig; sourceTree = "<group>"; };
 		E8D257B61CC525C000961842 /* UIKitRelease.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = UIKitRelease.xcconfig; path = xcconfig/UIKitRelease.xcconfig; sourceTree = "<group>"; };
-		E8F134481D05A1AE005A0AE0 /* Swift3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Swift3.swift; sourceTree = "<group>"; };
 		E8F152D51D05A374009581A7 /* Swift3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Swift3.swift; path = Sources/SwiftyEchoDaemon/Swift3.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -118,7 +116,6 @@
 			isa = PBXGroup;
 			children = (
 				E85D5FEA194B917900ECC32A /* AppDelegate.swift */,
-				E8F134481D05A1AE005A0AE0 /* Swift3.swift */,
 				E85D5FEC194B917900ECC32A /* Images.xcassets */,
 				E85D5FEE194B917900ECC32A /* MainMenu.xib */,
 				E85D5FE6194B917900ECC32A /* Supporting Files */,
@@ -428,7 +425,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E8F134491D05A1AE005A0AE0 /* Swift3.swift in Sources */,
 				E85D5FEB194B917900ECC32A /* AppDelegate.swift in Sources */,
 				E85D5FE9194B917900ECC32A /* main.swift in Sources */,
 			);

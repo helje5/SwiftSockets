@@ -53,11 +53,7 @@ extension NSTextView {
   func appendString(string s: String) {
     if let ts = textStorage {
       let ls = NSAttributedString(string: s)
-#if swift(>=3.0) // #swift3-1st-kwarg
-      ts.append(ls)
-#else
       ts.appendAttributedString(ls)
-#endif
     }
 
     let charCount = (s as NSString).length

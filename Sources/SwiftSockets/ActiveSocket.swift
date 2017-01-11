@@ -58,19 +58,6 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   // let the socket own the read buffer, what is the best buffer type?
   //   var readBuffer : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
-#if swift(>=3.0)
-  var readBufferPtr  =
-        UnsafeMutablePointer<CChar>(allocatingCapacity: (4096 + 2))
-  var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
-    didSet {
-      if readBufferSize != oldValue {
-        readBufferPtr.deallocateCapacity(oldValue + 2)
-        readBufferPtr =
-	  UnsafeMutablePointer<CChar>(allocatingCapacity: (readBufferSize + 2))
-      }
-    }
-  }
-#else // Swift 2.2+
   var readBufferPtr  = UnsafeMutablePointer<CChar>.alloc(4096 + 2)
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
@@ -80,7 +67,6 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
       }
     }
   }
-#endif
   
   
   public var isConnected : Bool {
@@ -123,11 +109,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     isSigPipeDisabled = fd.isValid // hm, hm?
   }
   deinit {
-#if swift(>=3.0)
-    readBufferPtr.deallocateCapacity(readBufferSize + 2)
-#else
     readBufferPtr.dealloc(readBufferSize + 2)
-#endif
   }
   
   
@@ -249,17 +231,6 @@ extension ActiveSocket : OutputStreamType { // writing
     }
   }
 }
-
-#if swift(>=3.0) // sigh, #if can't just #if the prefix, need to dupe
-public typealias OutputStreamType = OutputStream
-extension ActiveSocket { // writing
-  
-  public func write(_ string: String) {
-    write(string: string)
-  }
-}
-#else // Swift 2.2+
-#endif
 
 public extension ActiveSocket { // writing
   
@@ -439,11 +410,7 @@ public extension ActiveSocket { // Reading
     /* actually start listening ... */
 #if os(Linux)
     // TBD: what is the better way?
-#if swift(>=3.0)
-    dispatch_resume(unsafeBitCast(readSource!, to: dispatch_object_t.self))
-#else
     dispatch_resume(unsafeBitCast(readSource!, dispatch_object_t.self))
-#endif
 #else /* os(Darwin) */
     dispatch_resume(readSource!)
 #endif /* os(Darwin) */
@@ -460,13 +427,3 @@ public extension ActiveSocket { // ioctl
   }
   
 }
-
-#if swift(>=3.0) // #swift3-1st-kwarg
-extension ActiveSocket {
-  public func connect(_ address: T,
-                      onConnect: ( ActiveSocket<T> ) -> Void) -> Bool
-  {
-    return connect(address: address, onConnect: onConnect)
-  }
-}
-#endif

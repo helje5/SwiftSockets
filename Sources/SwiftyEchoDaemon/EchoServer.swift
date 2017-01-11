@@ -15,19 +15,11 @@ import Glibc
 import Darwin
 #endif
 
-#if swift(>=3.0)
-typealias OutputStreamType = OutputStream
-#endif
-
 class EchoServer {
 
   let port         : Int
   var listenSocket : PassiveSocketIPv4?
-#if swift(>=3.0)
-  let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
-#else
   let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)
-#endif
   var openSockets  =
         [FileDescriptor:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
@@ -55,11 +47,7 @@ class EchoServer {
     
     log(string: "Listen socket \(listenSocket)")
     
-#if swift(>=3.0) // #swift3-gcd
-    let queue = dispatch_get_global_queue(0, 0)!
-#else
     let queue = dispatch_get_global_queue(0, 0)
-#endif
 
     // Note: capturing self here
     _ = listenSocket!.listen(queue: queue, backlog: 5) { newSock in
@@ -136,11 +124,7 @@ class EchoServer {
       /* ptr has no map ;-) FIXME: add an extension 'mapWithCount'?
       let mblock = block.map({ $0 == 83 ? 90 : ($0 == 115 ? 122 : $0) })
       */
-#if swift(>=3.0)
-      var mblock = [CChar](repeating: 42, count: count + 1)
-#else
       var mblock = [CChar](count: count + 1, repeatedValue: 42)
-#endif
       for i in 0..<count {
         let c = block[i]
         mblock[i] = c == 83 ? 90 : (c == 115 ? 122 : c)

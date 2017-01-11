@@ -270,21 +270,6 @@ extension Socket { // Socket Options
     let v: Int32? = getSocketOption(option)
     return v != nil ? (v! == 0 ? false : true) : false
   }
-  
-#if swift(>=3.0) // #swift3-1st-kwarg
-  public func setSocketOption(_ option: Int32, value: Int32) -> Bool {
-    return setSocketOption(option: option, value: value)
-  }
-  public func getSocketOption(_ option: Int32) -> Int32? {
-    return getSocketOption(option: option)
-  }
-  public func setSocketOption(_ option: Int32, value: Bool) -> Bool {
-    return setSocketOption(option: option, value: value)
-  }
-  public func getSocketOption(_ option: Int32) -> Bool {
-    return getSocketOption(option: option)
-  }
-#endif
 }
 
 
@@ -312,14 +297,3 @@ extension Socket: CustomStringConvertible {
 extension Socket: BooleanType { // TBD: Swift doesn't want us to do this
   public var boolValue : Bool { return isValid }
 }
-
-
-#if swift(>=3.0)
-public typealias BooleanType = Boolean
-
-public extension Socket { // #swift3-1st-kwarg
-  public func bind(_ address: T) -> Bool {
-    return bind(address: address)
-  }
-}
-#endif

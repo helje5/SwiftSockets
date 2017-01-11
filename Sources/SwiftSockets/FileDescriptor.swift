@@ -14,10 +14,6 @@ import Darwin
 
 //import xsys - a struct in here
 
-#if swift(>=3.0) // #swift3-fd
-public typealias ErrorType = ErrorProtocol
-#endif
-
 #if os(Linux)
 extension POSIXError : ErrorType {}
 #else
@@ -65,11 +61,7 @@ public struct FileDescriptor: IntegerLiteralConvertible, NilLiteralConvertible {
   
   public func read(count: Int) -> ( ErrorType?, [ UInt8 ]? ) {
     // TODO: inefficient init. Also: reuse buffers.
-#if swift(>=3.0) // #swift3-fd
-    var buf = [ UInt8 ](repeating: 0, count: count)
-#else
     var buf = [ UInt8 ](count: count, repeatedValue: 0)
-#endif
 
     // synchronous
     
