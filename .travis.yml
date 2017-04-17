@@ -4,7 +4,7 @@ matrix:
     include:
         - os:   Linux
           dist: trusty
-          env:  SWIFT_SNAPSHOT_NAME=DEVELOPMENT-SNAPSHOT-2016-05-31-a
+          env:  "SWIFT_SNAPSHOT_NAME=https://swift.org/builds/swift-3.0-preview-1/ubuntu1404/swift-3.0-preview-1/swift-3.0-preview-1-ubuntu14.04.tar.gz"
           sudo: required
         - os:   Linux
           dist: trusty
@@ -23,5 +23,4 @@ install:
 script:
     - export SWIFTENV_ROOT="$HOME/.swiftenv"
     - export PATH="${SWIFTENV_ROOT}/bin:${SWIFTENV_ROOT}/shims:$PATH"
-    # - env|sort
     - make
