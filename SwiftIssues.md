@@ -6,7 +6,7 @@ Presumably they fix most of them pretty quickly.
 
 FIXME: Collect and list all issues :-)
 
-###Bugs
+### Bugs
 
 - No access to ioctl() (presumably due to varargs)
 - No access to fcntl() (presumably due to varargs)
@@ -18,15 +18,15 @@ FIXME: Collect and list all issues :-)
   no var)
 - Would be nice if Swift would allow chaining of Void methods (.onRead {} .onWrite {}) - right now all the methods have to return self manually.
 
-###How To?
+### How To?
 
-####Error Handling
+#### Error Handling
 
 I'm not sure how we are supposed to handle errors in Swift. Maybe using some
 enum for the error codes and a fallback value (e.g. the file descriptor) for
 the success case. Kinda like an Optional, with more fail values than nil.
 
-####Casting C Structures
+#### Casting C Structures
 
 How should we cast between typed pointers? Eg bind() takes a &sockaddr, but the
 actual structure is variable (eg a sockaddr_in).
@@ -41,7 +41,7 @@ let bptr = CConstPointer<sockaddr>(nil, bvptr.value)
 ```
 Which doesn't feel right.
 
-####Flexible Length C Structures
+#### Flexible Length C Structures
 
 I guess this can be done with UnsafePointer. Structures like sockaddr_un,
 which embed the path within the structure and thereby have a different size.

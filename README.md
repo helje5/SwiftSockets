@@ -22,7 +22,7 @@ a chat.
 Any suggestions on how to improve the code are welcome. I expect lots and lots
 :-)
 
-###Targets
+### Targets
 
 The project includes three targets:
 - SwiftSockets
@@ -41,7 +41,7 @@ On Linux the included ARIEchoServer/ARIFetch apps do not build, but this one
 does and is embedded:
 [SwiftyEchoDaemon](http://www.alwaysrightinstitute.com/SwiftyEchoDaemon/).
 
-####SwiftSockets
+#### SwiftSockets
 
 A framework containing the socket classes and relevant extensions. It takes a
 bit of inspiration from the [SOPE](http://sope.opengroupware.org) NGStreams
@@ -73,7 +73,7 @@ let socket = ActiveSocket<sockaddr_in>()!
   }
 ```
 
-####Using SwiftSockets with Swift Package Manager
+#### Using SwiftSockets with Swift Package Manager
 
 To use SwiftSockets in your SPM project, just add it as a dependency in your
 `Package.swift` file, like so:
@@ -91,7 +91,7 @@ To use SwiftSockets in your SPM project, just add it as a dependency in your
     )
 
 
-####ARIEchoServer / SwiftyEchoDaemon
+#### ARIEchoServer / SwiftyEchoDaemon
 
 There is the ARIEchoServer for Xcode and SwiftEchoDaemon for Package Manager
 installs. Your choize, both are equally awezome.
@@ -112,7 +112,7 @@ connect to it in the Terminal.app via ```telnet 1337```.
 
 ![](http://i.imgur.com/mzXANTC.png)
 
-####ARIFetch
+#### ARIFetch
 
 Connects a socket to some end point, sends an HTTP/1.0 GET request with some
 awesome headers, then shows the results the server sends. Cocoa app.
@@ -122,7 +122,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
 ![](http://i.imgur.com/nRhADxg.png)
 
 
-###Goals
+### Goals
 
 - [x] Max line length: 80 characters
 - [ ] Great error handling
@@ -209,7 +209,7 @@ Why HTTP/1.0? Avoids redirects on www.apple.com :-)
 - [x] Linux support
 - [x] Swift 3 2016-03-16
 
-###Why?!
+### Why?!
 
 This is an experiment to get acquainted with Swift. To check whether something
 real can be implemented in 'pure' Swift. Meaning, without using any Objective-C
@@ -217,7 +217,7 @@ Cocoa classes (no NS'ism).
 Or in other words: Can you use Swift without writing all the 'real' code in
 wrapped Objective-C? :-)
 
-###Contact
+### Contact
 
 [@helje5](http://twitter.com/helje5) | helge@alwaysrightinstitute.com
 
