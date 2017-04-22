@@ -325,9 +325,7 @@ public extension ActiveSocket { // writing
 #if os(Linux)
     let asyncData = dispatch_data_create(b, bufsize, queue!, nil)
 #else /* os(Darwin) */ // TBD
-    guard let asyncData = dispatch_data_create(b, bufsize, queue!, nil) else {
-      return false
-    }
+    let asyncData = dispatch_data_create(b, bufsize, queue!, nil)
 #endif /* os(Darwin) */
     
     write(data: asyncData)
@@ -354,9 +352,7 @@ public extension ActiveSocket { // writing
 #if os(Linux)
     let asyncData = dispatch_data_create(b, bufsize, queue!, nil);
 #else /* os(Darwin) */
-    guard let asyncData = dispatch_data_create(b, bufsize, queue!, nil) else {
-      return false
-    }
+    let asyncData = dispatch_data_create(b, bufsize, queue!, nil)
 #endif /* os(Darwin) */
 
     write(data: asyncData)
