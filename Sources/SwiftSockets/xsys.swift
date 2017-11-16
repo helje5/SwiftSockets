@@ -3,6 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 11/04/16.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 //
 
@@ -73,6 +74,49 @@ public typealias xsysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
     public static let ioctlVip = ari_ioctlVip
   }
 
+  // TODO: clear up the code vs error weirdness
+  public enum POSIXErrorCode : CInt {
+    case EPERM   = 1
+    case ENOENT  = 2
+    case ESRCH   = 3
+    case EINTR   = 4
+    case EIO     = 5
+    case ENXIO   = 6
+    case E2BIG   = 7
+    case ENOEXEC = 8
+    case EBADF   = 9
+    case ECHILD  = 10
+    case EAGAIN  = 11 // == EWOULDBLOCK
+    case ENOMEM  = 12
+    case EACCES  = 13
+    case EFAULT  = 14
+    case ENOTBLK = 15
+    case EBUSY   = 16
+    case EEXIST  = 17
+    case EXDEV   = 18
+    case ENODEV  = 19
+    case ENOTDIR = 20
+    case EISDIR  = 21
+    case EINVAL  = 22
+    case ENFILE  = 23
+    case EMFILE  = 24
+    case ENOTTY  = 25
+    case ETXTBSY = 26
+    case EFBIG   = 27
+    case ENOSPC  = 28
+    case ESPIPE  = 29
+    case EROFS   = 30
+    case EMLINK  = 31
+    case EPIPE   = 32
+    case EDOM    = 33
+    case ERANGE  = 34
+
+    // extra
+    case ECANCELED = 125
+  }
+  
+  extension POSIXErrorCode : Error {}
+  
   public enum POSIXError : CInt {
     case EPERM
   }
@@ -138,7 +182,7 @@ public typealias xsysOpenType = (UnsafePointer<CChar>, CInt) -> CInt
     // hh: not sure this is producing the right value
     public static let FIONREAD : CUnsignedLong =
       ( IOC_OUT
-        | ((CUnsignedLong(sizeof(Int32)) & CUnsignedLong(IOCPARM_MASK)) << 16)
+        | ((CUnsignedLong(4) & CUnsignedLong(IOCPARM_MASK)) << 16)
         | (102 /* 'f' */ << 8) | 127)
     public static let fcntlVi  = ari_fcntlVi
     public static let ioctlVip = ari_ioctlVip

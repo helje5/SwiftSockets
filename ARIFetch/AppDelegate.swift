@@ -3,12 +3,14 @@
 //  ARIFetch
 //
 //  Created by Helge Hess on 6/13/14.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 //
 
 import Cocoa
 import SwiftSockets
 
+@NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
                             
   @IBOutlet var window           : NSWindow!
@@ -20,15 +22,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     return resultViewParent.contentView.documentView as! NSTextView
   }
 
-  func applicationDidFinishLaunching(aNotification: NSNotification) {
-    #if swift(>=3.0) // #swift3-1st-kwarg
-      fetch(sender: nil)
-    #else
-      fetch(nil)
-    #endif
+  func applicationDidFinishLaunching(_ aNotification: Notification) {
+    fetch(sender: nil)
   }
 
-  func applicationWillTerminate(aNotification: NSNotification) {
+  func applicationWillTerminate(_ aNotification: Notification) {
     socket?.close()
   }
   
@@ -100,10 +98,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       // FIXME: I think I know why. It may happen if the block boundary is
       //        within a UTF-8 sequence?
       // The end of the block is 100,-30,-128,0
-      let data = String.fromCString(block)! // ignore error, abort
+      let data = String(validatingUTF8: block)! // ignore error, abort
       
       // log to view. Careful, must run in main thread!
-      dispatch_async(dispatch_get_main_queue()) {
+      DispatchQueue.main.async {
         self.resultView.appendString(string: data)
       }
     } while (true)
@@ -116,11 +114,7 @@ extension NSTextView {
   func appendString(string s: String) {
     if let ts = textStorage {
       let ls = NSAttributedString(string: s)
-#if swift(>=3.0) // #swift3-1st-kwarg
       ts.append(ls)
-#else
-      ts.appendAttributedString(ls)
-#endif
     }
 
     let charCount = (s as NSString).length

@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 6/11/14.
-//  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
@@ -46,41 +46,28 @@ public typealias ActiveSocketIPv4 = ActiveSocket<sockaddr_in>
  */
 public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
-  public var remoteAddress  : T?                 = nil
-  public var queue          : dispatch_queue_t?  = nil
+  public var remoteAddress  : T?               = nil
+  public var queue          : DispatchQueue?   = nil
   
-  var readSource     : dispatch_source_t? = nil
-  var sendCount      : Int                = 0
-  var closeRequested : Bool               = false
-  var didCloseRead   : Bool               = false
+  var readSource     : DispatchSourceProtocol? = nil
+  var sendCount      : Int                     = 0
+  var closeRequested : Bool                    = false
+  var didCloseRead   : Bool                    = false
   var readCB         : ((ActiveSocket, Int) -> Void)? = nil
 
   
   // let the socket own the read buffer, what is the best buffer type?
   //   var readBuffer : [CChar] =  [CChar](count: 4096 + 2, repeatedValue: 42)
-#if swift(>=3.0)
-  var readBufferPtr  =
-        UnsafeMutablePointer<CChar>(allocatingCapacity: (4096 + 2))
+  var readBufferPtr  = UnsafeMutablePointer<CChar>.allocate(capacity: 4096 + 2)
   var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
     didSet {
       if readBufferSize != oldValue {
-        readBufferPtr.deallocateCapacity(oldValue + 2)
+        readBufferPtr.deallocate(capacity: oldValue + 2)
         readBufferPtr =
-	  UnsafeMutablePointer<CChar>(allocatingCapacity: (readBufferSize + 2))
+	  UnsafeMutablePointer<CChar>.allocate(capacity: readBufferSize + 2)
       }
     }
   }
-#else // Swift 2.2+
-  var readBufferPtr  = UnsafeMutablePointer<CChar>.alloc(4096 + 2)
-  var readBufferSize : Int = 4096 { // available space, a bit more for '\0'
-    didSet {
-      if readBufferSize != oldValue {
-        readBufferPtr.dealloc(oldValue + 2)
-        readBufferPtr = UnsafeMutablePointer<CChar>.alloc(readBufferSize + 2)
-      }
-    }
-  }
-#endif
   
   
   public var isConnected : Bool {
@@ -113,7 +100,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   }
   
   public convenience init
-    (fd: FileDescriptor, remoteAddress: T?, queue: dispatch_queue_t? = nil)
+    (fd: FileDescriptor, remoteAddress: T?, queue: DispatchQueue? = nil)
   {
     self.init(fd: fd)
     
@@ -123,11 +110,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     isSigPipeDisabled = fd.isValid // hm, hm?
   }
   deinit {
-#if swift(>=3.0)
-    readBufferPtr.deallocateCapacity(readBufferSize + 2)
-#else
-    readBufferPtr.dealloc(readBufferSize + 2)
-#endif
+    readBufferPtr.deallocate(capacity: readBufferSize + 2)
   }
   
   
@@ -170,7 +153,7 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   
   /* connect */
   
-  public func connect(address: T,
+  public func connect(_ address: T,
                       onConnect: ( ActiveSocket<T> ) -> Void) -> Bool
   {
     // FIXME: make connect() asynchronous via GCD
@@ -186,9 +169,11 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
     var addr = address
     
     let lfd = fd.fd
-    let rc = withUnsafePointer(&addr) { ptr -> Int32 in
-      let bptr = UnsafePointer<sockaddr>(ptr) // cast
-      return xsys.connect(lfd, bptr, socklen_t(addr.len)) //only returns block
+    let rc = withUnsafePointer(to: &addr) { ptr -> Int32 in
+      return ptr.withMemoryRebound(to: xsys_sockaddr.self, capacity: 1) {
+        bptr in
+        return xsys.connect(lfd, bptr, socklen_t(addr.len)) //only returns block
+      }
     }
     
     guard rc == 0 else {
@@ -238,9 +223,9 @@ public class ActiveSocket<T: SocketAddress>: Socket<T> {
   }
 }
 
-extension ActiveSocket : OutputStreamType { // writing
+extension ActiveSocket : TextOutputStream {
   
-  public func write(string: String) {
+  public func write(_ string: String) {
     string.withCString { (cstr: UnsafePointer<Int8>) -> Void in
       let len = Int(strlen(cstr))
       if len > 0 {
@@ -249,17 +234,6 @@ extension ActiveSocket : OutputStreamType { // writing
     }
   }
 }
-
-#if swift(>=3.0) // sigh, #if can't just #if the prefix, need to dupe
-public typealias OutputStreamType = OutputStream
-extension ActiveSocket { // writing
-  
-  public func write(_ string: String) {
-    write(string: string)
-  }
-}
-#else // Swift 2.2+
-#endif
 
 public extension ActiveSocket { // writing
   
@@ -278,12 +252,14 @@ public extension ActiveSocket { // writing
     return true
   }
   
-  public func write(data d: dispatch_data_t) {
+  public func write(data d: DispatchData) {
     sendCount += 1
     if debugAsyncWrites { debugPrint("async send[\(d)]") }
     
     // in here we capture self, which I think is right.
-    dispatch_write(fd.fd, d, queue!) {
+    DispatchIO.write(toFileDescriptor: fd.fd, data: d,
+                     runningHandlerOn: queue!)
+    {
       asyncData, error in
       
       if self.debugAsyncWrites {
@@ -299,7 +275,7 @@ public extension ActiveSocket { // writing
       }
     }    
   }
-  public func write(data d: dispatch_data_t?) {
+  public func write(data d: DispatchData?) {
     guard d != nil else { return }
     write(data: d!)
   }
@@ -310,25 +286,29 @@ public extension ActiveSocket { // writing
     guard canWrite else { return false }
     
     let writelen = b.count
-    let bufsize  = writelen * strideof(T)
+    let bufsize  = writelen * MemoryLayout<T>.stride
     guard bufsize > 0 else { // Nothing to write ..
       return true
     }
     
     if queue == nil {
       debugPrint("No queue set, using main queue")
-      queue = dispatch_get_main_queue()
+      queue = DispatchQueue.main
     }
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-#if os(Linux)
-    let asyncData = dispatch_data_create(b, bufsize, queue!, nil)
-#else /* os(Darwin) */ // TBD
-    guard let asyncData = dispatch_data_create(b, bufsize, queue!, nil) else {
-      return false
+    
+    // TODO: add a ctor to DispatchData for this ... (create from array)
+    let asyncData : DispatchData = b.withUnsafeBufferPointer { bp in
+      return bp.baseAddress!.withMemoryRebound(to: UInt8.self,
+                                               capacity: bufsize)
+      {
+        ptr in
+        let bp = UnsafeBufferPointer(start: ptr, count: bufsize)
+        return DispatchData(bytes: bp)
+      }
     }
-#endif /* os(Darwin) */
     
     write(data: asyncData)
     return true
@@ -339,25 +319,27 @@ public extension ActiveSocket { // writing
     guard canWrite else { return false }
     
     let writelen = length
-    let bufsize  = writelen * strideof(T)
+    let bufsize  = writelen * MemoryLayout<T>.stride
     guard bufsize > 0 else { // Nothing to write ..
       return true
     }
     
     if queue == nil {
       debugPrint("No queue set, using main queue")
-      queue = dispatch_get_main_queue()
+      queue = DispatchQueue.main
     }
     
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
-#if os(Linux)
-    let asyncData = dispatch_data_create(b, bufsize, queue!, nil);
-#else /* os(Darwin) */
-    guard let asyncData = dispatch_data_create(b, bufsize, queue!, nil) else {
-      return false
+    
+    // TODO
+    let asyncData : DispatchData = b.withMemoryRebound(to: UInt8.self,
+                                                       capacity: bufsize)
+    {
+      ptr in
+      let bp = UnsafeBufferPointer(start: ptr, count: bufsize)
+      return DispatchData(bytes: bp)
     }
-#endif /* os(Darwin) */
 
     write(data: asyncData)
     return true
@@ -409,7 +391,7 @@ public extension ActiveSocket { // Reading
   
   func stopEventHandler() {
     if readSource != nil {
-      dispatch_source_cancel(readSource!)
+      readSource?.cancel()
       readSource = nil // abort()s if source is not resumed ...
     }
   }
@@ -424,17 +406,13 @@ public extension ActiveSocket { // Reading
     
     if queue == nil {
       debugPrint("No queue set, using main queue")
-      queue = dispatch_get_main_queue()
+      queue = DispatchQueue.main
     }
     
     /* setup GCD dispatch source */
     
-    readSource = dispatch_source_create(
-      Dispatch.DISPATCH_SOURCE_TYPE_READ,
-      UInt(fd.fd), // is this going to bite us?
-      0,
-      queue!
-    )
+    readSource =
+      DispatchSource.makeReadSource(fileDescriptor: fd.fd, queue: queue!)
     guard readSource != nil else {
       print("Could not create dispatch source for socket \(self)")
       return false
@@ -449,16 +427,7 @@ public extension ActiveSocket { // Reading
     }
     
     /* actually start listening ... */
-#if os(Linux)
-    // TBD: what is the better way?
-#if swift(>=3.0)
-    dispatch_resume(unsafeBitCast(readSource!, to: dispatch_object_t.self))
-#else
-    dispatch_resume(unsafeBitCast(readSource!, dispatch_object_t.self))
-#endif
-#else /* os(Darwin) */
-    dispatch_resume(readSource!)
-#endif /* os(Darwin) */
+    readSource?.resume()
     
     return true
   }
@@ -472,13 +441,3 @@ public extension ActiveSocket { // ioctl
   }
   
 }
-
-#if swift(>=3.0) // #swift3-1st-kwarg
-extension ActiveSocket {
-  public func connect(_ address: T,
-                      onConnect: ( ActiveSocket<T> ) -> Void) -> Bool
-  {
-    return connect(address: address, onConnect: onConnect)
-  }
-}
-#endif

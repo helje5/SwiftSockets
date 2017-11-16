@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Heß on 6/12/14.
-//  Copyright (c) 2014-2015 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 
 #if os(Linux)
@@ -50,20 +50,12 @@ public extension in_addr {
     }
     
     let len   = Int(INET_ADDRSTRLEN) + 2
-#if swift(>=3.0)
     var buf   = [CChar](repeating:0, count: len)
-#else
-    var buf   = [CChar](count: len, repeatedValue: 0)
-#endif
     
     var selfCopy = self // &self doesn't work, because it can be const?
     let cs = inet_ntop(AF_INET, &selfCopy, &buf, socklen_t(len))
     
-#if swift(>=3.0)
     return String(validatingUTF8: cs!)!
-#else
-    return String.fromCString(cs)!
-#endif
   }
   
 }
@@ -81,7 +73,7 @@ extension in_addr : Equatable, Hashable {
   
 }
 
-extension in_addr: StringLiteralConvertible {
+extension in_addr: ExpressibleByStringLiteral {
   // this allows you to do: let addr : in_addr = "192.168.0.1"
 
   public init(stringLiteral value: StringLiteralType) {
@@ -118,13 +110,13 @@ public protocol SocketAddress {
 extension sockaddr_in: SocketAddress {
   
   public static let domain = AF_INET
-  public static let size   = __uint8_t(strideof(sockaddr_in))
+  public static let size   = __uint8_t(MemoryLayout<sockaddr_in>.stride)
     // how to refer to self?
   
   public init() {
 #if os(Linux) // no sin_len on Linux
 #else
-    sin_len    = self.dynamicType.size // no way to access the static type here?
+    sin_len    = type(of: self).size // no way to access the static type here?
 #endif
     sin_family = sa_family_t(sockaddr_in.domain)
     sin_port   = 0
@@ -154,12 +146,8 @@ extension sockaddr_in: SocketAddress {
       }
       else {
         // split string at colon
-#if swift(>=3.0)
         let components =
 	    s.characters.split(separator: ":", maxSplits: 1).map { String($0) }
-#else
-        let components = s.characters.split(":", maxSplit: 1).map { String($0) }
-#endif
         if components.count == 2 {
           self.init(address: components[0], port: Int(components[1]))
         }
@@ -231,7 +219,7 @@ extension sockaddr_in: Equatable, Hashable {
  * it requires:
  *   StringInterpolationConvertible
  */
-extension sockaddr_in: StringLiteralConvertible {
+extension sockaddr_in: ExpressibleByStringLiteral {
   
   public init(stringLiteral value: String) {
     self.init(string: value)
@@ -258,12 +246,12 @@ extension sockaddr_in: CustomStringConvertible {
 extension sockaddr_in6: SocketAddress {
   
   public static let domain = AF_INET6
-  public static let size   = __uint8_t(strideof(sockaddr_in6))
+  public static let size   = __uint8_t(MemoryLayout<sockaddr_in6>.stride)
   
   public init() {
 #if os(Linux) // no sin_len on Linux
 #else
-    sin6_len = self.dynamicType.size // no way to access the static type here?
+    sin6_len = type(of: self).size // no way to access the static type here?
 #endif
     sin6_family   = sa_family_t(sockaddr_in6.domain)
     sin6_port     = 0
@@ -291,7 +279,8 @@ extension sockaddr_un: SocketAddress {
   //      technically dynamic (embedded string)
   
   public static let domain = AF_UNIX
-  public static let size   = __uint8_t(strideof(sockaddr_un)) // CAREFUL
+  public static let size   = __uint8_t(MemoryLayout<sockaddr_un>.stride)
+     // CAREFUL with size here!
   
   public init() {
 #if os(Linux) // no sin_len on Linux
@@ -357,21 +346,13 @@ public extension addrinfo {
     return ai_next != nil
   }
   public var next : addrinfo? {
-#if swift(>=3.0)
     return hasNext ? ai_next.pointee : nil
-#else
-    return hasNext ? ai_next.memory : nil
-#endif
   }
   
   public var canonicalName : String? {
     guard ai_canonname != nil && ai_canonname[0] != 0 else { return nil }
     
-#if swift(>=3.0)
     return String(validatingUTF8: ai_canonname)
-#else
-    return String.fromCString(ai_canonname)
-#endif
   }
   
   public var hasAddress : Bool {
@@ -379,13 +360,8 @@ public extension addrinfo {
   }
   
   public var isIPv4 : Bool {
-#if swift(>=3.0)
     return hasAddress &&
            (ai_addr.pointee.sa_family == sa_family_t(sockaddr_in.domain))
-#else
-    return hasAddress &&
-           (ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain))
-#endif
   }
   
   public var addressIPv4 : sockaddr_in?  { return address() }
@@ -395,48 +371,27 @@ public extension addrinfo {
   
   public func address<T: SocketAddress>() -> T? {
     guard ai_addr != nil else { return nil }
-#if swift(>=3.0) // #swift3-ptr
     guard ai_addr.pointee.sa_family == sa_family_t(T.domain) else { return nil }
-#else
-    guard ai_addr.memory.sa_family == sa_family_t(T.domain) else { return nil }
-#endif
     
-    let aiptr = UnsafePointer<T>(ai_addr) // cast
-#if swift(>=3.0) // #swift3-ptr
-    // copies the address to the return value
-    return aiptr != nil ? aiptr!.pointee : nil
-#else
-    return aiptr.memory // copies the address to the return value
-#endif
+    let airptr = UnsafeRawPointer(ai_addr)
+    let aiptr  = airptr?.assumingMemoryBound(to: T.self) // cast
+    return aiptr?.pointee // copies the address to the return value
   }
   
   public var dynamicAddress : SocketAddress? {
     guard hasAddress else { return nil }
     
-#if swift(>=3.0) // #swift3-ptr
+    let airptr = UnsafeRawPointer(ai_addr)
+    
     if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in.domain) {
-      let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
-      // copies the address to the return value
-      guard aiptr != nil else { return nil }
-      return aiptr!.pointee
+      let aiptr  = airptr?.assumingMemoryBound(to: sockaddr_in.self) // cast
+      return aiptr?.pointee // copies the address to the return value
     }
     
     if ai_addr.pointee.sa_family == sa_family_t(sockaddr_in6.domain) {
-      let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
-      guard aiptr != nil else { return nil }
-      return aiptr!.pointee // copies the address to the return value
+      let aiptr  = airptr?.assumingMemoryBound(to: sockaddr_in6.self) // cast
+      return aiptr?.pointee // copies the address to the return value
     }
-#else // Swift 2.2+
-    if ai_addr.memory.sa_family == sa_family_t(sockaddr_in.domain) {
-      let aiptr = UnsafePointer<sockaddr_in>(ai_addr) // cast
-      return aiptr.memory // copies the address to the return value
-    }
-    
-    if ai_addr.memory.sa_family == sa_family_t(sockaddr_in6.domain) {
-      let aiptr = UnsafePointer<sockaddr_in6>(ai_addr) // cast
-      return aiptr.memory // copies the address to the return value
-    }
-#endif
     
     return nil
   }
@@ -465,11 +420,7 @@ extension addrinfo : CustomStringConvertible {
       if f != 0 {
         fs.append("flags[\(f)]")
       }
-#if swift(>=3.0)
       let fss = fs.joined(separator: ",")
-#else
-      let fss = fs.joinWithSeparator(",")
-#endif
       s += " flags=" + fss
     }
     
@@ -506,7 +457,6 @@ extension addrinfo : CustomStringConvertible {
   }
 }
 
-#if swift(>=3.0)
 extension addrinfo : Sequence {
   
   public func makeIterator() -> AnyIterator<addrinfo> {
@@ -519,20 +469,6 @@ extension addrinfo : Sequence {
     }
   }
 }
-#else // Swift 2.2+
-extension addrinfo : SequenceType {
-  
-  public func generate() -> AnyGenerator<addrinfo> {
-    var cursor : addrinfo? = self
-    
-    return AnyGenerator {
-      guard let info = cursor else { return .None }
-      cursor = info.next
-      return info
-    }
-  }
-}
-#endif // Swift 2.2+
 
 public extension sa_family_t {
   // Swift 2 : CustomStringConvertible, already imp?!
