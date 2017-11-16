@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # our path is:
-#   /home/travis/build/...
+#   /home/travis/build/NozeIO/Noze.io/
 
 # Install Swift
 
