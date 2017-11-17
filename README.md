@@ -1,6 +1,7 @@
 SwiftSockets
 ============
-![Swift2n3](https://img.shields.io/badge/Swift-2.2%2C%203.0-blue.svg)
+![Swift3](https://img.shields.io/badge/swift-3-blue.svg)
+![Swift4](https://img.shields.io/badge/swift-4-blue.svg)
 ![Mac OS X](https://img.shields.io/badge/os-Mac%20OS%20X-green.svg?style=flat)
 ![iOS](https://img.shields.io/badge/os-iOS-green.svg?style=flat)
 ![Linux](https://img.shields.io/badge/os-Linux-green.svg?style=flat)
@@ -29,7 +30,8 @@ The project includes three targets:
 - ARIEchoServer
 - ARIFetch
 
-Updated for Swift 0.2.2 (aka Xcode 7.3), aand for Swift 0.3-2016-05-31.
+- Updated for Swift 3.2/4.0 (aka Xcode 9.1), and for Swift 3 final too
+- Updated for Swift 0.2.2 (aka Xcode 7.3), aand for Swift 0.3-2016-05-31.
 
 *Note for Linux users*:
 This compiles with the 2016-05-31-a snapshot via Swift Package Manager
@@ -50,7 +52,7 @@ library.
 Server Sample:
 ```swift
 let socket = PassiveSocket<sockaddr_in>(address: sockaddr_in(port: 4242))!
-  .listen(queue: dispatch_get_global_queue(0, 0), backlog: 5) {
+  .listen(queue: DispatchQueue.global(), backlog: 5) {
     print("Wait, someone is attempting to talk to me!")
     $0.close()
     print("All good, go ahead!")

@@ -1,7 +1,7 @@
 # coding: utf-8
 Pod::Spec.new do |s|
   s.name             = "SwiftSockets"
-  s.version          = "0.22.10"
+  s.version          = "0.3.0"
   s.summary          = "A simple GCD based socket wrapper for Swift"
   s.description      = <<-DESC
                        A simple GCD based socket wrapper for Swift.

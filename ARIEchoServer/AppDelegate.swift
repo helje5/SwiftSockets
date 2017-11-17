@@ -3,11 +3,13 @@
 //  ARIEchoServer
 //
 //  Created by Helge Heß on 6/13/14.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 //
 
 import Cocoa
 
+@NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
   
   @IBOutlet var window        : NSWindow!
@@ -21,7 +23,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   
   var echod : EchoServer?
   
-  func applicationDidFinishLaunching(aNotification: NSNotification) {
+  func applicationDidFinishLaunching(_ aNotification: Notification) {
     let port = 1337
     
     echod = EchoServer(port: port)
@@ -32,7 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       "Connect in e.g. Terminal via 'telnet 127.0.0.1 \(port)'"
   }
 
-  func applicationWillTerminate(aNotification: NSNotification) {
+  func applicationWillTerminate(_ aNotification: Notification) {
     echod?.stop()
   }
   
@@ -42,7 +44,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     print(s)
     
     // log to view. Careful, must run in main thread!
-    dispatch_async(dispatch_get_main_queue()) {
+    DispatchQueue.main.async {
       self.logView.appendString(string: s + "\n")
     }
   }
@@ -53,11 +55,7 @@ extension NSTextView {
   func appendString(string s: String) {
     if let ts = textStorage {
       let ls = NSAttributedString(string: s)
-#if swift(>=3.0) // #swift3-1st-kwarg
       ts.append(ls)
-#else
-      ts.appendAttributedString(ls)
-#endif
     }
 
     let charCount = (s as NSString).length

@@ -3,7 +3,7 @@
 //  SwiftSockets
 //
 //  Created by Helge Hess on 6/13/14.
-//  Copyright (c) 2014 Always Right Institute. All rights reserved.
+//  Copyright (c) 2014-2017 Always Right Institute. All rights reserved.
 //
 
 import SwiftSockets
@@ -15,19 +15,11 @@ import Glibc
 import Darwin
 #endif
 
-#if swift(>=3.0)
-typealias OutputStreamType = OutputStream
-#endif
-
 class EchoServer {
 
   let port         : Int
   var listenSocket : PassiveSocketIPv4?
-#if swift(>=3.0)
-  let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)!
-#else
-  let lockQueue    = dispatch_queue_create("com.ari.socklock", nil)
-#endif
+  let lockQueue    = DispatchQueue(label: "com.ari.socklock")
   var openSockets  =
         [FileDescriptor:ActiveSocket<sockaddr_in>](minimumCapacity: 8)
   var appLog       : ((String) -> Void)?
@@ -48,18 +40,14 @@ class EchoServer {
   
   func start() {
     listenSocket = PassiveSocketIPv4(address: sockaddr_in(port: port))
-    if listenSocket == nil || !listenSocket! { // neat, eh? ;-)
+    if listenSocket == nil || !listenSocket!.isValid { // neat, eh? ;-)
       log(string: "ERROR: could not create socket ...")
       return
     }
     
-    log(string: "Listen socket \(listenSocket)")
+    log(string: "Listen socket \(listenSocket as Optional)")
     
-#if swift(>=3.0) // #swift3-gcd
-    let queue = dispatch_get_global_queue(0, 0)!
-#else
-    let queue = dispatch_get_global_queue(0, 0)
-#endif
+    let queue = DispatchQueue.global()
 
     // Note: capturing self here
     _ = listenSocket!.listen(queue: queue, backlog: 5) { newSock in
@@ -67,7 +55,7 @@ class EchoServer {
       self.log(string: "got new sock: \(newSock) nio=\(newSock.isNonBlocking)")
       newSock.isNonBlocking = true
       
-      dispatch_async(self.lockQueue) {
+      self.lockQueue.async {
         // Note: we need to keep the socket around!!
         self.openSockets[newSock.fd] = newSock
       }
@@ -78,7 +66,7 @@ class EchoServer {
         .onRead  { self.handleIncomingData(socket: $0, expectedCount: $1) }
         .onClose { ( fd: FileDescriptor ) -> Void in
         // we need to consume the return value to give peace to the closure
-        dispatch_async(self.lockQueue) { [unowned self] in
+        self.lockQueue.async { [unowned self] in
           _ = self.openSockets.removeValue(forKey: fd)
         }
       }
@@ -86,7 +74,7 @@ class EchoServer {
       
     }
     
-    log(string: "Started running listen socket \(listenSocket)")
+    log(string: "Started running listen socket \(listenSocket as Optional)")
   }
   
   func stop() {
@@ -103,7 +91,7 @@ class EchoServer {
     "\r\nTalk to me Dave!\r\n" +
     "> "
 
-  func send<T: OutputStreamType>(welcome sockI: T) {
+  func send<T: TextOutputStream>(welcome sockI: T) {
     var sock = sockI // cannot use 'var' in parameters anymore?
     // Hm, how to use print(), this doesn't work for me:
     //   print(s, target: sock)
@@ -136,11 +124,7 @@ class EchoServer {
       /* ptr has no map ;-) FIXME: add an extension 'mapWithCount'?
       let mblock = block.map({ $0 == 83 ? 90 : ($0 == 115 ? 122 : $0) })
       */
-#if swift(>=3.0)
       var mblock = [CChar](repeating: 42, count: count + 1)
-#else
-      var mblock = [CChar](count: count + 1, repeatedValue: 42)
-#endif
       for i in 0..<count {
         let c = block[i]
         mblock[i] = c == 83 ? 90 : (c == 115 ? 122 : c)
@@ -154,14 +138,22 @@ class EchoServer {
   }
 
   func logReceived(block b: UnsafePointer<CChar>, length: Int) {
-    let k = String.fromCString(b)
+    let k = String(validatingUTF8: b)
     var s = k ?? "Could not process result block \(b) length \(length)"
     
     // Hu, now this is funny. In b5 \r\n is one Character (but 2 unicodeScalars)
-    let suffix = String(s.characters.suffix(2))
+    #if swift(>=3.2)
+      let suffix = String(s.suffix(2))
+    #else
+      let suffix = String(s.characters.suffix(2))
+    #endif
     if suffix == "\r\n" {
       let to = s.index(before: s.endIndex)
-      s = s[s.startIndex..<to]
+      #if swift(>=4.0)
+        s = String(s[s.startIndex..<to])
+      #else
+        s = s[s.startIndex..<to]
+      #endif
     }
     
     log(string: "read string: \(s)")
