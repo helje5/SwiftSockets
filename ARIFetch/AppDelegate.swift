@@ -41,7 +41,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     socket = ActiveSocket<sockaddr_in>()
-    print("Got socket: \(socket)")
+    print("Got socket: \(socket as Optional)")
     if socket == nil {
       return
     }

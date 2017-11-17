@@ -45,7 +45,7 @@ class EchoServer {
       return
     }
     
-    log(string: "Listen socket \(listenSocket)")
+    log(string: "Listen socket \(listenSocket as Optional)")
     
     let queue = DispatchQueue.global()
 
@@ -74,7 +74,7 @@ class EchoServer {
       
     }
     
-    log(string: "Started running listen socket \(listenSocket)")
+    log(string: "Started running listen socket \(listenSocket as Optional)")
   }
   
   func stop() {
@@ -142,10 +142,18 @@ class EchoServer {
     var s = k ?? "Could not process result block \(b) length \(length)"
     
     // Hu, now this is funny. In b5 \r\n is one Character (but 2 unicodeScalars)
-    let suffix = String(s.characters.suffix(2))
+    #if swift(>=3.2)
+      let suffix = String(s.suffix(2))
+    #else
+      let suffix = String(s.characters.suffix(2))
+    #endif
     if suffix == "\r\n" {
       let to = s.index(before: s.endIndex)
-      s = s[s.startIndex..<to]
+      #if swift(>=4.0)
+        s = String(s[s.startIndex..<to])
+      #else
+        s = s[s.startIndex..<to]
+      #endif
     }
     
     log(string: "read string: \(s)")

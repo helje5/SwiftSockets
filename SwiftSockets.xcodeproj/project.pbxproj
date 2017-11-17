@@ -49,6 +49,7 @@
 		E8305D74194B06E20073740A /* UnixUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UnixUtils.swift; path = Sources/SwiftSockets/UnixUtils.swift; sourceTree = SOURCE_ROOT; };
 		E8386B6A1CA9723C0013C2EF /* EchoServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = EchoServer.swift; path = Sources/SwiftyEchoDaemon/EchoServer.swift; sourceTree = SOURCE_ROOT; };
 		E83FFF33197DF00E00A51E6F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		E8460D7D1FBF13AF002CDC28 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Base.xcconfig; path = xcconfig/Base.xcconfig; sourceTree = "<group>"; };
 		E84F40DB1CBBD5F700544DE5 /* xsys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = xsys.swift; path = Sources/SwiftSockets/xsys.swift; sourceTree = SOURCE_ROOT; };
 		E84F41041CBCF6EC00544DE5 /* sockaddr_any.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = sockaddr_any.swift; path = Sources/SwiftSockets/sockaddr_any.swift; sourceTree = SOURCE_ROOT; };
 		E85D5FE4194B917900ECC32A /* ARIFetch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIFetch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -164,7 +165,8 @@
 				E84F41041CBCF6EC00544DE5 /* sockaddr_any.swift */,
 				E88984B7194A751E00A831A3 /* Supporting Files */,
 			);
-			path = SwiftSockets;
+			name = SwiftSockets;
+			path = Sources/SwiftSockets;
 			sourceTree = "<group>";
 		};
 		E88984B7194A751E00A831A3 /* Supporting Files */ = {
@@ -199,6 +201,7 @@
 		E8D257B11CC5258B00961842 /* Configs */ = {
 			isa = PBXGroup;
 			children = (
+				E8460D7D1FBF13AF002CDC28 /* Base.xcconfig */,
 				E8D257B21CC525C000961842 /* AppKitDebug.xcconfig */,
 				E8D257B31CC525C000961842 /* AppKitRelease.xcconfig */,
 				E8D257B41CC525C000961842 /* SwiftModuleFW.xcconfig */,
@@ -307,7 +310,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0820;
+				LastUpgradeCheck = 0910;
 				TargetAttributes = {
 					3710E9F01BF548480002A4DB = {
 						CreatedOnToolsVersion = 7.2;
@@ -559,12 +562,18 @@
 		E88984AD194A74C400A831A3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -586,12 +595,18 @@
 		E88984AE194A74C400A831A3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;

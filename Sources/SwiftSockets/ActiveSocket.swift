@@ -299,17 +299,22 @@ public extension ActiveSocket { // writing
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
     
-    // TODO: add a ctor to DispatchData for this ... (create from array)
-    let asyncData : DispatchData = b.withUnsafeBufferPointer { bp in
-      return bp.baseAddress!.withMemoryRebound(to: UInt8.self,
-                                               capacity: bufsize)
-      {
-        ptr in
-        let bp = UnsafeBufferPointer(start: ptr, count: bufsize)
-        return DispatchData(bytes: bp)
+    #if swift(>=4.0)
+      let asyncData = b.withUnsafeBytes { rbp in
+        return DispatchData(bytes: rbp)
       }
-    }
-    
+    #else
+      // TODO: add a ctor to DispatchData for this ... (create from array)
+      let asyncData : DispatchData = b.withUnsafeBufferPointer { bp in
+        return bp.baseAddress!.withMemoryRebound(to: UInt8.self,
+                                                 capacity: bufsize)
+        {
+          ptr in
+          let bp = UnsafeBufferPointer(start: ptr, count: bufsize)
+          return DispatchData(bytes: bp)
+        }
+      }
+    #endif
     write(data: asyncData)
     return true
   }
@@ -332,14 +337,18 @@ public extension ActiveSocket { // writing
     // the default destructor is supposed to copy the data. Not good, but
     // handling ownership is going to be messy
     
-    // TODO
-    let asyncData : DispatchData = b.withMemoryRebound(to: UInt8.self,
-                                                       capacity: bufsize)
-    {
-      ptr in
-      let bp = UnsafeBufferPointer(start: ptr, count: bufsize)
-      return DispatchData(bytes: bp)
-    }
+    #if swift(>=4.0)
+      let asyncData =
+            DispatchData(bytes: UnsafeRawBufferPointer(start: b, count: length))
+    #else
+      let asyncData : DispatchData = b.withMemoryRebound(to: UInt8.self,
+                                                         capacity: bufsize)
+      {
+        ptr in
+        let bp = UnsafeBufferPointer(start: ptr, count: bufsize)
+        return DispatchData(bytes: bp)
+      }
+    #endif
 
     write(data: asyncData)
     return true

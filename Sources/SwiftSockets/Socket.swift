@@ -53,20 +53,20 @@ public class Socket<T: SocketAddress> {
   public func close() {
     if fd.isValid {
       closedFD = fd
-      if debugClose { print("Closing socket \(closedFD) for good ...") }
+      if debugClose { print("Closing socket \(closedFD!) for good ...") }
       fd.close()
       fd       = nil
       
       if let cb = closeCB {
         // can be used to unregister socket etc when the socket is really closed
-        if debugClose { print("  let closeCB \(closedFD) know ...") }
+        if debugClose { print("  let closeCB \(closedFD as Optional) know...") }
         cb(closedFD!)
         closeCB = nil // break potential cycles
       }
-      if debugClose { print("done closing \(closedFD)") }
+      if debugClose { print("done closing \(closedFD as Optional)") }
     }
     else if debugClose {
-      print("socket \(closedFD) already closed.")
+      print("socket \(closedFD as Optional) already closed.")
     }
     
     boundAddress = nil
@@ -163,7 +163,7 @@ public class Socket<T: SocketAddress> {
   func descriptionAttributes() -> String {
     var s = fd.isValid
       ? " fd=\(fd.fd)"
-      : (closedFD != nil ? " closed[\(closedFD)]" :" not-open")
+      : (closedFD != nil ? " closed[\(closedFD!)]" :" not-open")
     if boundAddress != nil {
       s += " \(boundAddress!)"
     }
